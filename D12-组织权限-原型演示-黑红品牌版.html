@@ -1,0 +1,1527 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<!-- poc-embed-guest -->
+<script src="poc-embed-guest.js"></script>
+
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>D12 组织权限 · 多组织管理 · 黑红品牌版原型</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: { DEFAULT: '#C8102E', hover: '#A00D25', active: '#7A0A1C', bg: '#FDE8EC' },
+            success: { DEFAULT: '#2F6B3A', bg: '#EAF5EC' },
+            warning: { DEFAULT: '#8A6A1A', bg: '#F7F1DE' },
+            danger: { DEFAULT: '#C8102E', bg: '#FDE8EC' },
+            ink: { DEFAULT: '#0A0A0A', secondary: '#4A4A4A', tertiary: '#8A8A8A', disabled: '#B8B8B8' },
+            line: { DEFAULT: '#D4D4D4', soft: '#EBEBEB' },
+            page: '#EDEDED',
+            fill: '#F7F7F7',
+            brand: { black: '#0A0A0A', red: '#C8102E', gray: '#6B6B6B', white: '#FFFFFF' },
+          },
+          fontFamily: { sans: ['"PingFang SC"', '"Microsoft YaHei"', 'system-ui', 'sans-serif'] },
+          boxShadow: { card: '0 1px 2px rgba(0,0,0,.06), 0 8px 24px rgba(0,0,0,.06)' },
+        },
+      },
+    };
+  </script>
+  <style>
+    [x-cloak] { display: none !important; }
+    .sidebar-scroll::-webkit-scrollbar { width: 4px; }
+    .sidebar-scroll::-webkit-scrollbar-thumb { background: #555; border-radius: 4px; }
+    .table-wrap { overflow-x: auto; }
+    .tree-scroll { max-height: calc(100vh - 12rem); overflow-y: auto; }
+    .detail-scroll { max-height: calc(100vh - 12rem); overflow-y: auto; }
+    .toast-enter { animation: toastIn .25s ease; }
+    @keyframes toastIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
+    .brand-stripe { background: linear-gradient(90deg, #0A0A0A 0%, #0A0A0A 72%, #C8102E 72%, #C8102E 100%); }
+    .drawer-panel { animation: slideIn .2s ease; }
+    @keyframes slideIn { from { transform: translateX(12px); opacity: .6; } to { transform: none; opacity: 1; } }
+    .check-row:hover { background: #F7F7F7; }
+  
+    /* §2.2 已打开页面 Tab */
+    .open-tab {
+      display: inline-flex; align-items: center; gap: 6px; max-width: 160px;
+      padding: 6px 10px; font-size: 13px; border-radius: 4px;
+      color: rgba(255,255,255,.72); white-space: nowrap; transition: all .15s;
+      border-bottom: 2px solid transparent; background: transparent; border-left: 0; border-right: 0; border-top: 0;
+    }
+    .open-tab:hover { color: #fff; background: rgba(255,255,255,.08); }
+    .open-tab.active { color: #fff; font-weight: 600; border-bottom-color: #C8102E; background: rgba(200,16,46,.18); }
+    .open-tab .tab-close { opacity: .55; font-size: 12px; line-height: 1; padding: 2px 4px; border-radius: 3px; }
+    .open-tab .tab-close:hover { opacity: 1; background: rgba(255,255,255,.15); }
+
+
+    /* App shell: header+sidebar fixed; only main scrolls */
+    html, body { height: 100%; overflow: hidden; }
+    .zippo-shell { display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+    .zippo-shell > header.sticky,
+    .zippo-shell > header.global-topbar,
+    body > header.sticky,
+    body > header.global-topbar { flex: 0 0 auto; position: sticky; top: 0; z-index: 50; }
+    .zippo-body {
+      flex: 1 1 auto; min-height: 0; display: flex; overflow: hidden;
+    }
+    .zippo-body > aside,
+    .zippo-body > .sidebar {
+      flex: 0 0 auto; height: 100%; overflow-y: auto; position: relative !important;
+      top: auto !important; inset: auto !important;
+    }
+    .zippo-main {
+      flex: 1 1 auto; min-width: 0; min-height: 0; overflow-y: auto;
+      background: #EDEDED;
+    }
+
+
+    /* body 纵向壳：顶栏固定，下方 zippo-body 占满剩余高度 */
+    body.overflow-hidden, body.zippo-fixed, body.d06-shell {
+      display: flex !important; flex-direction: column !important; height: 100vh !important; margin: 0;
+    }
+    body > header, body > .brand-stripe, body > .h-1.brand-stripe, body > div.h-1 {
+      flex: 0 0 auto !important;
+    }
+    .zippo-body { flex: 1 1 auto !important; min-height: 0 !important; height: auto !important; }
+    main.zippo-main, .zippo-main {
+      flex: 1 1 auto !important; min-width: 0 !important; min-height: 0 !important;
+      overflow-y: auto !important;
+    }
+
+
+/* Spec §2.2 white sidebar override */
+.proto-sidebar, aside.sidebar, aside.primary-nav, .module-sidebar, .d-sidebar {
+  background: #0A0A0A !important; color: #cfcfcf !important;
+  border-right: 0 !important;
+}
+.proto-nav-item.active, .nav button.active, .nav-item.active, .side-nav a.active, .menu-item.active {
+  background: #2d2d2d !important; color: #fff !important; font-weight: 600;
+  border-left: 3px solid #C8102E !important;
+}
+
+
+
+/* ZIPPO_NAV_HIERARCHY_V3 */
+details.nav-group { margin: 0 0 6px; border: 0; }
+details.nav-group > summary.nav-l1 {
+  list-style: none; cursor: pointer; user-select: none;
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  min-height: 40px; padding: 0 12px; margin: 0; border-radius: 4px;
+  font-size: 13px !important; font-weight: 600 !important; line-height: 1.2;
+  color: #FFFFFF !important; letter-spacing: 0 !important; text-transform: none !important;
+  background: transparent;
+}
+details.nav-group > summary.nav-l1::-webkit-details-marker { display: none; }
+details.nav-group > summary.nav-l1 .nav-chev {
+  font-size: 10px; color: rgba(255,255,255,.7); transition: transform .15s;
+}
+details.nav-group:not([open]) > summary.nav-l1 .nav-chev { transform: rotate(-90deg); }
+details.nav-group > summary.nav-l1:hover { background: #2d2d2d; }
+.nav-l2-wrap { display: flex; flex-direction: column; gap: 2px; padding: 2px 0 6px; }
+.nav-l2-wrap .proto-nav-item,
+.nav-l2-wrap > button,
+.nav-l2-wrap .nav-item,
+aside .nav-l2-wrap button {
+  font-size: 13px !important;
+  color: #E8E8E8 !important;
+  min-height: 40px;
+}
+/* dark sidebar contrast: kill low-contrast tertiary / selected white block */
+aside.proto-sidebar, aside.sidebar, aside.module-sidebar, .proto-sidebar {
+  color: #E8E8E8 !important;
+}
+aside.proto-sidebar .text-ink-secondary,
+aside.proto-sidebar .text-ink-tertiary,
+aside.proto-sidebar .text-ink,
+aside .nav-label {
+  color: #E8E8E8 !important;
+}
+aside.proto-sidebar button.text-ink-secondary,
+aside.proto-sidebar a.text-ink-secondary {
+  color: #E8E8E8 !important;
+}
+aside.proto-sidebar .bg-\[\#F5F5F5\],
+aside.proto-sidebar button.bg-\[\#F5F5F5\] {
+  background: #2d2d2d !important;
+  color: #FFFFFF !important;
+}
+aside.proto-sidebar .hover\:bg-fill:hover,
+aside.proto-sidebar button:hover {
+  background: #2d2d2d !important;
+  color: #FFFFFF !important;
+}
+/* L1 labels that are not yet details */
+.nav-label, .proto-nav-group, .proto-sidebar-title {
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  color: #FFFFFF !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+}
+.proto-nav-item, .nav button, aside .nav button {
+  color: #E8E8E8 !important;
+  font-size: 13px !important;
+}
+.proto-nav-item.active, .nav button.active {
+  color: #FFFFFF !important;
+}
+/* hide sidebar bottom notes / brand footnotes */
+.sidebar-note, .sidebar-foot, .sidebar-footer,
+aside .zippo-sidebar-note,
+aside nav > .mt-6.px-3.py-3.rounded-lg {
+  display: none !important;
+}
+
+/* ZIPPO_NAV_SPACING_V2 */
+.nav, .proto-sidebar-nav, aside .nav, .sidebar .nav {
+  gap: 4px !important;
+}
+.proto-nav-item, .nav button, .nav-item, .side-nav a, .menu-item {
+  min-height: 40px !important;
+  height: auto !important;
+  max-height: none !important;
+  padding-top: 8px !important;
+  padding-bottom: 8px !important;
+  box-sizing: border-box !important;
+  flex-shrink: 0 !important;
+}
+.nav-label, .proto-sidebar-title .label {
+  padding-top: 10px !important;
+  padding-bottom: 4px !important;
+}
+
+/* ZIPPO_GLOBAL_SHELL_V2 */
+.card.has-table { display:flex; flex-direction:column; min-height:0; }
+.card.has-table > .table-wrap { flex:1 1 auto; min-height:0; overflow:auto; }
+.card > .pager, .card > .pager.pagination, .pager.zippo-pager-sticky {
+  position:sticky; bottom:0; z-index:5; flex-shrink:0;
+  background:#fff; border-top:1px solid #EBEBEB; margin-top:0;
+  box-shadow:0 -4px 12px rgba(0,0,0,.04);
+}
+.sidebar-foot, .sidebar-footer { display:none !important; }
+.zippo-user-menu { position:relative; display:inline-flex; }
+.zippo-user-menu-panel {
+  display:none; position:absolute; right:0; top:calc(100% + 6px); min-width:128px;
+  background:#fff; color:#0A0A0A; border:1px solid #EBEBEB; border-radius:6px;
+  box-shadow:0 8px 24px rgba(0,0,0,.12); padding:4px; z-index:80;
+}
+.zippo-user-menu.open .zippo-user-menu-panel { display:block; }
+.zippo-user-menu-panel button {
+  display:block; width:100%; text-align:left; border:0; background:transparent;
+  padding:8px 10px; font-size:13px; border-radius:4px; cursor:pointer; color:#0A0A0A;
+}
+.zippo-user-menu-panel button:hover { background:#F5F5F5; }
+
+</style>
+</head>
+<body class="bg-page text-ink font-sans antialiased overflow-hidden" x-data="orgApp()" x-cloak>
+  <header class="sticky top-0 z-40 h-14 bg-brand-black text-white border-b border-black flex items-center justify-between px-4 lg:px-6">
+    <div class="flex items-center gap-3">
+      <button @click="mobileNav = !mobileNav" class="lg:hidden p-2 rounded hover:bg-white/10" aria-label="菜单">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+      </button>
+      <div class="flex items-center gap-2">
+        <div>
+          <div class="text-base font-bold tracking-wider">ZIPPO</div>
+        </div>
+      </div>
+    </div>
+    
+      <nav class="flex items-center gap-0.5 overflow-x-auto flex-1 min-w-0 py-1 mx-2" aria-label="已打开页面">
+        <template x-for="t in openTabs" :key="t.id">
+          <button type="button" @click="activateTab(t.id)" class="open-tab" :class="activeTabId===t.id ? 'active' : ''" :title="t.label">
+            <span class="truncate" x-text="t.label"></span>
+            <span class="tab-close" @click.stop="closeTab(t.id)" title="关闭">✕</span>
+          </button>
+        </template>
+      </nav>
+<div class="flex items-center gap-3">
+      <div class="hidden sm:flex items-center gap-2 text-xs text-white/70">
+        <span>演示角色</span>
+        <select x-model="role" @change="onRoleChange()" class="border border-white/20 rounded-md px-2 py-1.5 text-sm bg-black text-white focus:outline-none focus:ring-2 focus:ring-primary/50">
+          <option value="PLATFORM_ADMIN">平台管理员</option>
+          <option value="BRAND_ADMIN">品牌管理员</option>
+          <option value="BRAND_OPERATOR">品牌业务（默认无入口）</option>
+          <option value="DISTRIBUTOR_ADMIN">经销商组织管理员</option>
+          <option value="RETAILER_ADMIN">零售商组织管理员</option>
+        </select>
+      </div>
+      <button type="button" @click="toast('通知')" class="relative w-8 h-8 flex items-center justify-center rounded hover:bg-white/10 text-white/70" aria-label="通知"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg><span class="absolute top-1 right-1 w-2 h-2 bg-primary rounded-full"></span></button>
+      <div class="flex items-center gap-2 pl-2 border-l border-white/15">
+        <div class="w-8 h-8 rounded-full bg-primary text-white text-xs font-semibold flex items-center justify-center" x-text="currentUser.avatar"></div>
+      </div>
+    </div>
+  </header>
+  <div class="h-1 brand-stripe"></div>
+
+  <div class="zippo-body">
+    <aside class="proto-sidebar fixed lg:static inset-y-[3.75rem] left-0 z-30 w-56 bg-white text-ink border-r border-line-soft transform transition-transform lg:translate-x-0"
+      :class="mobileNav ? 'translate-x-0' : '-translate-x-full'">
+      <nav class="p-3 space-y-1 sidebar-scroll overflow-y-auto h-full">
+        <details class="nav-group" open><summary class="nav-l1">多组织管理<span class="nav-chev">▾</span></summary><div class="nav-l2-wrap"><template x-for="item in menus" :key="item.id">
+          <button x-show="item.visible()" @click="go(item.id); mobileNav=false"
+            class="w-full flex items-center gap-2 px-3 py-2.5 rounded-md text-sm transition"
+            :class="page===item.id ? 'bg-[#2d2d2d] text-white font-medium border-l-[3px] border-l-primary' : 'text-[#E8E8E8] hover:bg-[#2d2d2d] hover:text-white'">
+            <span x-html="item.icon"></span>
+            <span x-text="item.label"></span>
+            <span x-show="item.badge && item.badge()" class="ml-auto text-[10px] px-1.5 py-0.5 rounded-full bg-white text-primary font-semibold" x-text="item.badge && item.badge()"></span>
+          </button>
+        </template>
+</div></details></nav>
+    </aside>
+    <div x-show="mobileNav" @click="mobileNav=false" class="fixed inset-0 z-20 bg-black/40 lg:hidden"></div>
+
+    <main class="zippo-main flex-1 min-w-0 p-4 lg:p-6">
+      <div class="mb-4 flex items-center justify-between gap-3 flex-wrap">
+        <div class="text-sm text-ink-tertiary">首页 / 多组织管理 / <span class="text-ink" x-text="pageTitle"></span></div>
+        <div class="text-[11px] text-ink-tertiary" x-show="!canAccessOrg">当前角色默认不可见多组织管理（演示空态）</div>
+      </div>
+
+      <!-- 无权限空态 -->
+      <section x-show="!canAccessOrg" class="bg-white rounded-lg shadow-card border border-line-soft min-h-[70vh] flex flex-col items-center justify-center text-center p-10">
+        <div class="w-16 h-16 rounded-full bg-fill border border-line flex items-center justify-center text-2xl text-ink-tertiary mb-4">∅</div>
+        <div class="text-lg font-semibold mb-2">无多组织管理入口</div>
+        <p class="text-sm text-ink-secondary max-w-md">品牌普通业务 / 未授权员工默认不可见。请切换为品牌管理员、经销商/零售商组织管理员或平台管理员体验。</p>
+      </section>
+
+      <!-- ===== 组织架构 ===== -->
+      <section x-show="canAccessOrg && page==='architecture'" class="space-y-4">
+        <div class="bg-white rounded-lg shadow-card border border-line-soft">
+          <div class="px-5 py-4 flex flex-wrap items-center justify-between gap-3 border-b border-line-soft">
+            <div>
+              <h1 class="text-base font-semibold">组织架构</h1>
+              <p class="text-xs text-ink-tertiary mt-0.5">左树右详情 · 经销商平级可排序 · 同经销商下零售商可排序 · 外部合作系统预置</p>
+            </div>
+            <div class="flex flex-wrap gap-2">
+              <button x-show="canEditOrg" @click="openMenuTemplate()" class="px-3 py-1.5 text-sm rounded-md border border-line hover:bg-fill">菜单模板</button>
+              <button x-show="canEditOrg" @click="toast('已触发全平台组织树导出')" class="px-3 py-1.5 text-sm rounded-md border border-line hover:bg-fill">导出组织树</button>
+              <button x-show="canEditOrg" @click="openOrgModal('create')" class="px-3 py-1.5 text-sm rounded-md bg-primary text-white hover:bg-primary-hover">新建组织</button>
+            </div>
+          </div>
+          <div class="grid lg:grid-cols-12 min-h-[calc(100vh-14rem)]">
+            <div class="lg:col-span-4 border-r border-line-soft p-4 tree-scroll">
+              <input x-model="orgKeyword" type="text" placeholder="搜索组织名称…" class="w-full mb-3 border border-line rounded-md px-3 py-2 text-sm" />
+              <template x-for="node in filteredOrgTree" :key="node.id">
+                <div>
+                  <button @click="selectOrg(node)" class="w-full text-left px-2 py-1.5 rounded text-sm flex items-center gap-1"
+                    :class="selectedOrg && selectedOrg.id===node.id ? 'bg-primary-bg text-primary font-medium' : 'hover:bg-fill'"
+                    :style="`padding-left:${8 + node.depth*14}px`">
+                    <span class="text-ink-tertiary w-3" x-text="node.children && node.children.length ? (node.open?'▼':'▶') : '·'" @click.stop="node.open=!node.open"></span>
+                    <span x-text="node.name"></span>
+                    <span class="ml-auto text-[10px] text-ink-tertiary" x-text="node.typeLabel"></span>
+                  </button>
+                  <template x-if="node.open && node.children">
+                    <div>
+                      <template x-for="c in node.children" :key="c.id">
+                        <div>
+                          <div class="flex items-center gap-0.5 rounded"
+                            :class="selectedOrg && selectedOrg.id===c.id ? 'bg-primary-bg' : 'hover:bg-fill'"
+                            :style="`padding-left:${8 + c.depth*14}px`">
+                            <button @click="selectOrg(c)" class="flex-1 text-left py-1.5 text-sm flex items-center gap-1 min-w-0"
+                              :class="selectedOrg && selectedOrg.id===c.id ? 'text-primary font-medium' : ''">
+                              <span class="text-ink-tertiary w-3 shrink-0" x-text="c.children && c.children.length ? (c.open?'▼':'▶') : '·'" @click.stop="c.open=!c.open"></span>
+                              <span class="truncate" x-text="c.name"></span>
+                              <span class="ml-auto text-[10px] px-1 rounded shrink-0" :class="c.status==='启用'?'bg-success-bg text-success':'bg-fill text-ink-tertiary'" x-text="c.status"></span>
+                            </button>
+                            <template x-if="canEditOrg && c.type==='DISTRIBUTOR'">
+                              <span class="flex shrink-0 pr-1">
+                                <button type="button" @click.stop="moveOrg(c,'up')" class="px-1 text-[10px] text-ink-tertiary hover:text-primary" title="上移">↑</button>
+                                <button type="button" @click.stop="moveOrg(c,'down')" class="px-1 text-[10px] text-ink-tertiary hover:text-primary" title="下移">↓</button>
+                              </span>
+                            </template>
+                          </div>
+                          <template x-if="c.open && c.children">
+                            <div>
+                              <template x-for="g in c.children" :key="g.id">
+                                <div class="flex items-center gap-0.5 rounded"
+                                  :class="selectedOrg && selectedOrg.id===g.id ? 'bg-primary-bg' : 'hover:bg-fill'"
+                                  :style="`padding-left:${8 + g.depth*14}px`">
+                                  <button @click="selectOrg(g)" class="flex-1 text-left py-1.5 text-sm flex items-center gap-1 min-w-0"
+                                    :class="selectedOrg && selectedOrg.id===g.id ? 'text-primary font-medium' : ''">
+                                    <span class="w-3 text-ink-tertiary shrink-0">·</span>
+                                    <span class="truncate" x-text="g.name"></span>
+                                    <span class="ml-auto text-[10px] shrink-0" x-text="g.typeLabel"></span>
+                                  </button>
+                                  <template x-if="canEditOrg && g.type==='RETAILER'">
+                                    <span class="flex shrink-0 pr-1">
+                                      <button type="button" @click.stop="moveOrg(g,'up')" class="px-1 text-[10px] text-ink-tertiary hover:text-primary" title="上移">↑</button>
+                                      <button type="button" @click.stop="moveOrg(g,'down')" class="px-1 text-[10px] text-ink-tertiary hover:text-primary" title="下移">↓</button>
+                                    </span>
+                                  </template>
+                                </div>
+                              </template>
+                            </div>
+                          </template>
+                        </div>
+                      </template>
+                    </div>
+                  </template>
+                </div>
+              </template>
+            </div>
+            <div class="lg:col-span-8 p-5 detail-scroll" x-show="selectedOrg">
+              <div class="flex flex-wrap items-start justify-between gap-3 mb-4">
+                <div>
+                  <div class="text-lg font-semibold" x-text="selectedOrg && selectedOrg.name"></div>
+                  <div class="text-xs text-ink-tertiary mt-1 flex flex-wrap gap-3">
+                    <span>类型：<span class="text-ink" x-text="selectedOrg && selectedOrg.typeLabel"></span></span>
+                    <span>状态：<span :class="selectedOrg && selectedOrg.status==='启用'?'text-success':'text-warning'" x-text="selectedOrg && selectedOrg.status"></span></span>
+                    <span>负责人：<span class="text-ink" x-text="selectedOrg && selectedOrg.owner"></span></span>
+                  </div>
+                </div>
+                <div class="flex flex-wrap gap-2" x-show="canEditOrg">
+                  <button @click="openOrgModal('edit')" class="px-3 py-1.5 text-sm rounded-md border border-line hover:bg-fill" x-show="selectedOrg && selectedOrg.type!=='EXTERNAL' && selectedOrg.type!=='BRAND'">编辑</button>
+                  <button @click="moveOrg(selectedOrg,'up')" class="px-3 py-1.5 text-sm rounded-md border border-line hover:bg-fill" x-show="selectedOrg && (selectedOrg.type==='DISTRIBUTOR' || selectedOrg.type==='RETAILER')">上移</button>
+                  <button @click="moveOrg(selectedOrg,'down')" class="px-3 py-1.5 text-sm rounded-md border border-line hover:bg-fill" x-show="selectedOrg && (selectedOrg.type==='DISTRIBUTOR' || selectedOrg.type==='RETAILER')">下移</button>
+                  <button @click="toggleOrgStatus()" class="px-3 py-1.5 text-sm rounded-md border border-line hover:bg-fill" x-show="selectedOrg && selectedOrg.type!=='BRAND'" x-text="selectedOrg && selectedOrg.status==='启用'?'停用':'启用'"></button>
+                  <button @click="confirmDeleteOrg()" class="px-3 py-1.5 text-sm rounded-md border border-primary/30 text-primary hover:bg-primary-bg" x-show="selectedOrg && selectedOrg.type!=='EXTERNAL' && selectedOrg.type!=='BRAND'">删除</button>
+                </div>
+              </div>
+              <div class="grid sm:grid-cols-3 gap-3 mb-5">
+                <div class="rounded-lg border border-line-soft bg-fill px-4 py-3"><div class="text-[11px] text-ink-tertiary">下级组织</div><div class="text-xl font-semibold mt-1" x-text="selectedOrg && selectedOrg.childCount"></div></div>
+                <div class="rounded-lg border border-line-soft bg-fill px-4 py-3"><div class="text-[11px] text-ink-tertiary">成员数</div><div class="text-xl font-semibold mt-1" x-text="selectedOrg && selectedOrg.memberCount"></div></div>
+                <div class="rounded-lg border border-line-soft bg-fill px-4 py-3"><div class="text-[11px] text-ink-tertiary">菜单状态</div><div class="text-sm font-medium mt-1.5" x-text="selectedOrg && selectedOrg.inherit"></div></div>
+              </div>
+              <div class="border border-line-soft rounded-lg overflow-hidden">
+                <div class="px-4 py-3 bg-fill border-b border-line-soft flex items-center justify-between">
+                  <div class="text-sm font-semibold">组织菜单策略</div>
+                  <div class="flex gap-2" x-show="canEditOrg && selectedOrg && selectedOrg.type!=='BRAND'">
+                    <button x-show="selectedOrg && selectedOrg.inheritMode==='INHERIT'" @click="cancelInherit()" class="text-xs text-primary hover:underline">取消默认继承</button>
+                    <button x-show="selectedOrg && selectedOrg.inheritMode==='CUSTOM'" @click="restoreInherit()" class="text-xs text-primary hover:underline">恢复默认继承</button>
+                  </div>
+                </div>
+                <div class="p-4" x-show="selectedOrg && selectedOrg.type!=='BRAND' && selectedOrg.type!=='EXTERNAL'">
+                  <p class="text-xs text-ink-tertiary mb-3" x-text="selectedOrg && selectedOrg.inheritMode==='INHERIT' ? '默认继承：只读预览，随类型模板自动更新；个别组织差异化请取消默认后在模板范围内单独调整' : '单独维护：仅可在类型模板已开放范围内勾选；缩小前须先清角色冲突'"></p>
+                  <div class="space-y-2">
+                    <template x-for="m in orgMenuPreview" :key="m.code">
+                      <label class="flex items-center gap-2 text-sm check-row px-2 py-1.5 rounded" :class="!canEditMenuPolicy || !m.inTemplate ? 'opacity-50' : ''">
+                        <input type="checkbox" class="rounded border-line text-primary focus:ring-primary" :disabled="!canEditMenuPolicy || !m.inTemplate" x-model="m.checked" />
+                        <span x-text="m.name"></span>
+                        <span x-show="!m.inTemplate" class="text-[10px] text-ink-tertiary">（超出模板不可选）</span>
+                      </label>
+                    </template>
+                  </div>
+                  <div class="mt-4 flex gap-2" x-show="canEditMenuPolicy">
+                    <button @click="previewMenu()" class="px-3 py-1.5 text-sm rounded-md border border-line hover:bg-fill">预览效果</button>
+                    <button @click="saveOrgMenu()" class="px-3 py-1.5 text-sm rounded-md bg-primary text-white hover:bg-primary-hover">保存</button>
+                  </div>
+                </div>
+                <div class="p-4 text-sm text-ink-secondary" x-show="selectedOrg && (selectedOrg.type==='BRAND' || selectedOrg.type==='EXTERNAL')">
+                  <span x-show="selectedOrg && selectedOrg.type==='BRAND'">品牌根节点：不走经销商·零售商类型模板继承策略。下属经销商均为平级组织，无等级关系。</span>
+                  <span x-show="selectedOrg && selectedOrg.type==='EXTERNAL'">外部合作节点：系统预置，不可通过「新建组织」创建；挂接加工商与设计师账号；不走类型模板继承。</span>
+                </div>
+              </div>
+              <div class="mt-4">
+                <button @click="go('accounts'); accountFilters.org=selectedOrg && selectedOrg.name" class="text-sm text-primary hover:underline">查看成员 →</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== 角色管理 ===== -->
+      <section x-show="canAccessOrg && page==='roles'" class="space-y-4">
+        <div class="bg-white rounded-lg shadow-card border border-line-soft">
+          <div class="px-5 py-4 flex flex-wrap items-center justify-between gap-3 border-b border-line-soft">
+            <div>
+              <h1 class="text-base font-semibold">角色管理</h1>
+              <p class="text-xs text-ink-tertiary mt-0.5">本组织角色 · 页面级 + 按钮级 · 权限树仅展示本组织已开放菜单（未开放项静默过滤）</p>
+            </div>
+            <button @click="openRoleDrawer('create')" class="px-3 py-1.5 text-sm rounded-md bg-primary text-white hover:bg-primary-hover">新建角色</button>
+          </div>
+          <div class="p-4 flex flex-wrap gap-3 items-end border-b border-line-soft bg-fill/50">
+            <label class="text-xs text-ink-secondary space-y-1"><span>角色名称</span>
+              <input x-model="roleFilters.keyword" class="block w-44 border border-line rounded-md px-2 py-1.5 text-sm" placeholder="模糊搜索" /></label>
+            <label class="text-xs text-ink-secondary space-y-1"><span>更新时间</span>
+              <span class="flex gap-1 items-center">
+                <input type="date" x-model="roleFilters.start" class="block w-36 border border-line rounded-md px-2 py-1.5 text-sm bg-white" />
+                <span class="text-ink-tertiary">~</span>
+                <input type="date" x-model="roleFilters.end" class="block w-36 border border-line rounded-md px-2 py-1.5 text-sm bg-white" />
+              </span></label>
+            <label class="text-xs text-ink-secondary space-y-1"><span>类型</span>
+              <select x-model="roleFilters.type" class="block w-36 border border-line rounded-md px-2 py-1.5 text-sm bg-white">
+                <option value="">全部</option><option>预设</option><option>自定义</option>
+              </select></label>
+            <button @click="rolePage=1; toast('已按条件筛选')" class="px-3 py-1.5 text-sm rounded-md bg-primary text-white hover:bg-primary-hover">搜索</button>
+            <button @click="resetRoleFilters()" class="px-3 py-1.5 text-sm rounded-md border border-line hover:bg-fill">重置</button>
+          </div>
+          <div class="table-wrap">
+            <table class="w-full text-sm">
+              <thead class="bg-fill text-ink-secondary text-xs">
+                <tr>
+                  <th class="text-left font-medium px-4 py-3">角色名称</th>
+                  <th class="text-left font-medium px-4 py-3">类型</th>
+                  <th class="text-left font-medium px-4 py-3">关联账号</th>
+                  <th class="text-left font-medium px-4 py-3">状态</th>
+                  <th class="text-left font-medium px-4 py-3">更新时间</th>
+                  <th class="text-left font-medium px-4 py-3">操作</th>
+                </tr>
+              </thead>
+              <tbody>
+                <template x-for="r in pagedRoles" :key="r.id">
+                  <tr class="border-t border-line-soft hover:bg-fill/60">
+                    <td class="px-4 py-3 font-medium" x-text="r.name"></td>
+                    <td class="px-4 py-3"><span class="text-xs px-1.5 py-0.5 rounded" :class="r.type==='预设'?'bg-primary-bg text-primary':'bg-fill text-ink-secondary'" x-text="r.type"></span></td>
+                    <td class="px-4 py-3" x-text="r.accounts"></td>
+                    <td class="px-4 py-3"><span :class="r.status==='启用'?'text-success':'text-ink-tertiary'" x-text="r.status"></span></td>
+                    <td class="px-4 py-3 text-ink-tertiary" x-text="r.updated"></td>
+                    <td class="px-4 py-3 space-x-2 text-primary">
+                      <button @click="openRoleDrawer('edit', r)" class="hover:underline">编辑</button>
+                      <button @click="toggleRole(r)" class="hover:underline" x-text="r.status==='启用'?'停用':'启用'"></button>
+                      <button @click="go('accounts'); accountFilters.role=r.name" class="hover:underline">查看账号</button>
+                    </td>
+                  </tr>
+                </template>
+              </tbody>
+            </table>
+          </div>
+          <div class="px-4 py-3 border-t border-line-soft flex items-center justify-between text-xs text-ink-tertiary">
+            <span x-text="'共 '+filteredRoles.length+' 条'"></span>
+            <div class="flex gap-2">
+              <select x-model.number="rolePageSize" @change="rolePage=1" class="border border-line rounded px-2 py-1 text-xs bg-white">
+                <option :value="20">20条/页</option><option :value="50">50条/页</option><option :value="100">100条/页</option>
+              </select>
+              <button @click="rolePage=Math.max(1,rolePage-1)" class="px-2 py-1 border border-line rounded hover:bg-fill">上一页</button>
+              <span x-text="rolePage+' / '+roleTotalPages"></span>
+              <button @click="rolePage=Math.min(roleTotalPages,rolePage+1)" class="px-2 py-1 border border-line rounded hover:bg-fill">下一页</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== 账号管理 ===== -->
+      <section x-show="canAccessOrg && page==='accounts'" class="space-y-4">
+        <div class="bg-white rounded-lg shadow-card border border-line-soft">
+          <div class="px-5 pt-4 flex items-center justify-between border-b border-line-soft">
+            <div class="flex gap-6">
+              <button @click="accountTab='list'" class="pb-3 text-sm relative" :class="accountTab==='list'?'text-primary font-semibold':'text-ink-secondary'">
+                账号列表<span x-show="accountTab==='list'" class="absolute left-0 right-0 -bottom-px h-0.5 bg-primary"></span>
+              </button>
+              <button x-show="canReviewRegister" @click="accountTab='register'" class="pb-3 text-sm relative" :class="accountTab==='register'?'text-primary font-semibold':'text-ink-secondary'">
+                注册申请<span class="ml-1 text-[10px] px-1.5 py-0.5 rounded-full bg-primary text-white" x-text="pendingRegisterCount"></span>
+                <span x-show="accountTab==='register'" class="absolute left-0 right-0 -bottom-px h-0.5 bg-primary"></span>
+              </button>
+            </div>
+            <div class="pb-3 flex gap-2" x-show="accountTab==='list'">
+              <button @click="toast('导出任务已提交（>1000 行将异步通知）')" class="px-3 py-1.5 text-sm rounded-md border border-line hover:bg-fill">导出账号</button>
+              <button @click="openAccountDrawer('create')" class="px-3 py-1.5 text-sm rounded-md bg-primary text-white hover:bg-primary-hover">新建账号</button>
+            </div>
+          </div>
+
+          <div x-show="accountTab==='list'">
+            <div class="p-4 flex flex-wrap gap-3 items-end border-b border-line-soft bg-fill/50">
+              <label class="text-xs text-ink-secondary space-y-1"><span>组织</span>
+                <input x-model="accountFilters.org" class="block w-40 border border-line rounded-md px-2 py-1.5 text-sm" placeholder="组织名" /></label>
+              <label class="text-xs text-ink-secondary space-y-1"><span>角色</span>
+                <input x-model="accountFilters.role" class="block w-36 border border-line rounded-md px-2 py-1.5 text-sm" placeholder="角色" /></label>
+              <label class="text-xs text-ink-secondary space-y-1"><span>状态</span>
+                <select x-model="accountFilters.status" class="block w-28 border border-line rounded-md px-2 py-1.5 text-sm bg-white">
+                  <option value="">全部</option><option>启用</option><option>停用</option>
+                </select></label>
+              <label class="text-xs text-ink-secondary space-y-1"><span>创建时间</span>
+              <span class="flex gap-1 items-center">
+                <input type="date" x-model="accountFilters.start" class="block w-36 border border-line rounded-md px-2 py-1.5 text-sm bg-white" />
+                <span class="text-ink-tertiary">~</span>
+                <input type="date" x-model="accountFilters.end" class="block w-36 border border-line rounded-md px-2 py-1.5 text-sm bg-white" />
+              </span></label>
+              <label class="text-xs text-ink-secondary space-y-1"><span>姓名/手机/邮箱</span>
+                <input x-model="accountFilters.keyword" class="block w-48 border border-line rounded-md px-2 py-1.5 text-sm" /></label>
+              <button @click="accountPage=1" class="px-3 py-1.5 text-sm rounded-md bg-primary text-white hover:bg-primary-hover">搜索</button>
+              <button @click="resetAccountFilters()" class="px-3 py-1.5 text-sm rounded-md border border-line hover:bg-fill">重置</button>
+            </div>
+            <div class="table-wrap">
+              <table class="w-full text-sm">
+                <thead class="bg-fill text-ink-secondary text-xs">
+                  <tr>
+                    <th class="text-left font-medium px-4 py-3">姓名</th>
+                    <th class="text-left font-medium px-4 py-3">公司/机构</th>
+                    <th class="text-left font-medium px-4 py-3">组织</th>
+                    <th class="text-left font-medium px-4 py-3">角色</th>
+                    <th class="text-left font-medium px-4 py-3">手机号</th>
+                    <th class="text-left font-medium px-4 py-3">状态</th>
+                    <th class="text-left font-medium px-4 py-3">最近登录</th>
+                    <th class="text-left font-medium px-4 py-3">操作</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <template x-for="a in pagedAccounts" :key="a.id">
+                    <tr class="border-t border-line-soft hover:bg-fill/60">
+                      <td class="px-4 py-3 font-medium" x-text="a.name"></td>
+                      <td class="px-4 py-3" x-text="a.company || '—'"></td>
+                      <td class="px-4 py-3" x-text="a.org"></td>
+                      <td class="px-4 py-3 text-xs" x-text="a.roles.join('、')"></td>
+                      <td class="px-4 py-3 font-mono text-xs" x-text="a.mobile"></td>
+                      <td class="px-4 py-3"><span :class="a.status==='启用'?'text-success':'text-ink-tertiary'" x-text="a.status"></span></td>
+                      <td class="px-4 py-3 text-ink-tertiary text-xs" x-text="a.lastLogin"></td>
+                      <td class="px-4 py-3 space-x-2 text-primary whitespace-nowrap">
+                        <button @click="openAccountDrawer('edit', a)" class="hover:underline">编辑</button>
+                        <button @click="resetPwd(a)" class="hover:underline">重置密码</button>
+                        <button @click="toggleAccount(a)" class="hover:underline" x-text="a.status==='启用'?'停用':'启用'"></button>
+                      </td>
+                    </tr>
+                  </template>
+                </tbody>
+              </table>
+            </div>
+            <div class="px-4 py-3 border-t border-line-soft flex items-center justify-between text-xs text-ink-tertiary">
+              <span x-text="'共 '+filteredAccounts.length+' 条 · 手机号完整展示不脱敏'"></span>
+              <div class="flex gap-2">
+                <select x-model.number="accountPageSize" @change="accountPage=1" class="border border-line rounded px-2 py-1 text-xs bg-white">
+                  <option :value="20">20条/页</option><option :value="50">50条/页</option><option :value="100">100条/页</option>
+                </select>
+                <button @click="accountPage=Math.max(1,accountPage-1)" class="px-2 py-1 border border-line rounded hover:bg-fill">上一页</button>
+                <span x-text="accountPage+' / '+accountTotalPages"></span>
+                <button @click="accountPage=Math.min(accountTotalPages,accountPage+1)" class="px-2 py-1 border border-line rounded hover:bg-fill">下一页</button>
+              </div>
+            </div>
+          </div>
+
+          <div x-show="accountTab==='register' && canReviewRegister">
+            <div class="p-4 flex flex-wrap gap-3 items-end border-b border-line-soft bg-fill/50">
+              <select x-model="regFilter" class="border border-line rounded-md px-2 py-1.5 text-sm bg-white">
+                <option value="">全部状态</option><option>待处理</option><option>已通过</option><option>已驳回</option>
+              </select>
+              <label class="text-xs text-ink-secondary space-y-1"><span>申请时间</span>
+                <span class="flex gap-1 items-center">
+                  <input type="date" x-model="regTime.start" class="block w-36 border border-line rounded-md px-2 py-1.5 text-sm bg-white" />
+                  <span class="text-ink-tertiary">~</span>
+                  <input type="date" x-model="regTime.end" class="block w-36 border border-line rounded-md px-2 py-1.5 text-sm bg-white" />
+                </span></label>
+              <input x-model="regKeyword" class="border border-line rounded-md px-2 py-1.5 text-sm w-44" placeholder="姓名/手机号" />
+              <button @click="toast('已按条件筛选')" class="px-3 py-1.5 text-sm rounded-md bg-primary text-white hover:bg-primary-hover">搜索</button>
+            </div>
+            <div class="table-wrap">
+              <table class="w-full text-sm">
+                <thead class="bg-fill text-ink-secondary text-xs">
+                  <tr>
+                    <th class="text-left font-medium px-4 py-3">姓名</th>
+                    <th class="text-left font-medium px-4 py-3">公司/机构</th>
+                    <th class="text-left font-medium px-4 py-3">手机号</th>
+                    <th class="text-left font-medium px-4 py-3">申请时间</th>
+                    <th class="text-left font-medium px-4 py-3">次数</th>
+                    <th class="text-left font-medium px-4 py-3">状态</th>
+                    <th class="text-left font-medium px-4 py-3">操作</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <template x-for="r in filteredRegisters" :key="r.id">
+                    <tr class="border-t border-line-soft hover:bg-fill/60">
+                      <td class="px-4 py-3 font-medium" x-text="r.name"></td>
+                      <td class="px-4 py-3" x-text="r.company || '—'"></td>
+                      <td class="px-4 py-3 font-mono text-xs" x-text="r.mobile"></td>
+                      <td class="px-4 py-3 text-ink-tertiary" x-text="r.time"></td>
+                      <td class="px-4 py-3" x-text="r.count+'/3'"></td>
+                      <td class="px-4 py-3"><span class="text-xs px-1.5 py-0.5 rounded"
+                        :class="r.status==='待处理'?'bg-warning-bg text-warning':(r.status==='已通过'?'bg-success-bg text-success':'bg-fill text-ink-tertiary')"
+                        x-text="r.status"></span></td>
+                      <td class="px-4 py-3">
+                        <button x-show="r.status==='待处理'" @click="openRegisterReview(r)" class="text-primary hover:underline">审核</button>
+                        <span x-show="r.status!=='待处理'" class="text-ink-tertiary">—</span>
+                      </td>
+                    </tr>
+                  </template>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== 账户数据范围 ===== -->
+      <section x-show="canAccessOrg && page==='dataScope'" class="space-y-4">
+        <div class="bg-white rounded-lg shadow-card border border-line-soft min-h-[70vh]">
+          <div class="px-5 py-4 border-b border-line-soft">
+            <h1 class="text-base font-semibold">账户数据范围</h1>
+            <p class="text-xs text-ink-tertiary mt-0.5">配置组织 / 品类 / 渠道管辖 · 不配置菜单按钮与表单字段 · 空选=该维无数据</p>
+          </div>
+          <div class="p-5 max-w-3xl space-y-5">
+            <label class="block text-sm space-y-1">
+              <span class="text-ink-secondary text-xs">配置账号</span>
+              <select x-model="scopeAccountId" @change="loadScope()" class="w-full border border-line rounded-md px-3 py-2 text-sm bg-white">
+                <template x-for="a in scopeAccountOptions" :key="a.id">
+                  <option :value="a.id" x-text="a.name+' - '+a.org"></option>
+                </template>
+              </select>
+            </label>
+            <div class="rounded-lg border border-line-soft p-4 space-y-3">
+              <div class="text-sm font-semibold">组织管辖范围</div>
+              <div class="text-xs text-ink-tertiary">默认：仅本组织 <span class="text-ink">[已启用，不可取消]</span></div>
+              <label class="flex items-center gap-2 text-sm">
+                <input type="checkbox" class="rounded border-line text-primary" x-model="scope.includeAllChildren" @change="if(scope.includeAllChildren) scope.extra=[]" />
+                全部下级（一键包含本组织下所有下级）
+              </label>
+              <div class="text-xs text-ink-secondary" :class="scope.includeAllChildren?'opacity-40':''">额外可见组织（未勾选全部下级时可多选）</div>
+              <div class="grid sm:grid-cols-2 gap-2" :class="scope.includeAllChildren?'pointer-events-none opacity-40':''">
+                <template x-for="o in scopeOrgOptions" :key="o">
+                  <label class="flex items-center gap-2 text-sm check-row px-2 py-1 rounded">
+                    <input type="checkbox" class="rounded border-line text-primary" :value="o" x-model="scope.extra" />
+                    <span x-text="o"></span>
+                  </label>
+                </template>
+              </div>
+            </div>
+            <div class="rounded-lg border border-line-soft p-4 space-y-3">
+              <div class="text-sm font-semibold">品类管辖范围 <span class="text-[11px] font-normal text-ink-tertiary">（选项来自类目主数据）</span></div>
+              <div class="grid sm:grid-cols-3 gap-2">
+                <template x-for="c in categoryOptions" :key="c">
+                  <label class="flex items-center gap-2 text-sm check-row px-2 py-1 rounded">
+                    <input type="checkbox" class="rounded border-line text-primary" :value="c" x-model="scope.categories" />
+                    <span x-text="c"></span>
+                  </label>
+                </template>
+              </div>
+            </div>
+            <div class="rounded-lg border border-line-soft p-4 space-y-3">
+              <div class="text-sm font-semibold">渠道管辖范围</div>
+              <div class="grid sm:grid-cols-3 gap-2">
+                <template x-for="c in channelOptions" :key="c">
+                  <label class="flex items-center gap-2 text-sm check-row px-2 py-1 rounded">
+                    <input type="checkbox" class="rounded border-line text-primary" :value="c" x-model="scope.channels" />
+                    <span x-text="c"></span>
+                  </label>
+                </template>
+              </div>
+            </div>
+            <div class="rounded-lg bg-fill border border-line-soft px-4 py-3 text-xs text-ink-secondary leading-relaxed">
+              <span class="font-semibold text-ink">品牌策略（只读）：</span>品牌可查看全部经销商自建数据（直接按权限看，不另拷一份；经销商之间仍互盲）。
+            </div>
+            <button @click="saveScope()" class="px-4 py-2 text-sm rounded-md bg-primary text-white hover:bg-primary-hover">保存</button>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Toast -->
+  <div class="fixed top-16 right-4 z-[60] space-y-2" x-show="toasts.length" x-cloak>
+    <template x-for="t in toasts" :key="t.id">
+      <div class="toast-enter min-w-[240px] max-w-sm px-4 py-3 rounded-lg shadow-card border text-sm"
+        :class="t.type==='error' ? 'bg-white border-primary text-primary' : 'bg-white text-ink border-r border-line-soft border-black'">
+        <span x-text="t.msg"></span>
+      </div>
+    </template>
+  </div>
+
+  <!-- Confirm Modal -->
+  <div x-show="confirmOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4" x-cloak>
+    <div class="absolute inset-0 bg-black/45" @click="confirmOpen=false"></div>
+    <div class="relative bg-white rounded-lg shadow-card border border-line-soft w-full max-w-md p-5">
+      <div class="text-base font-semibold mb-2" x-text="confirmTitle"></div>
+      <p class="text-sm text-ink-secondary mb-5" x-text="confirmMsg"></p>
+      <div class="flex justify-end gap-2">
+        <button @click="confirmOpen=false" class="px-3 py-1.5 text-sm rounded-md border border-line hover:bg-fill">取消</button>
+        <button @click="runConfirm()" class="px-3 py-1.5 text-sm rounded-md bg-primary text-white hover:bg-primary-hover">确认</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Org Modal -->
+  <div x-show="orgModalOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4" x-cloak>
+    <div class="absolute inset-0 bg-black/45" @click="orgModalOpen=false"></div>
+    <div class="relative bg-white rounded-lg shadow-card border border-line-soft w-full max-w-lg p-5">
+      <div class="flex items-center justify-between mb-4">
+        <div class="text-base font-semibold" x-text="orgModalMode==='create'?'新建组织':'编辑组织'"></div>
+        <button @click="orgModalOpen=false" class="text-ink-tertiary hover:text-ink">×</button>
+      </div>
+      <div class="space-y-3 text-sm">
+        <label class="block space-y-1"><span class="text-xs text-ink-secondary">组织类型</span>
+          <div class="flex gap-4 pt-1">
+            <label class="flex items-center gap-1.5"><input type="radio" value="DISTRIBUTOR" x-model="orgForm.type" :disabled="orgModalMode==='edit'" />经销商</label>
+            <label class="flex items-center gap-1.5"><input type="radio" value="RETAILER" x-model="orgForm.type" :disabled="orgModalMode==='edit'" />零售商</label>
+          </div>
+          <p class="text-[11px] text-ink-tertiary mt-1" x-show="orgModalMode==='create'">外部合作为系统预置节点，不在此创建</p>
+        </label>
+        <label class="block space-y-1"><span class="text-xs text-ink-secondary">上级组织</span>
+          <select x-model="orgForm.parent" class="w-full border border-line rounded-md px-3 py-2 bg-white" :disabled="orgModalMode==='edit'">
+            <option>品牌总部</option>
+            <template x-for="d in distributorNames" :key="d"><option x-text="d"></option></template>
+          </select>
+        </label>
+        <label class="block space-y-1"><span class="text-xs text-ink-secondary">组织名称 *</span>
+          <input x-model="orgForm.name" class="w-full border border-line rounded-md px-3 py-2" /></label>
+        <label class="block space-y-1"><span class="text-xs text-ink-secondary">负责人</span>
+          <input x-model="orgForm.owner" class="w-full border border-line rounded-md px-3 py-2" placeholder="自由文本" /></label>
+        <div class="text-xs text-ink-tertiary bg-fill rounded px-3 py-2" x-show="orgModalMode==='create'">
+          提示：新建后将默认继承「<span x-text="orgForm.type==='RETAILER'?'零售商':'经销商'"></span>模板」菜单；个别组织差异化由品牌在模板范围内单独调整
+        </div>
+      </div>
+      <div class="flex justify-end gap-2 mt-5">
+        <button @click="orgModalOpen=false" class="px-3 py-1.5 text-sm rounded-md border border-line hover:bg-fill">取消</button>
+        <button @click="saveOrg()" class="px-3 py-1.5 text-sm rounded-md bg-primary text-white hover:bg-primary-hover">确认</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Menu Template Drawer -->
+  <div x-show="menuTplOpen" class="fixed inset-0 z-50" x-cloak>
+    <div class="absolute inset-0 bg-black/45" @click="menuTplOpen=false"></div>
+    <div class="absolute right-0 top-0 h-full w-full max-w-md bg-white shadow-card border-l border-line drawer-panel flex flex-col">
+      <div class="px-5 py-4 border-b border-line-soft flex items-center justify-between">
+        <div class="font-semibold">类型级菜单模板</div>
+        <button @click="menuTplOpen=false" class="text-ink-tertiary text-xl leading-none">×</button>
+      </div>
+      <div class="px-5 pt-3 flex gap-4 border-b border-line-soft">
+        <button @click="menuTplTab='DISTRIBUTOR'" class="pb-2.5 text-sm relative" :class="menuTplTab==='DISTRIBUTOR'?'text-primary font-semibold':'text-ink-secondary'">
+          经销商模板<span x-show="menuTplTab==='DISTRIBUTOR'" class="absolute left-0 right-0 -bottom-px h-0.5 bg-primary"></span>
+        </button>
+        <button @click="menuTplTab='RETAILER'" class="pb-2.5 text-sm relative" :class="menuTplTab==='RETAILER'?'text-primary font-semibold':'text-ink-secondary'">
+          零售商模板<span x-show="menuTplTab==='RETAILER'" class="absolute left-0 right-0 -bottom-px h-0.5 bg-primary"></span>
+        </button>
+      </div>
+      <div class="flex-1 overflow-y-auto p-5 space-y-2">
+        <p class="text-xs text-ink-tertiary mb-3">新建对应类型组织默认继承本模板；仍走默认继承的组织将随保存自动更新。AI 不单独成模块，模块内 AI 入口由各业务域按权限技术隐藏。</p>
+        <template x-for="m in currentTemplateMenus" :key="m.code">
+          <label class="flex items-center gap-2 text-sm check-row px-2 py-2 rounded border border-transparent hover:border-line-soft">
+            <input type="checkbox" class="rounded border-line text-primary" x-model="m.checked" />
+            <span x-text="m.name"></span>
+          </label>
+        </template>
+      </div>
+      <div class="px-5 py-4 border-t border-line-soft flex justify-end gap-2">
+        <button @click="menuTplOpen=false" class="px-3 py-1.5 text-sm rounded-md border border-line hover:bg-fill">取消</button>
+        <button @click="saveMenuTemplate()" class="px-3 py-1.5 text-sm rounded-md bg-primary text-white hover:bg-primary-hover">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Role Drawer -->
+  <div x-show="roleDrawerOpen" class="fixed inset-0 z-50" x-cloak>
+    <div class="absolute inset-0 bg-black/45" @click="roleDrawerOpen=false"></div>
+    <div class="absolute right-0 top-0 h-full w-full max-w-md bg-white shadow-card border-l border-line drawer-panel flex flex-col">
+      <div class="px-5 py-4 border-b border-line-soft flex items-center justify-between">
+        <div class="font-semibold" x-text="roleDrawerMode==='create'?'新建角色':'编辑角色'"></div>
+        <button @click="roleDrawerOpen=false" class="text-ink-tertiary text-xl">×</button>
+      </div>
+      <div class="flex-1 overflow-y-auto p-5 space-y-3 text-sm">
+        <label class="block space-y-1"><span class="text-xs text-ink-secondary">角色名称 *</span>
+          <input x-model="roleForm.name" class="w-full border border-line rounded-md px-3 py-2" /></label>
+        <label class="block space-y-1"><span class="text-xs text-ink-secondary">角色说明</span>
+          <input x-model="roleForm.desc" class="w-full border border-line rounded-md px-3 py-2" /></label>
+        <div class="text-xs font-semibold text-ink-secondary pt-2">功能权限（页面级 + 按钮级）</div>
+        <p class="text-[11px] text-ink-tertiary">仅展示本组织已开放的全部菜单页面；未开放项已过滤，不提示无权限</p>
+        <template x-for="p in rolePermTree" :key="p.code">
+          <div class="border border-line-soft rounded-md p-2">
+            <label class="flex items-center gap-2 font-medium">
+              <input type="checkbox" class="rounded border-line text-primary" x-model="p.checked" />
+              <span x-text="p.name"></span>
+            </label>
+            <div class="ml-6 mt-1 space-y-1">
+              <template x-for="b in p.buttons" :key="b.code">
+                <label class="flex items-center gap-2 text-xs text-ink-secondary">
+                  <input type="checkbox" class="rounded border-line text-primary" x-model="b.checked" />
+                  <span x-text="b.name"></span>
+                </label>
+              </template>
+            </div>
+          </div>
+        </template>
+      </div>
+      <div class="px-5 py-4 border-t border-line-soft flex justify-end gap-2">
+        <button @click="roleDrawerOpen=false" class="px-3 py-1.5 text-sm rounded-md border border-line hover:bg-fill">取消</button>
+        <button @click="saveRole()" class="px-3 py-1.5 text-sm rounded-md bg-primary text-white hover:bg-primary-hover">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Account Drawer -->
+  <div x-show="accountDrawerOpen" class="fixed inset-0 z-50" x-cloak>
+    <div class="absolute inset-0 bg-black/45" @click="accountDrawerOpen=false"></div>
+    <div class="absolute right-0 top-0 h-full w-full max-w-md bg-white shadow-card border-l border-line drawer-panel flex flex-col">
+      <div class="px-5 py-4 border-b border-line-soft flex items-center justify-between">
+        <div class="font-semibold" x-text="accountDrawerMode==='create'?'新建账号':'编辑账号'"></div>
+        <button @click="accountDrawerOpen=false" class="text-ink-tertiary text-xl">×</button>
+      </div>
+      <div class="flex-1 overflow-y-auto p-5 space-y-3 text-sm">
+        <label class="block space-y-1"><span class="text-xs text-ink-secondary">姓名 *</span>
+          <input x-model="accountForm.name" class="w-full border border-line rounded-md px-3 py-2" :disabled="accountFormReadonly" /></label>
+        <label class="block space-y-1"><span class="text-xs text-ink-secondary">公司/机构</span>
+          <input x-model="accountForm.company" class="w-full border border-line rounded-md px-3 py-2" :disabled="accountFormReadonly" /></label>
+        <label class="block space-y-1"><span class="text-xs text-ink-secondary">手机号 *</span>
+          <input x-model="accountForm.mobile" class="w-full border border-line rounded-md px-3 py-2" :disabled="accountFormReadonly || accountDrawerMode==='edit'" /></label>
+        <label class="block space-y-1"><span class="text-xs text-ink-secondary">邮箱</span>
+          <input x-model="accountForm.email" class="w-full border border-line rounded-md px-3 py-2" :disabled="accountFormReadonly" /></label>
+        <label class="block space-y-1"><span class="text-xs text-ink-secondary">归属组织 *</span>
+          <select x-model="accountForm.org" class="w-full border border-line rounded-md px-3 py-2 bg-white" :disabled="accountFormReadonly || !canPickOrg">
+            <template x-for="o in accountOrgOptions" :key="o"><option x-text="o"></option></template>
+          </select>
+        </label>
+        <div class="space-y-1">
+          <div class="text-xs text-ink-secondary">角色 *（组织管理员与普通业务角色互斥）</div>
+          <template x-for="role in accountRoleOptions" :key="role">
+            <label class="flex items-center gap-2 text-sm">
+              <input type="checkbox" class="rounded border-line text-primary" :value="role" x-model="accountForm.roles" :disabled="accountFormReadonly" />
+              <span x-text="role"></span>
+            </label>
+          </template>
+        </div>
+        <p class="text-xs text-ink-tertiary bg-fill rounded px-3 py-2" x-show="accountDrawerMode==='create'">保存后将弹窗展示临时密码，支持复制；确认后推送开通通知</p>
+        <button x-show="!accountFormReadonly" @click="go('dataScope'); accountDrawerOpen=false; toast('请在账户数据范围页继续配置')" class="text-sm text-primary hover:underline">配置账户数据范围 →</button>
+        <p class="text-xs text-warning" x-show="accountFormReadonly">品牌不修改经销商/零售商既有账号内容（演示：表单只读）</p>
+      </div>
+      <div class="px-5 py-4 border-t border-line-soft flex justify-end gap-2">
+        <button @click="accountDrawerOpen=false" class="px-3 py-1.5 text-sm rounded-md border border-line hover:bg-fill">取消</button>
+        <button x-show="!accountFormReadonly" @click="saveAccount()" class="px-3 py-1.5 text-sm rounded-md bg-primary text-white hover:bg-primary-hover">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Register Review Drawer -->
+  <div x-show="regDrawerOpen" class="fixed inset-0 z-50" x-cloak>
+    <div class="absolute inset-0 bg-black/45" @click="regDrawerOpen=false"></div>
+    <div class="absolute right-0 top-0 h-full w-full max-w-md bg-white shadow-card border-l border-line drawer-panel flex flex-col">
+      <div class="px-5 py-4 border-b border-line-soft flex items-center justify-between">
+        <div class="font-semibold">注册申请审核</div>
+        <button @click="regDrawerOpen=false" class="text-ink-tertiary text-xl">×</button>
+      </div>
+      <div class="flex-1 overflow-y-auto p-5 space-y-3 text-sm" x-show="regCurrent">
+        <div>姓名：<span class="font-medium" x-text="regCurrent && regCurrent.name"></span></div>
+        <div>公司：<span x-text="(regCurrent && regCurrent.company) || '—'"></span></div>
+        <div>手机号：<span class="font-mono" x-text="regCurrent && regCurrent.mobile"></span></div>
+        <div class="pt-2 text-xs text-ink-secondary">角色</div>
+        <label class="flex items-center gap-2"><input type="radio" value="加工商" x-model="regForm.role" />加工商</label>
+        <label class="flex items-center gap-2"><input type="radio" value="设计师" x-model="regForm.role" />设计师</label>
+        <div class="text-xs text-ink-tertiary">归属：外部合作节点（系统预置，固定）</div>
+        <label class="block space-y-1 pt-2"><span class="text-xs text-ink-secondary">驳回原因（驳回时必填）</span>
+          <textarea x-model="regForm.reason" rows="3" class="w-full border border-line rounded-md px-3 py-2"></textarea></label>
+      </div>
+      <div class="px-5 py-4 border-t border-line-soft flex justify-end gap-2">
+        <button @click="rejectRegister()" class="px-3 py-1.5 text-sm rounded-md border border-line hover:bg-fill">驳回</button>
+        <button @click="approveRegister()" class="px-3 py-1.5 text-sm rounded-md bg-primary text-white hover:bg-primary-hover">通过并开通</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Temp Password Modal -->
+  <div x-show="pwdModalOpen" class="fixed inset-0 z-[55] flex items-center justify-center p-4" x-cloak>
+    <div class="absolute inset-0 bg-black/45"></div>
+    <div class="relative bg-white rounded-lg shadow-card border border-line-soft w-full max-w-md p-5">
+      <div class="text-base font-semibold mb-1">临时密码</div>
+      <p class="text-xs text-ink-tertiary mb-4">请复制后妥善保管；确认后系统将向关联账户推送开通通知（含临时密码）</p>
+      <div class="flex items-center gap-2 mb-2">
+        <input type="text" readonly class="flex-1 border border-line rounded-md px-3 py-2 text-sm font-mono bg-fill" :value="tempPassword" />
+        <button type="button" @click="copyTempPassword()" class="px-3 py-2 text-sm rounded-md border border-line hover:bg-fill whitespace-nowrap">复制</button>
+      </div>
+      <p class="text-[11px] text-success mb-4" x-show="pwdCopied">已复制到剪贴板</p>
+      <div class="flex justify-end gap-2">
+        <button type="button" @click="confirmTempPassword()" class="px-4 py-2 text-sm rounded-md bg-primary text-white hover:bg-primary-hover">确认并推送开通通知</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+function orgApp() {
+  const isoDate = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  const DEMO_TODAY = new Date(2026, 7, 14);
+  const defaultMonthRange = () => {
+    const end = new Date(DEMO_TODAY);
+    const start = new Date(DEMO_TODAY);
+    start.setMonth(start.getMonth() - 1);
+    return { start: isoDate(start), end: isoDate(end) };
+  };
+  const inRange = (dateStr, start, end) => {
+    if (!dateStr) return true;
+    const d = String(dateStr).slice(0, 10);
+    if (start && d < start) return false;
+    if (end && d > end) return false;
+    return true;
+  };
+  const defRange = defaultMonthRange();
+  const icon = (d) => `<svg class="w-4 h-4 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="2" d="${d}"/></svg>`;
+  const distributors = ['华东经销商','华南经销商','华北经销商','西南经销商','华中经销商','西北经销商','东北经销商','华东二区经销商'];
+  const retailersOf = (d, n) => Array.from({length: n}, (_, i) => ({
+    id: d + '-r' + (i+1), name: d.replace('经销商','') + '零售商' + String.fromCharCode(65+i), type: 'RETAILER', typeLabel: '零售商',
+    depth: 2, status: i % 5 === 0 ? '停用' : '启用', owner: '店长' + (i+1), childCount: 0, memberCount: 3 + (i%8),
+    inherit: '默认继承「零售商模板」', inheritMode: 'INHERIT', open: false, children: []
+  }));
+  const buildTree = () => {
+    const children = distributors.map((name, idx) => ({
+      id: 'd' + (idx+1), name, type: 'DISTRIBUTOR', typeLabel: '经销商', depth: 1,
+      status: idx === 6 ? '停用' : '启用', owner: ['张三','李四','王五','赵六','钱七','孙八','周九','吴十'][idx],
+      childCount: 4 + (idx % 3), memberCount: 12 + idx * 3,
+      inherit: idx === 1 ? '单独维护（已取消默认）' : '默认继承「经销商模板」',
+      inheritMode: idx === 1 ? 'CUSTOM' : 'INHERIT',
+      open: idx < 2, children: retailersOf(name, 4 + (idx % 3))
+    }));
+    children.push({
+      id: 'ext', name: '外部合作', type: 'EXTERNAL', typeLabel: '外部合作', depth: 1, status: '启用',
+      owner: '—', childCount: 0, memberCount: 28, inherit: '—', inheritMode: 'INHERIT', open: false, children: []
+    });
+    return [{
+      id: 'brand', name: '品牌总部', type: 'BRAND', typeLabel: '品牌', depth: 0, status: '启用',
+      owner: '品牌管理员', childCount: children.length, memberCount: 56,
+      inherit: '—', inheritMode: 'INHERIT', open: true, children
+    }];
+  };
+  const roleNames = ['组织管理员','商品编辑','选品专员','价格专员','素材专员','渠道运营','只读观察','审计查看','新品提报','库存协同','促销配置','法务复核'];
+  const makeRoles = (org) => roleNames.map((name, i) => ({
+    id: org + '-role-' + i, name, type: i === 0 ? '预设' : '自定义', accounts: 2 + (i % 9),
+    status: i === 7 ? '停用' : '启用', updated: (i % 2 ? '2026-07-' : '2026-08-') + String(i % 2 ? (16 + (i % 12)) : (1 + (i % 12))).padStart(2, '0'), org
+  }));
+  const firstNames = ['李','王','张','刘','陈','杨','赵','黄','周','吴','徐','孙','马','朱','胡','郭','何','高','林','罗'];
+  const lastNames = ['伟','芳','娜','敏','静','丽','强','磊','军','洋','勇','艳','杰','涛','明','超','秀英','霞','平','刚'];
+  const makeAccounts = () => {
+    const list = [];
+    let id = 1;
+    const orgs = ['品牌总部', ...distributors, '外部合作', '上海零售商A', '杭州零售商B', '广州零售商A', '深圳零售商B'];
+    orgs.forEach((org, oi) => {
+      for (let i = 0; i < (org === '外部合作' ? 16 : 10); i++) {
+        const name = firstNames[(oi + i) % firstNames.length] + lastNames[(oi * 3 + i) % lastNames.length];
+        const roles = org === '外部合作'
+          ? (i % 3 === 0 ? ['加工商','设计师'] : (i % 2 ? ['设计师'] : ['加工商']))
+          : (i === 0 ? ['组织管理员'] : [roleNames[1 + (i % 6)]]);
+        list.push({
+          id: 'a' + (id++), name,
+          company: org === '外部合作' ? (roles.includes('设计师') && i % 2 ? '' : '精工制造' + (i+1) + '厂') : (org.includes('零售') ? '' : org.replace('经销商','贸易')),
+          org, roles, mobile: '1' + String(3800000000 + oi * 100 + i), email: i % 3 ? '' : `u${id}@zippo-demo.cn`,
+          status: i % 9 === 0 ? '停用' : '启用', lastLogin: '2026-08-0' + (1 + (i % 5)) + ' 09:' + String(10 + i).padStart(2, '0'),
+          created: (i % 3 ? '2026-07-' : '2026-08-') + String(i % 3 ? (15 + ((oi + i) % 14)) : (1 + (i % 12))).padStart(2, '0')
+        });
+      }
+    });
+    return list;
+  };
+  const makeRegisters = () => Array.from({length: 120}, (_, i) => ({
+    id: 'reg' + (i+1),
+    name: firstNames[i % firstNames.length] + lastNames[(i*2) % lastNames.length],
+    company: i % 4 === 0 ? '' : '申请工厂' + (i+1),
+    mobile: '139' + String(10000000 + i * 17).slice(0, 8),
+    time: '2026-07-' + String(20 + (i % 10)).padStart(2, '0'),
+    count: 1 + (i % 3),
+    status: i < 6 ? '待处理' : (i < 12 ? '已通过' : '已驳回')
+  }));
+
+  return {
+    mobileNav: false,
+        openTabs: [{ id: 'home', label: '组织管理', page: null }],
+        activeTabId: 'home',
+        activateTab(id) {
+          const t = this.openTabs.find(x => x.id === id);
+          if (!t) return;
+          this.activeTabId = id;
+          if (t.page && typeof this.go === 'function') this.go(t.page, true);
+        },
+        closeTab(id) {
+          if (this.openTabs.length <= 1) return;
+          const i = this.openTabs.findIndex(x => x.id === id);
+          if (i < 0) return;
+          this.openTabs.splice(i, 1);
+          if (this.activeTabId === id) {
+            const next = this.openTabs[Math.max(0, i - 1)];
+            this.activateTab(next.id);
+          }
+        },
+        ensureOpenTab(page, label) {
+          const id = 'p-' + page;
+          let t = this.openTabs.find(x => x.id === id);
+          if (!t) {
+            this.openTabs.push({ id, label, page });
+          } else {
+            t.label = label;
+          }
+          this.activeTabId = id;
+        },
+
+    role: 'BRAND_ADMIN',
+    page: 'architecture',
+    toasts: [],
+    toastId: 0,
+    confirmOpen: false, confirmTitle: '', confirmMsg: '', confirmAction: null,
+    pwdModalOpen: false, tempPassword: '', pwdCopied: false, pwdNotifyHint: '',
+    orgTree: buildTree(),
+    orgKeyword: '',
+    selectedOrg: null,
+    orgMenuPreview: [],
+    orgModalOpen: false, orgModalMode: 'create',
+    orgForm: { type: 'DISTRIBUTOR', parent: '品牌总部', name: '', owner: '' },
+    menuTplOpen: false, menuTplTab: 'DISTRIBUTOR',
+    menuTemplates: {
+      DISTRIBUTOR: [
+        { code: 'selection', name: '选品中心', checked: true },
+        { code: 'product', name: '商品管理', checked: true },
+        { code: 'price', name: '价格管理', checked: true },
+        { code: 'asset', name: '素材空间', checked: false },
+        { code: 'channel', name: '渠道管理', checked: true },
+      ],
+      RETAILER: [
+        { code: 'selection', name: '选品中心', checked: false },
+        { code: 'product', name: '商品管理', checked: true },
+        { code: 'price', name: '价格管理', checked: false },
+        { code: 'asset', name: '素材空间', checked: true },
+        { code: 'channel', name: '渠道管理', checked: true },
+      ],
+    },
+    roles: [...makeRoles('品牌总部'), ...makeRoles('华东经销商'), ...makeRoles('华南经销商')],
+    roleFilters: { keyword: '', type: '', start: defRange.start, end: defRange.end },
+    rolePage: 1, rolePageSize: 20,
+    roleDrawerOpen: false, roleDrawerMode: 'create', roleForm: { name: '', desc: '' },
+    rolePermTree: [],
+    accounts: makeAccounts(),
+    accountTab: 'list',
+    accountFilters: { org: '', role: '', status: '', keyword: '', start: defRange.start, end: defRange.end },
+    accountPage: 1, accountPageSize: 20,
+    accountDrawerOpen: false, accountDrawerMode: 'create', accountFormReadonly: false,
+    accountForm: { name: '', company: '', mobile: '', email: '', org: '', roles: [] },
+    registers: makeRegisters(),
+    regFilter: '待处理',
+    regKeyword: '',
+    regTime: { start: defRange.start, end: defRange.end },
+    regDrawerOpen: false, regCurrent: null, regForm: { role: '设计师', reason: '' },
+    scopeAccountId: '',
+    scope: { includeAllChildren: false, extra: [], categories: [], channels: [] },
+    categoryOptions: ['打火机','配件','礼盒套装','燃料耗材','收藏系列','联名款','户外系列','文创周边'],
+    channelOptions: ['天猫','京东','抖音','拼多多','官网','线下门店','经销商专供','跨境'],
+    scopeOrgOptions: [],
+
+    get roleLabel() {
+      return ({ PLATFORM_ADMIN:'平台管理员', BRAND_ADMIN:'品牌管理员', BRAND_OPERATOR:'品牌业务', DISTRIBUTOR_ADMIN:'经销商组织管理员', RETAILER_ADMIN:'零售商组织管理员' })[this.role];
+    },
+    get currentUser() {
+      const map = {
+        PLATFORM_ADMIN: { name: 'Root·运维', avatar: 'R' },
+        BRAND_ADMIN: { name: '陈品牌', avatar: '陈' },
+        BRAND_OPERATOR: { name: '刘业务', avatar: '刘' },
+        DISTRIBUTOR_ADMIN: { name: '李四', avatar: '李' },
+        RETAILER_ADMIN: { name: '周店长', avatar: '周' },
+      };
+      return map[this.role];
+    },
+    get canAccessOrg() { return this.role !== 'BRAND_OPERATOR'; },
+    get canEditOrg() { return this.role === 'PLATFORM_ADMIN' || this.role === 'BRAND_ADMIN'; },
+    get canReviewRegister() { return this.canEditOrg; },
+    get canPickOrg() { return this.canEditOrg; },
+    get canEditMenuPolicy() {
+      return this.canEditOrg && this.selectedOrg && this.selectedOrg.inheritMode === 'CUSTOM';
+    },
+    get menus() {
+      const self = this;
+      return [
+        { id: 'architecture', label: '组织架构', icon: icon('M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z'), visible: () => self.canAccessOrg },
+        { id: 'roles', label: '角色管理', icon: icon('M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197'), visible: () => self.canAccessOrg },
+        { id: 'accounts', label: '账号管理', icon: icon('M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z'), badge: () => self.canReviewRegister ? self.pendingRegisterCount : 0, visible: () => self.canAccessOrg },
+        { id: 'dataScope', label: '账户数据范围', icon: icon('M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z'), visible: () => self.canAccessOrg },
+      ];
+    },
+    get pageTitle() {
+      return ({ architecture:'组织架构', roles:'角色管理', accounts:'账号管理', dataScope:'账户数据范围' })[this.page] || '';
+    },
+    get filteredOrgTree() {
+      const kw = this.orgKeyword.trim();
+      let tree = JSON.parse(JSON.stringify(this.orgTree));
+      if (this.role === 'DISTRIBUTOR_ADMIN') {
+        const d = tree[0].children.find(c => c.name === '华东经销商');
+        tree = d ? [{ ...d, depth: 0, open: true }] : [];
+      } else if (this.role === 'RETAILER_ADMIN') {
+        tree = [{ id: 'my', name: '上海零售商A', type: 'RETAILER', typeLabel: '零售商', depth: 0, status: '启用', owner: '周店长', childCount: 0, memberCount: 6, inherit: '默认继承「零售商模板」', inheritMode: 'INHERIT', open: false, children: [] }];
+      }
+      if (!kw) return tree;
+      const filterNode = (n) => {
+        const kids = (n.children || []).map(filterNode).filter(Boolean);
+        if (n.name.includes(kw) || kids.length) return { ...n, open: true, children: kids };
+        return null;
+      };
+      return tree.map(filterNode).filter(Boolean);
+    },
+    get distributorNames() { return distributors; },
+    get currentTemplateMenus() { return this.menuTemplates[this.menuTplTab]; },
+    get filteredRoles() {
+      let list = this.roles;
+      if (this.role === 'DISTRIBUTOR_ADMIN') list = list.filter(r => r.org === '华东经销商' || r.name === '组织管理员');
+      if (this.role === 'RETAILER_ADMIN') list = list.filter(r => r.org.includes('零售') || r.name === '组织管理员').slice(0, 8);
+      if (this.roleFilters.keyword) list = list.filter(r => r.name.includes(this.roleFilters.keyword));
+      if (this.roleFilters.type) list = list.filter(r => r.type === this.roleFilters.type);
+      list = list.filter(r => inRange(r.updated, this.roleFilters.start, this.roleFilters.end));
+      return list;
+    },
+    get roleTotalPages() { return Math.max(1, Math.ceil(this.filteredRoles.length / this.rolePageSize)); },
+    get pagedRoles() {
+      const s = (this.rolePage - 1) * this.rolePageSize;
+      return this.filteredRoles.slice(s, s + this.rolePageSize);
+    },
+    get filteredAccounts() {
+      let list = this.accounts;
+      if (this.role === 'DISTRIBUTOR_ADMIN') list = list.filter(a => a.org === '华东经销商' || a.org.includes('华东') || a.org.includes('上海') || a.org.includes('杭州'));
+      if (this.role === 'RETAILER_ADMIN') list = list.filter(a => a.org.includes('上海零售') || a.org === '上海零售商A');
+      const f = this.accountFilters;
+      if (f.org) list = list.filter(a => a.org.includes(f.org));
+      if (f.role) list = list.filter(a => a.roles.some(r => r.includes(f.role)));
+      if (f.status) list = list.filter(a => a.status === f.status);
+      if (f.keyword) list = list.filter(a => a.name.includes(f.keyword) || a.mobile.includes(f.keyword) || (a.email && a.email.includes(f.keyword)));
+      list = list.filter(a => inRange(a.created, f.start, f.end));
+      return list;
+    },
+    get accountTotalPages() { return Math.max(1, Math.ceil(this.filteredAccounts.length / this.accountPageSize)); },
+    get pagedAccounts() {
+      const s = (this.accountPage - 1) * this.accountPageSize;
+      return this.filteredAccounts.slice(s, s + this.accountPageSize);
+    },
+    get pendingRegisterCount() { return this.registers.filter(r => r.status === '待处理').length; },
+    get filteredRegisters() {
+      let list = this.registers;
+      if (this.regFilter) list = list.filter(r => r.status === this.regFilter);
+      if (this.regKeyword) list = list.filter(r => r.name.includes(this.regKeyword) || r.mobile.includes(this.regKeyword));
+      list = list.filter(r => inRange(r.time, this.regTime.start, this.regTime.end));
+      return list;
+    },
+    get scopeAccountOptions() {
+      if (this.role === 'DISTRIBUTOR_ADMIN') return this.accounts.filter(a => a.org === '华东经销商' && a.status === '启用').slice(0, 20);
+      if (this.role === 'RETAILER_ADMIN') return this.accounts.filter(a => a.org.includes('上海零售')).slice(0, 12);
+      if (this.role === 'BRAND_ADMIN' || this.role === 'PLATFORM_ADMIN') return this.accounts.filter(a => a.org === '品牌总部').slice(0, 20);
+      return this.accounts.slice(0, 20);
+    },
+    get accountOrgOptions() {
+      if (this.role === 'DISTRIBUTOR_ADMIN') return ['华东经销商'];
+      if (this.role === 'RETAILER_ADMIN') return ['上海零售商A'];
+      return ['品牌总部', ...distributors, '外部合作'];
+    },
+    get accountRoleOptions() {
+      return ['组织管理员','商品编辑','选品专员','价格专员','加工商','设计师'];
+    },
+
+    init() {
+      this.selectedOrg = this.orgTree[0].children[0];
+      this.refreshOrgMenuPreview();
+      this.scopeAccountId = (this.scopeAccountOptions[0] || {}).id || '';
+      this.loadScope();
+    },
+    onRoleChange() {
+      this.page = this.canAccessOrg ? 'architecture' : 'architecture';
+      this.accountTab = 'list';
+      if (this.role === 'DISTRIBUTOR_ADMIN') this.selectedOrg = this.orgTree[0].children.find(c => c.name === '华东经销商');
+      else if (this.role === 'RETAILER_ADMIN') this.selectedOrg = { id: 'my', name: '上海零售商A', type: 'RETAILER', typeLabel: '零售商', status: '启用', owner: '周店长', childCount: 0, memberCount: 6, inherit: '默认继承「零售商模板」', inheritMode: 'INHERIT' };
+      else this.selectedOrg = this.orgTree[0].children[0];
+      this.refreshOrgMenuPreview();
+      this.scopeAccountId = (this.scopeAccountOptions[0] || {}).id || '';
+      this.loadScope();
+      this.toast('已切换为：' + this.roleLabel);
+    },
+    go(id) { if (!this.canAccessOrg) return; this.page = id; },
+    resetRoleFilters() {
+      const r = defaultMonthRange();
+      this.roleFilters = { keyword: '', type: '', start: r.start, end: r.end };
+      this.rolePage = 1;
+    },
+    resetAccountFilters() {
+      const r = defaultMonthRange();
+      this.accountFilters = { org: '', role: '', status: '', keyword: '', start: r.start, end: r.end };
+      this.accountPage = 1;
+    },
+    toast(msg, type = 'ok') {
+      const id = ++this.toastId;
+      this.toasts.push({ id, msg, type });
+      setTimeout(() => { this.toasts = this.toasts.filter(t => t.id !== id); }, 2600);
+    },
+    selectOrg(node) {
+      this.selectedOrg = node;
+      this.refreshOrgMenuPreview();
+    },
+    refreshOrgMenuPreview() {
+      if (!this.selectedOrg) return;
+      const tplKey = this.selectedOrg.type === 'RETAILER' ? 'RETAILER' : 'DISTRIBUTOR';
+      const tpl = this.menuTemplates[tplKey] || this.menuTemplates.DISTRIBUTOR;
+      const custom = this.selectedOrg.inheritMode === 'CUSTOM';
+      this.orgMenuPreview = tpl.map(m => {
+        const inTemplate = !!m.checked;
+        const checked = custom
+          ? !!(this.selectedOrg._customMenus && this.selectedOrg._customMenus[m.code])
+          : !!m.checked;
+        return { code: m.code, name: m.name, inTemplate, checked };
+      });
+    },
+    openMenuTemplate() { this.menuTplOpen = true; },
+    saveMenuTemplate() {
+      this.menuTplOpen = false;
+      this.refreshOrgMenuPreview();
+      this.toast('模板已保存并同步默认继承组织');
+    },
+    openOrgModal(mode) {
+      this.orgModalMode = mode;
+      if (mode === 'create') this.orgForm = { type: 'DISTRIBUTOR', parent: '品牌总部', name: '', owner: '' };
+      else {
+        if (this.selectedOrg.type === 'EXTERNAL' || this.selectedOrg.type === 'BRAND') {
+          this.toast('外部合作/品牌根节点不可通过本弹窗编辑类型', 'error'); return;
+        }
+        this.orgForm = { type: this.selectedOrg.type, parent: '品牌总部', name: this.selectedOrg.name, owner: this.selectedOrg.owner };
+      }
+      this.orgModalOpen = true;
+    },
+    saveOrg() {
+      if (!this.orgForm.name.trim()) { this.toast('请填写组织名称', 'error'); return; }
+      if (this.orgForm.type === 'EXTERNAL') { this.toast('不可创建外部合作节点（系统预置）', 'error'); return; }
+      if (this.orgForm.type === 'RETAILER' && this.orgForm.parent === '品牌总部') {
+        this.toast('零售商上级须为经销商', 'error'); return;
+      }
+      this.orgModalOpen = false;
+      this.toast(this.orgModalMode === 'create' ? '组织已创建（默认继承模板）' : '组织已更新');
+    },
+    moveOrg(node, dir) {
+      if (!node || !this.canEditOrg) return;
+      if (node.type !== 'DISTRIBUTOR' && node.type !== 'RETAILER') {
+        this.toast('仅同级经销商或同经销商下零售商可调整顺序', 'error'); return;
+      }
+      const brand = this.orgTree[0];
+      let siblings = null;
+      if (node.type === 'DISTRIBUTOR') {
+        siblings = brand.children.filter(c => c.type === 'DISTRIBUTOR');
+      } else {
+        const parent = brand.children.find(d => d.children && d.children.some(r => r.id === node.id));
+        if (!parent) { this.toast('未找到上级经销商', 'error'); return; }
+        siblings = parent.children;
+      }
+      const idx = siblings.findIndex(s => s.id === node.id);
+      if (idx < 0) return;
+      const swap = dir === 'up' ? idx - 1 : idx + 1;
+      if (swap < 0 || swap >= siblings.length) {
+        this.toast(dir === 'up' ? '已在最前' : '已在最后'); return;
+      }
+      const item = siblings.splice(idx, 1)[0];
+      siblings.splice(swap, 0, item);
+      if (node.type === 'DISTRIBUTOR') {
+        const ext = brand.children.find(c => c.type === 'EXTERNAL');
+        brand.children = [...siblings];
+        if (ext) brand.children.push(ext);
+      } else {
+        // 触发零售商列表刷新
+        const parent = brand.children.find(d => d.children && d.children.some(r => r.id === node.id));
+        if (parent) parent.children = [...siblings];
+      }
+      this.toast('已调整展示顺序（经销商平级 / 同经销商下零售商）');
+    },
+    toggleOrgStatus() {
+      const next = this.selectedOrg.status === '启用' ? '停用' : '启用';
+      this.confirmTitle = next === '停用' ? '确认停用组织？' : '确认启用组织？';
+      this.confirmMsg = next === '停用'
+        ? '停用后下属账号将停用且无法登录，期间不可启用账号。'
+        : '启用组织后，下属账号仍为停用，须再手动启用。';
+      this.confirmAction = () => {
+        this.selectedOrg.status = next;
+        this.toast('组织已' + next);
+      };
+      this.confirmOpen = true;
+    },
+    confirmDeleteOrg() {
+      this.confirmTitle = '确认删除组织？';
+      this.confirmMsg = '仅当无下级、无挂接账号、无业务数据时可删除。';
+      this.confirmAction = () => {
+        if (this.selectedOrg.childCount > 0 || this.selectedOrg.memberCount > 0) {
+          this.toast('删除被拒绝：仍有下级或账号', 'error');
+        } else this.toast('组织已删除');
+      };
+      this.confirmOpen = true;
+    },
+    cancelInherit() {
+      this.selectedOrg.inheritMode = 'CUSTOM';
+      this.selectedOrg.inherit = '单独维护（已取消默认）';
+      this.selectedOrg._customMenus = Object.fromEntries(this.orgMenuPreview.map(m => [m.code, m.checked]));
+      this.refreshOrgMenuPreview();
+      this.toast('已取消默认继承，可单独勾选菜单');
+    },
+    restoreInherit() {
+      this.confirmTitle = '恢复默认继承？';
+      this.confirmMsg = '将丢弃单独维护结果，重新跟随类型模板。';
+      this.confirmAction = () => {
+        this.selectedOrg.inheritMode = 'INHERIT';
+        this.selectedOrg.inherit = '默认继承「经销商模板」';
+        this.selectedOrg._customMenus = null;
+        this.refreshOrgMenuPreview();
+        this.toast('已恢复默认继承');
+      };
+      this.confirmOpen = true;
+    },
+    previewMenu() { this.toast('预览：登录后将按当前勾选展示菜单（须重新登录生效）'); },
+    saveOrgMenu() {
+      // simulate role conflict if unchecking product while custom
+      const product = this.orgMenuPreview.find(m => m.code === 'product');
+      if (this.selectedOrg.inheritMode === 'CUSTOM' && product && !product.checked) {
+        this.toast('禁止保存：角色「商品编辑」仍含拟收回页面', 'error');
+        return;
+      }
+      this.selectedOrg._customMenus = Object.fromEntries(this.orgMenuPreview.map(m => [m.code, m.checked]));
+      this.toast('组织菜单策略已保存');
+    },
+    openRoleDrawer(mode, row) {
+      this.roleDrawerMode = mode;
+      this.roleForm = mode === 'edit' ? { name: row.name, desc: '', id: row.id } : { name: '', desc: '' };
+      // 仅渲染本组织已开放菜单；未开放项（如价格管理）静默过滤，不展示「无权限」
+      this.rolePermTree = [
+        { code: 'product', name: '商品管理', checked: true, buttons: [
+          { code: 'create', name: '新建', checked: true }, { code: 'export', name: '导出', checked: true }, { code: 'delete', name: '删除', checked: false }
+        ]},
+        { code: 'selection', name: '选品中心', checked: true, buttons: [
+          { code: 'submit', name: '新品提报', checked: true }, { code: 'board', name: '热词看板', checked: false }
+        ]},
+        { code: 'channel', name: '渠道管理', checked: false, buttons: [
+          { code: 'shop', name: '店铺配置', checked: false }, { code: 'sync', name: '同步', checked: true }
+        ]},
+      ];
+      this.roleDrawerOpen = true;
+    },
+    saveRole() {
+      if (!this.roleForm.name.trim()) { this.toast('请填写角色名称', 'error'); return; }
+      this.roleDrawerOpen = false;
+      this.toast('角色已保存；关联账号须重新登录后生效');
+    },
+    toggleRole(r) {
+      this.confirmTitle = r.status === '启用' ? '确认停用角色？' : '确认启用角色？';
+      this.confirmMsg = r.status === '启用' ? '停用后不可再分配；已登录用户须重新登录后失权。' : '启用后可重新分配给账号。';
+      this.confirmAction = () => { r.status = r.status === '启用' ? '停用' : '启用'; this.toast('角色已' + r.status); };
+      this.confirmOpen = true;
+    },
+    openAccountDrawer(mode, row) {
+      this.accountDrawerMode = mode;
+      const isLower = row && row.org !== '品牌总部' && row.org !== '外部合作';
+      this.accountFormReadonly = mode === 'edit' && this.role === 'BRAND_ADMIN' && isLower;
+      if (mode === 'create') {
+        this.accountForm = { name: '', company: '', mobile: '', email: '', org: this.accountOrgOptions[0], roles: [] };
+      } else {
+        this.accountForm = { name: row.name, company: row.company, mobile: row.mobile, email: row.email, org: row.org, roles: [...row.roles], id: row.id };
+      }
+      this.accountDrawerOpen = true;
+    },
+    saveAccount() {
+      if (!this.accountForm.name || !this.accountForm.mobile) { this.toast('姓名与手机号必填', 'error'); return; }
+      const hasAdmin = this.accountForm.roles.includes('组织管理员');
+      const hasBiz = this.accountForm.roles.some(r => r !== '组织管理员' && r !== '加工商' && r !== '设计师');
+      if (hasAdmin && hasBiz) { this.toast('组织管理员与普通业务角色互斥', 'error'); return; }
+      if (this.accounts.some(a => a.mobile === this.accountForm.mobile && a.id !== this.accountForm.id)) {
+        this.toast('手机号已被占用（含停用账号）', 'error'); return;
+      }
+      this.accountDrawerOpen = false;
+      if (this.accountDrawerMode === 'create') {
+        this.showTempPasswordModal('账号已创建');
+      } else {
+        this.toast('账号已更新');
+      }
+    },
+    showTempPasswordModal(hint) {
+      const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789#@$';
+      let pwd = '';
+      for (let i = 0; i < 10; i++) pwd += chars[Math.floor(Math.random() * chars.length)];
+      this.tempPassword = pwd;
+      this.pwdCopied = false;
+      this.pwdNotifyHint = hint || '';
+      this.pwdModalOpen = true;
+    },
+    copyTempPassword() {
+      const text = this.tempPassword;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(() => { this.pwdCopied = true; }).catch(() => { this.fallbackCopy(text); });
+      } else {
+        this.fallbackCopy(text);
+      }
+    },
+    fallbackCopy(text) {
+      const ta = document.createElement('textarea');
+      ta.value = text; document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); this.pwdCopied = true; } catch (e) { this.toast('请手动复制密码', 'error'); }
+      document.body.removeChild(ta);
+    },
+    confirmTempPassword() {
+      this.pwdModalOpen = false;
+      this.toast((this.pwdNotifyHint ? this.pwdNotifyHint + '；' : '') + '已确认，开通通知（含临时密码）已推送至关联账户');
+      this.tempPassword = '';
+      this.pwdCopied = false;
+    },
+    toggleAccount(a) {
+      if (a.status === '停用' && this.selectedOrg && this.selectedOrg.status === '停用') {
+        this.toast('组织停用期间不可启用下属账号', 'error'); return;
+      }
+      this.confirmTitle = a.status === '启用' ? '确认停用账号？' : '确认启用账号？';
+      this.confirmMsg = a.status === '启用' ? '停用后该手机号/邮箱仍被占用，不可用于新建。' : '启用后账号可登录（组织须为启用）。';
+      this.confirmAction = () => { a.status = a.status === '启用' ? '停用' : '启用'; this.toast('账号已' + a.status); };
+      this.confirmOpen = true;
+    },
+    resetPwd(a) {
+      this.showTempPasswordModal('已为「' + a.name + '」重置密码');
+    },
+    openRegisterReview(r) {
+      this.regCurrent = r;
+      this.regForm = { role: r.company ? '加工商' : '设计师', reason: '' };
+      this.regDrawerOpen = true;
+    },
+    approveRegister() {
+      this.regCurrent.status = '已通过';
+      this.regDrawerOpen = false;
+      this.showTempPasswordModal('已开通并归属外部合作');
+    },
+    rejectRegister() {
+      if (!this.regForm.reason.trim()) { this.toast('驳回须填写原因', 'error'); return; }
+      this.regCurrent.status = '已驳回';
+      this.regDrawerOpen = false;
+      this.toast('已驳回');
+    },
+    loadScope() {
+      const a = this.accounts.find(x => x.id === this.scopeAccountId);
+      this.scopeOrgOptions = a && a.org.includes('经销')
+        ? ['上海零售商A','杭州零售商B','南京零售商C','苏州零售商D','宁波零售商E','无锡零售商F']
+        : ['华东经销商','华南经销商','华北经销商'];
+      this.scope = {
+        includeAllChildren: false,
+        extra: this.scopeOrgOptions.slice(0, 2),
+        categories: ['打火机','配件','礼盒套装'],
+        channels: ['天猫','京东','抖音'],
+      };
+    },
+    saveScope() {
+      if (this.scope.includeAllChildren && this.scope.extra.length) {
+        this.toast('「全部下级」与多选指定组织互斥', 'error'); return;
+      }
+      this.toast('账户数据范围已保存；须重新登录后生效');
+    },
+    runConfirm() {
+      this.confirmOpen = false;
+      if (typeof this.confirmAction === 'function') this.confirmAction();
+      this.confirmAction = null;
+    },
+  };
+}
+</script>
+<script src="view-guard.js"></script>
+</body>
+
+<script>
+/* ZIPPO_GLOBAL_SHELL_V2 */
+(function(){
+  if(window.__zippoShellV2) return;
+  window.__zippoShellV2 = 1;
+  document.querySelectorAll('.card').forEach(function(card){
+    if(card.querySelector('.table-wrap table')) card.classList.add('has-table');
+  });
+  document.querySelectorAll('.pager, .pagination').forEach(function(p){
+    p.classList.add('zippo-pager-sticky');
+  });
+  function wrapAvatar(el){
+    if(!el || el.closest('.zippo-user-menu')) return;
+    var wrap = document.createElement('div');
+    wrap.className = 'zippo-user-menu';
+    var panel = document.createElement('div');
+    panel.className = 'zippo-user-menu-panel';
+    panel.innerHTML = '<button type="button" data-act="profile">个人中心</button><button type="button" data-act="logout">退出登录</button>';
+    el.parentNode.insertBefore(wrap, el);
+    wrap.appendChild(el);
+    wrap.appendChild(panel);
+    el.style.cursor = 'pointer';
+    el.addEventListener('click', function(e){ e.stopPropagation(); wrap.classList.toggle('open'); });
+    panel.querySelector('[data-act=profile]').onclick = function(){
+      wrap.classList.remove('open');
+      var t=document.getElementById('toast'); if(t){t.textContent='个人中心';t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1600);} else alert('个人中心');
+    };
+    panel.querySelector('[data-act=logout]').onclick = function(){
+      wrap.classList.remove('open');
+      var t=document.getElementById('toast'); if(t){t.textContent='已退出登录';t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1600);} else alert('已退出登录');
+    };
+    document.addEventListener('click', function(){ wrap.classList.remove('open'); });
+  }
+  document.querySelectorAll('[aria-label="账号"], [title="管理员"], .d05-avatar, .d03-avatar, .zippo-avatar-trigger').forEach(wrapAvatar);
+  document.querySelectorAll('.top-right span[title], .global-topbar .top-right > span[style*="border-radius:50%"]').forEach(function(el){
+    if(el.textContent && el.textContent.length<=2) wrapAvatar(el);
+  });
+  document.querySelectorAll('.w-8.h-8.rounded-full, .rounded-full.bg-primary').forEach(function(el){
+    if(el.closest('header') && !el.closest('.zippo-user-menu')) wrapAvatar(el);
+  });
+})();
+</script>
+
+</html>

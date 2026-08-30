@@ -1,0 +1,2066 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<!-- poc-embed-guest -->
+<script src="poc-embed-guest.js"></script>
+
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>D04 工艺知识库 · 黑红品牌版原型</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: { DEFAULT: '#C8102E', hover: '#A00D25', active: '#7A0A1C', bg: '#FDE8EC' },
+            success: { DEFAULT: '#2F6B3A', bg: '#EAF5EC' },
+            warning: { DEFAULT: '#8A6A1A', bg: '#F7F1DE' },
+            ink: { DEFAULT: '#0A0A0A', secondary: '#4A4A4A', tertiary: '#8A8A8A', disabled: '#B8B8B8' },
+            line: { DEFAULT: '#D4D4D4', soft: '#EBEBEB' },
+            page: '#EDEDED',
+            fill: '#F7F7F7',
+            brand: { black: '#0A0A0A', red: '#C8102E', gray: '#6B6B6B', white: '#FFFFFF' },
+          },
+          fontFamily: { sans: ['"PingFang SC"', '"Microsoft YaHei"', 'system-ui', 'sans-serif'] },
+          boxShadow: { card: '0 1px 2px rgba(0,0,0,.06), 0 8px 24px rgba(0,0,0,.06)' },
+        },
+      },
+    };
+  </script>
+  <style>
+    [x-cloak] { display: none !important; }
+    .sidebar-scroll::-webkit-scrollbar { width: 4px; }
+    .sidebar-scroll::-webkit-scrollbar-thumb { background: #D4D4D4; border-radius: 4px; }
+    .proto-sidebar { width: 224px; background: #0A0A0A; border-right: 0; flex-shrink: 0; color: #cfcfcf; }
+    .proto-nav-group { padding: 8px 12px 4px; font-size: 11px; font-weight: 600; color: #8f8f8f; letter-spacing: .04em; }
+    .proto-nav-item {
+      display: flex; align-items: center; gap: 8px; width: 100%; text-align: left;
+      padding: 8px 12px; min-height: 40px; border-radius: 4px; font-size: 13px;
+      color: #cfcfcf; border: 0; background: transparent; border-left: 3px solid transparent;
+    }
+    .proto-nav-item:hover { background: #2d2d2d; color: #fff; }
+    .proto-nav-item.active { background: #2d2d2d; color: #fff; font-weight: 600; border-left-color: #C8102E; }
+    .table-wrap { overflow-x: auto; }
+    .skeleton { background: linear-gradient(90deg, #ececec 25%, #e0e0e0 50%, #ececec 75%); background-size: 200% 100%; animation: shimmer 1.2s infinite; }
+    @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+    .toast-enter { animation: toastIn .25s ease; }
+    @keyframes toastIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
+    .brand-stripe { background: linear-gradient(90deg, #0A0A0A 0%, #0A0A0A 72%, #C8102E 72%, #C8102E 100%); }
+    .modal-enter { animation: modalIn .2s ease; }
+    @keyframes modalIn { from { opacity: 0; transform: translateY(8px) scale(.98); } to { opacity: 1; transform: none; } }
+    .protect { user-select: none; -webkit-user-select: none; }
+    .rte-body { min-height: 420px; }
+    .rte-body:focus { outline: none; }
+    .rte-body:empty:before { content: attr(data-placeholder); color: #B8B8B8; pointer-events: none; }
+    .rte-body h2 { font-size: 20px; font-weight: 650; color: #0A0A0A; margin: 22px 0 10px; line-height: 1.35; }
+    .rte-body h3 { font-size: 16px; font-weight: 600; color: #0A0A0A; margin: 16px 0 8px; line-height: 1.4; }
+    .rte-body p { margin: 0 0 12px; line-height: 1.85; }
+    .rte-body ul, .rte-body ol { margin: 0 0 12px; padding-left: 1.4rem; }
+    .rte-body blockquote { margin: 12px 0; padding: 8px 14px; border-left: 3px solid #C8102E; background: #FDE8EC; color: #4A4A4A; }
+    .wiki-media { margin: 16px 0; border: 1px solid #EBEBEB; border-radius: 8px; overflow: hidden; background: #F7F7F7; }
+    .wiki-media figcaption { font-size: 12px; color: #8A8A8A; padding: 8px 12px; border-top: 1px solid #EBEBEB; background: #fff; }
+    .wiki-img-ph { min-height: 180px; display: flex; align-items: center; justify-content: center; color: #8A8A8A; font-size: 13px; background: linear-gradient(135deg, #F7F7F7, #EDEDED); }
+    .wiki-video-frame { min-height: 200px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; background: #0A0A0A; color: #fff; font-size: 13px; }
+    .wiki-video-frame .play { width: 44px; height: 44px; border-radius: 999px; background: #C8102E; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+    .wiki-doc-title { width: 100%; border: 0; background: transparent; font-size: 28px; font-weight: 700; line-height: 1.3; color: #0A0A0A; padding: 0; }
+    .wiki-doc-title:focus { outline: none; }
+    .wiki-doc-title::placeholder { color: #B8B8B8; font-weight: 600; }
+    .wiki-summary { width: 100%; border: 0; background: transparent; font-size: 14px; line-height: 1.6; color: #4A4A4A; resize: none; padding: 0; }
+    .wiki-summary:focus { outline: none; }
+    .wiki-summary::placeholder { color: #B8B8B8; }
+    .wiki-toolbar button.active, .wiki-toolbar button:hover { background: #fff; border-color: #D4D4D4; }
+    .wiki-outline a { display: block; padding: 6px 10px; border-radius: 6px; color: #4A4A4A; font-size: 12px; line-height: 1.4; }
+    .wiki-outline a:hover { background: #F7F7F7; color: #C8102E; }
+    .wiki-outline a.h2 { font-weight: 600; color: #0A0A0A; }
+    .wiki-outline a.h3 { padding-left: 20px; color: #8A8A8A; }
+    .rte-body table { width: 100%; border-collapse: collapse; margin: 12px 0 16px; font-size: 14px; }
+    .rte-body table th, .rte-body table td { border: 1px solid #D4D4D4; padding: 8px 10px; text-align: left; }
+    .rte-body table th { background: #F7F7F7; font-weight: 600; }
+    .rte-body hr.wiki-hr { border: 0; border-top: 1px solid #EBEBEB; margin: 20px 0; }
+    .rte-body .wiki-callout { margin: 14px 0; padding: 12px 14px; border-radius: 8px; border: 1px solid #E6D7A8; background: #F7F1DE; color: #4A4A4A; font-size: 14px; }
+    .rte-body .wiki-callout strong { color: #8A6A1A; }
+    .preview-shell { background: #fff; }
+    .wiki-rule { height: 1px; background: #EBEBEB; }
+    .wiki-talk-item { border-bottom: 1px solid #EBEBEB; }
+    .wm-layer {
+      pointer-events: none;
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      z-index: 2;
+    }
+    .wm-layer span {
+      position: absolute;
+      color: rgba(10,10,10,.11);
+      font-size: 13px;
+      white-space: nowrap;
+      transform: rotate(-22deg);
+    }
+  
+    /* §2.2 已打开页面 Tab */
+    .open-tab {
+      display: inline-flex; align-items: center; gap: 6px; max-width: 160px;
+      padding: 6px 10px; font-size: 13px; border-radius: 4px;
+      color: rgba(255,255,255,.72); white-space: nowrap; transition: all .15s;
+      border-bottom: 2px solid transparent; background: transparent; border-left: 0; border-right: 0; border-top: 0;
+    }
+    .open-tab:hover { color: #fff; background: rgba(255,255,255,.08); }
+    .open-tab.active { color: #fff; font-weight: 600; border-bottom-color: #C8102E; background: rgba(200,16,46,.18); }
+    .open-tab .tab-close { opacity: .55; font-size: 12px; line-height: 1; padding: 2px 4px; border-radius: 3px; }
+    .open-tab .tab-close:hover { opacity: 1; background: rgba(255,255,255,.15); }
+
+
+    /* App shell: header+sidebar fixed; only main scrolls */
+    html, body { height: 100%; overflow: hidden; }
+    .zippo-shell { display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+    .zippo-shell > header.sticky,
+    .zippo-shell > header.global-topbar,
+    body > header.sticky,
+    body > header.global-topbar { flex: 0 0 auto; position: sticky; top: 0; z-index: 50; }
+    .zippo-body {
+      flex: 1 1 auto; min-height: 0; display: flex; overflow: hidden;
+    }
+    .zippo-body > aside,
+    .zippo-body > .sidebar {
+      flex: 0 0 auto; height: 100%; overflow-y: auto; position: relative !important;
+      top: auto !important; inset: auto !important;
+    }
+    .zippo-main {
+      flex: 1 1 auto; min-width: 0; min-height: 0; overflow-y: auto;
+      background: #EDEDED;
+    }
+
+
+    /* body 纵向壳：顶栏固定，下方 zippo-body 占满剩余高度 */
+    body.overflow-hidden, body.zippo-fixed, body.d06-shell {
+      display: flex !important; flex-direction: column !important; height: 100vh !important; margin: 0;
+    }
+    body > header, body > .brand-stripe, body > .h-1.brand-stripe, body > div.h-1 {
+      flex: 0 0 auto !important;
+    }
+    .zippo-body { flex: 1 1 auto !important; min-height: 0 !important; height: auto !important; }
+    main.zippo-main, .zippo-main {
+      flex: 1 1 auto !important; min-width: 0 !important; min-height: 0 !important;
+      overflow-y: auto !important;
+    }
+
+
+
+
+/* ZIPPO_NAV_HIERARCHY_V3 */
+details.nav-group { margin: 0 0 6px; border: 0; }
+details.nav-group > summary.nav-l1 {
+  list-style: none; cursor: pointer; user-select: none;
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  min-height: 40px; padding: 0 12px; margin: 0; border-radius: 4px;
+  font-size: 13px !important; font-weight: 600 !important; line-height: 1.2;
+  color: #FFFFFF !important; letter-spacing: 0 !important; text-transform: none !important;
+  background: transparent;
+}
+details.nav-group > summary.nav-l1::-webkit-details-marker { display: none; }
+details.nav-group > summary.nav-l1 .nav-chev {
+  font-size: 10px; color: rgba(255,255,255,.7); transition: transform .15s;
+}
+details.nav-group:not([open]) > summary.nav-l1 .nav-chev { transform: rotate(-90deg); }
+details.nav-group > summary.nav-l1:hover { background: #2d2d2d; }
+.nav-l2-wrap { display: flex; flex-direction: column; gap: 2px; padding: 2px 0 6px; }
+.nav-l2-wrap .proto-nav-item,
+.nav-l2-wrap > button,
+.nav-l2-wrap .nav-item,
+aside .nav-l2-wrap button {
+  font-size: 13px !important;
+  color: #E8E8E8 !important;
+  min-height: 40px;
+}
+/* dark sidebar contrast: kill low-contrast tertiary / selected white block */
+aside.proto-sidebar, aside.sidebar, aside.module-sidebar, .proto-sidebar {
+  color: #E8E8E8 !important;
+}
+aside.proto-sidebar .text-ink-secondary,
+aside.proto-sidebar .text-ink-tertiary,
+aside.proto-sidebar .text-ink,
+aside .nav-label {
+  color: #E8E8E8 !important;
+}
+aside.proto-sidebar button.text-ink-secondary,
+aside.proto-sidebar a.text-ink-secondary {
+  color: #E8E8E8 !important;
+}
+aside.proto-sidebar .bg-\[\#F5F5F5\],
+aside.proto-sidebar button.bg-\[\#F5F5F5\] {
+  background: #2d2d2d !important;
+  color: #FFFFFF !important;
+}
+aside.proto-sidebar .hover\:bg-fill:hover,
+aside.proto-sidebar button:hover {
+  background: #2d2d2d !important;
+  color: #FFFFFF !important;
+}
+/* L1 labels that are not yet details */
+.nav-label, .proto-nav-group, .proto-sidebar-title {
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  color: #FFFFFF !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+}
+.proto-nav-item, .nav button, aside .nav button {
+  color: #E8E8E8 !important;
+  font-size: 13px !important;
+}
+.proto-nav-item.active, .nav button.active {
+  color: #FFFFFF !important;
+}
+/* hide sidebar bottom notes / brand footnotes */
+.sidebar-note, .sidebar-foot, .sidebar-footer,
+aside .zippo-sidebar-note,
+aside nav > .mt-6.px-3.py-3.rounded-lg {
+  display: none !important;
+}
+
+/* ZIPPO_NAV_SPACING_V2 */
+.nav, .proto-sidebar-nav, aside .nav, .sidebar .nav {
+  gap: 4px !important;
+}
+.proto-nav-item, .nav button, .nav-item, .side-nav a, .menu-item {
+  min-height: 40px !important;
+  height: auto !important;
+  max-height: none !important;
+  padding-top: 8px !important;
+  padding-bottom: 8px !important;
+  box-sizing: border-box !important;
+  flex-shrink: 0 !important;
+}
+.nav-label, .proto-sidebar-title .label {
+  padding-top: 10px !important;
+  padding-bottom: 4px !important;
+}
+
+/* ZIPPO_GLOBAL_SHELL_V2 */
+.card.has-table { display:flex; flex-direction:column; min-height:0; }
+.card.has-table > .table-wrap { flex:1 1 auto; min-height:0; overflow:auto; }
+.card > .pager, .card > .pager.pagination, .pager.zippo-pager-sticky {
+  position:sticky; bottom:0; z-index:5; flex-shrink:0;
+  background:#fff; border-top:1px solid #EBEBEB; margin-top:0;
+  box-shadow:0 -4px 12px rgba(0,0,0,.04);
+}
+.sidebar-foot, .sidebar-footer { display:none !important; }
+.zippo-user-menu { position:relative; display:inline-flex; }
+.zippo-user-menu-panel {
+  display:none; position:absolute; right:0; top:calc(100% + 6px); min-width:128px;
+  background:#fff; color:#0A0A0A; border:1px solid #EBEBEB; border-radius:6px;
+  box-shadow:0 8px 24px rgba(0,0,0,.12); padding:4px; z-index:80;
+}
+.zippo-user-menu.open .zippo-user-menu-panel { display:block; }
+.zippo-user-menu-panel button {
+  display:block; width:100%; text-align:left; border:0; background:transparent;
+  padding:8px 10px; font-size:13px; border-radius:4px; cursor:pointer; color:#0A0A0A;
+}
+.zippo-user-menu-panel button:hover { background:#F5F5F5; }
+
+</style>
+</head>
+<body class="bg-page text-ink font-sans antialiased overflow-hidden" x-data="craftApp()" x-init="_padHandbooks()" x-cloak>
+  <header class="sticky top-0 z-40 h-14 bg-brand-black text-white border-b border-black flex items-center px-4 lg:px-6 gap-3">
+    <button @click="mobileNav = !mobileNav" class="lg:hidden p-2 rounded hover:bg-white/10 shrink-0" aria-label="菜单">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+    <div class="text-base font-bold tracking-wider shrink-0">ZIPPO</div>
+    <nav class="flex items-center gap-0.5 overflow-x-auto flex-1 min-w-0 py-1" aria-label="已打开页面">
+      <template x-for="t in openTabs" :key="t.id">
+        <button type="button" @click="activateTab(t.id)" class="open-tab" :class="activeTabId===t.id ? 'active' : ''" :title="t.label">
+          <span class="truncate" x-text="t.label"></span>
+          <span class="tab-close" @click.stop="closeTab(t.id)" title="关闭">✕</span>
+        </button>
+      </template>
+    </nav>
+    <div class="flex items-center gap-2 shrink-0">
+      <select x-model="role" @change="onRoleChange()" class="hidden md:block border border-white/20 rounded-md px-2 py-1.5 text-xs bg-black text-white max-w-[150px]" aria-label="演示角色">
+        <option value="BRAND_ADMIN">品牌管理员</option>
+        <option value="BRAND_OPERATOR">品牌业务</option>
+        <option value="MANUFACTURER">加工商</option>
+        <option value="DESIGNER">独立设计师</option>
+        <option value="DISTRIBUTOR">经销商（默认无入口）</option>
+        <option value="RETAILER">零售商（默认无入口）</option>
+      </select>
+      <button type="button" @click="toast('3 条未读通知')" class="relative w-8 h-8 flex items-center justify-center rounded hover:bg-white/10 text-white/70" aria-label="通知">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="2" d="M15 17h5l-1.4-1.4A2 2 0 0118 14.2V11a6 6 0 10-12 0v3.2c0 .5-.2 1-.6 1.4L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+        <span class="absolute top-1 right-1 w-2 h-2 bg-primary rounded-full"></span>
+      </button>
+      <div class="w-8 h-8 rounded-full bg-primary text-white text-xs font-semibold flex items-center justify-center" x-text="currentUser.avatar" :title="currentUser.name"></div>
+    </div>
+  </header>
+  <div class="h-1 brand-stripe"></div>
+
+  <div class="zippo-body">
+    <aside class="proto-sidebar sidebar-scroll fixed lg:static inset-y-0 left-0 z-30 transform transition-transform lg:translate-x-0"
+      :class="mobileNav ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'"
+      style="top: calc(56px + 4px); height: calc(100vh - 60px); overflow-y: auto;">
+      <nav class="py-3 px-2 space-y-0.5 pb-16">
+        <details class="nav-group" open x-show="hasAnyMenu">
+          <summary class="nav-l1">工艺知识库<span class="nav-chev">▾</span></summary>
+          <div class="nav-l2-wrap">
+            <button x-show="canMaintain" type="button" @click="go('handbookList'); mobileNav=false" class="proto-nav-item"
+              :class="['handbookList','handbookEdit','archiveList'].includes(page) ? 'active' : ''">
+              <span>工艺手册</span>
+            </button>
+            <button x-show="canQuery" type="button" @click="go('queryLibrary'); mobileNav=false" class="proto-nav-item"
+              :class="['queryLibrary','queryResult'].includes(page) ? 'active' : ''">
+              <span>工艺查询</span>
+            </button>
+            <button x-show="canHandle" type="button" @click="go('suggestionList'); mobileNav=false" class="proto-nav-item"
+              :class="['suggestionList','suggestionDetail'].includes(page) ? 'active' : ''">
+              <span>改进建议</span>
+            </button>
+            <button x-show="canAudit" type="button" @click="go('auditList'); mobileNav=false" class="proto-nav-item"
+              :class="page==='auditList' ? 'active' : ''">
+              <span>查阅记录</span>
+            </button>
+          </div>
+        </details>
+      </nav>
+    </aside>
+    <div x-show="mobileNav" @click="mobileNav=false" class="fixed inset-0 z-20 bg-black/40 lg:hidden"></div>
+
+    <main class="zippo-main flex-1 min-w-0" :class="page==='handbookEdit' ? '' : 'p-4 lg:p-6'">
+      <div class="mb-4 flex items-center justify-between gap-3 flex-wrap" x-show="page!=='handbookEdit'">
+        <div class="text-sm text-ink-tertiary">首页 / 工艺知识库 / <span class="text-ink" x-text="pageTitle"></span></div>
+      </div>
+
+      <!-- 演示开关 -->
+      <div class="mb-4 bg-white rounded-lg border border-line-soft px-4 py-3 text-xs text-ink-secondary flex flex-wrap gap-x-6 gap-y-2 items-center" x-show="page!=='handbookEdit'">
+        <span class="font-medium text-ink">演示开关</span>
+        <label class="inline-flex items-center gap-1.5 cursor-pointer">
+          <input type="checkbox" x-model="grantDownload" class="rounded border-line text-primary" />
+          <span>D12 授予当前角色「下载」（F6）</span>
+        </label>
+        <label class="inline-flex items-center gap-1.5 cursor-pointer" x-show="role==='DISTRIBUTOR' || role==='RETAILER'">
+          <input type="checkbox" x-model="grantDealerMenu" @change="onRoleChange()" class="rounded border-line text-primary" />
+          <span>D12 授予本域菜单（F7，须重新登录口径：本演示立即切）</span>
+        </label>
+        <label class="inline-flex items-center gap-1.5 cursor-pointer" title="打开手册时，系统必须先记下谁看过。若记不下来，就不展示正文和视频，防止无审计阅读。此开关仅用于演示该异常。">
+          <input type="checkbox" x-model="auditFail" class="rounded border-line text-primary" />
+          <span>演示异常：查阅记失败则不展示正文</span>
+        </label>
+      </div>
+
+      <section x-show="!hasAnyMenu" class="bg-white rounded-lg shadow-card border border-line-soft p-12 text-center">
+        <div class="text-base font-semibold mb-2">暂无菜单权限</div>
+        <p class="text-sm text-ink-secondary">经销商 / 零售商默认无工艺知识库入口。若需开通，请在组织权限（D12）授予对应菜单后重新登录。</p>
+      </section>
+
+      <!-- ===== 6.1 工艺标准手册列表 ===== -->
+      <section x-show="page==='handbookList' && canMaintain" class="space-y-4">
+        <div class="bg-white rounded-lg shadow-card border border-line-soft">
+          <div class="px-5 py-4 border-b border-line-soft flex items-start justify-between gap-4">
+            <div>
+              <h1 class="text-base font-semibold">工艺手册</h1>
+              <p class="mt-1 text-xs text-ink-tertiary">仅品牌组织可维护。发布即生效，不走审批。未关联商品编码的内容仅可手册库浏览。</p>
+            </div>
+            <div class="flex gap-2 shrink-0">
+              <button @click="openBatchLink()" class="px-3 py-1.5 text-sm rounded-md border border-line hover:bg-fill">批量关联编码</button>
+              <button @click="openNew()" class="px-3 py-1.5 text-sm rounded-md bg-primary text-white hover:bg-primary-hover">新建</button>
+            </div>
+          </div>
+          <div class="p-4 flex flex-wrap gap-3 items-end border-b border-line-soft bg-fill/50">
+            <label class="text-xs text-ink-secondary space-y-1"><span>状态</span>
+              <select x-model="filters.hb.status" class="block w-32 border border-line rounded-md px-2 py-1.5 text-sm bg-white">
+                <option value="">全部</option>
+                <option value="DRAFT">草稿</option>
+                <option value="PUBLISHED">已发布</option>
+                <option value="ARCHIVED">已归档</option>
+              </select>
+            </label>
+            <label class="text-xs text-ink-secondary space-y-1"><span>核心资产</span>
+              <select x-model="filters.hb.core" class="block w-28 border border-line rounded-md px-2 py-1.5 text-sm bg-white">
+                <option value="">全部</option>
+                <option value="Y">核心</option>
+                <option value="N">非核心</option>
+              </select>
+            </label>
+            <label class="text-xs text-ink-secondary space-y-1"><span>关联编码</span>
+              <select x-model="filters.hb.linked" class="block w-28 border border-line rounded-md px-2 py-1.5 text-sm bg-white">
+                <option value="">全部</option>
+                <option value="Y">已关联</option>
+                <option value="N">未关联</option>
+              </select>
+            </label>
+            <label class="text-xs text-ink-secondary space-y-1"><span>关键词</span>
+              <input x-model="filters.hb.keyword" type="text" placeholder="标题 / 工序编号 / 商品编码" class="block w-56 border border-line rounded-md px-2 py-1.5 text-sm" />
+            </label>
+            <button @click="searchWithLoading()" class="px-3 py-1.5 text-sm rounded-md bg-primary text-white hover:bg-primary-hover">搜索</button>
+            <button @click="filters.hb={status:'',core:'',linked:'',keyword:''}" class="px-3 py-1.5 text-sm rounded-md border border-line hover:bg-fill">重置</button>
+          </div>
+          <div class="table-wrap">
+            <template x-if="loading"><div class="p-6 space-y-3"><div class="h-10 skeleton rounded"></div><div class="h-10 skeleton rounded"></div></div></template>
+            <template x-if="!loading && !filteredHandbooks.length">
+              <div class="p-12 text-center text-sm text-ink-tertiary">暂无工艺内容，请新建。</div>
+            </template>
+            <template x-if="!loading && filteredHandbooks.length">
+              <table class="w-full text-sm">
+                <thead class="bg-fill text-ink-secondary text-xs">
+                  <tr>
+                    <th class="text-left font-medium px-4 py-3">标题</th>
+                    <th class="text-left font-medium px-4 py-3">分类</th>
+                    <th class="text-left font-medium px-4 py-3">关联 SKU</th>
+                    <th class="text-left font-medium px-4 py-3">核心</th>
+                    <th class="text-left font-medium px-4 py-3">状态</th>
+                    <th class="text-left font-medium px-4 py-3">更新人</th>
+                    <th class="text-left font-medium px-4 py-3">更新时间</th>
+                    <th class="text-left font-medium px-4 py-3">操作</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <template x-for="row in pagedHandbooks" :key="row.id">
+                    <tr class="border-t border-line-soft hover:bg-primary-bg/40">
+                    <td class="px-4 py-3">
+                      <div class="font-medium" x-text="row.title"></div>
+                      <div class="text-[11px] text-ink-tertiary mt-0.5" x-show="row.summary" x-text="row.summary"></div>
+                    </td>
+                    <td class="px-4 py-3 text-ink-secondary" x-text="row.category || row.typeLabel"></td>
+                      <td class="px-4 py-3" x-text="row.skus.length"></td>
+                      <td class="px-4 py-3" x-text="row.core ? '是' : '否'"></td>
+                      <td class="px-4 py-3"><span class="text-xs px-2 py-0.5 rounded border" :class="statusClass(row.status)" x-text="statusLabel(row.status)"></span></td>
+                      <td class="px-4 py-3" x-text="row.updater"></td>
+                      <td class="px-4 py-3 text-ink-secondary whitespace-nowrap" x-text="row.updatedAt"></td>
+                      <td class="px-4 py-3 align-middle">
+                        <div class="flex items-center gap-3 h-8 whitespace-nowrap">
+                          <template x-for="act in handbookPrimaryActions(row)" :key="act.key">
+                            <button type="button"
+                              @click="runHandbookAction(row, act.key)"
+                              class="inline-flex items-center h-7 text-sm leading-none text-primary hover:underline"
+                              x-text="act.label"></button>
+                          </template>
+                          <div class="relative" x-show="handbookOverflowActions(row).length" @click.outside="actionMenuId = null">
+                            <button type="button"
+                              @click.stop="actionMenuId = actionMenuId === row.id ? null : row.id"
+                              class="inline-flex items-center h-7 px-2 gap-1 text-xs rounded-md border border-line bg-white text-ink-secondary hover:border-primary hover:text-primary">
+                              <span>更多</span>
+                              <svg class="w-3 h-3 opacity-70" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                            </button>
+                            <div x-show="actionMenuId === row.id" x-cloak
+                              class="absolute right-0 top-full mt-1 z-30 min-w-[6.5rem] py-1 bg-white border border-line rounded-md shadow-card">
+                              <template x-for="act in handbookOverflowActions(row)" :key="act.key">
+                                <button type="button"
+                                  @click="runHandbookAction(row, act.key)"
+                                  class="w-full text-left px-3 py-1.5 text-sm text-ink hover:bg-primary-bg hover:text-primary"
+                                  x-text="act.label"></button>
+                              </template>
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  </template>
+                </tbody>
+              </table>
+            </template>
+          </div>
+          <div class="px-4 py-3 border-t border-line-soft text-xs text-ink-tertiary flex items-center justify-between gap-3 flex-wrap">
+            <span>共 <span x-text="filteredHandbooks.length"></span> 条</span>
+            <div class="flex items-center gap-2">
+              <select x-model.number="handbookPageSize" @change="handbookPage=1" class="border border-line rounded px-2 py-1 text-xs bg-white">
+                <option :value="20">20条/页</option><option :value="50">50条/页</option><option :value="100">100条/页</option>
+              </select>
+              <button type="button" @click="handbookPage=Math.max(1,handbookPage-1)" class="px-2 py-1 border border-line rounded">上一页</button>
+              <span x-text="handbookPage+' / '+handbookTotalPages"></span>
+              <button type="button" @click="handbookPage=Math.min(handbookTotalPages,handbookPage+1)" class="px-2 py-1 border border-line rounded">下一页</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== 6.2 Wiki 文档编辑页（帮助中心 / 公告后台式） ===== -->
+      <section x-show="page==='handbookEdit' && canMaintain" class="min-h-[calc(100vh-3.75rem)] bg-[#F3F3F3]">
+        <div class="sticky top-14 z-20 bg-white border-b border-line-soft">
+          <div class="px-4 lg:px-6 py-3 flex items-center justify-between gap-3 flex-wrap">
+            <div class="flex items-center gap-3 min-w-0">
+              <button @click="go('handbookList')" class="text-sm text-ink-secondary hover:text-primary shrink-0">← 返回列表</button>
+              <span class="text-ink-disabled">|</span>
+              <span class="text-xs px-2 py-0.5 rounded border bg-fill text-ink-secondary" x-text="editForm.id ? '编辑中' : '新建'"></span>
+              <span class="text-[11px] text-ink-tertiary truncate" x-text="autoSaveHint"></span>
+            </div>
+            <div class="flex flex-wrap gap-2 items-center">
+              <button type="button" @click="editOutlineOpen=!editOutlineOpen" class="px-3 py-1.5 text-sm rounded-md border border-line hover:bg-fill hidden lg:inline-flex">目录</button>
+              <button type="button" @click="editMetaOpen=!editMetaOpen" class="px-3 py-1.5 text-sm rounded-md border border-line hover:bg-fill" :class="editMetaOpen ? 'bg-primary-bg border-primary/30 text-primary' : ''">发布设置</button>
+              <button type="button" @click="openPreview()" class="px-3 py-1.5 text-sm rounded-md border border-line hover:bg-fill">预览</button>
+              <button @click="go('handbookList')" class="px-3 py-1.5 text-sm rounded-md border border-line hover:bg-fill">取消</button>
+              <button @click="saveDraft()" class="px-3 py-1.5 text-sm rounded-md border border-primary text-primary hover:bg-primary-bg">保存草稿</button>
+              <button @click="openPublish()" class="px-3 py-1.5 text-sm rounded-md bg-primary text-white hover:bg-primary-hover">发布</button>
+            </div>
+          </div>
+          <div class="wiki-toolbar px-4 lg:px-6 py-2 flex flex-wrap gap-1 border-t border-line-soft bg-fill/70">
+            <button type="button" @click="fmt('bold')" class="px-2.5 py-1.5 text-xs rounded border border-transparent font-semibold" title="加粗">B</button>
+            <button type="button" @click="fmt('italic')" class="px-2.5 py-1.5 text-xs rounded border border-transparent italic" title="斜体">I</button>
+            <button type="button" @click="fmt('underline')" class="px-2.5 py-1.5 text-xs rounded border border-transparent underline" title="下划线">U</button>
+            <span class="w-px h-5 bg-line self-center mx-1"></span>
+            <button type="button" @click="fmtHeading('h2')" class="px-2.5 py-1.5 text-xs rounded border border-transparent" title="一级标题">H2</button>
+            <button type="button" @click="fmtHeading('h3')" class="px-2.5 py-1.5 text-xs rounded border border-transparent" title="二级标题">H3</button>
+            <button type="button" @click="fmt('insertUnorderedList')" class="px-2.5 py-1.5 text-xs rounded border border-transparent" title="无序列表">• 列表</button>
+            <button type="button" @click="fmt('insertOrderedList')" class="px-2.5 py-1.5 text-xs rounded border border-transparent" title="有序列表">1. 列表</button>
+            <button type="button" @click="fmtQuote()" class="px-2.5 py-1.5 text-xs rounded border border-transparent" title="引用">引用</button>
+            <button type="button" @click="insertTable()" class="px-2.5 py-1.5 text-xs rounded border border-transparent" title="插入表格">表格</button>
+            <button type="button" @click="insertDivider()" class="px-2.5 py-1.5 text-xs rounded border border-transparent" title="分割线">分割线</button>
+            <button type="button" @click="insertCallout()" class="px-2.5 py-1.5 text-xs rounded border border-transparent" title="提示块（公告常用）">提示块</button>
+            <span class="w-px h-5 bg-line self-center mx-1"></span>
+            <button type="button" @click="insertImage()" class="px-2.5 py-1.5 text-xs rounded border border-transparent text-primary font-medium" title="插入图片">图片</button>
+            <button type="button" @click="insertVideo()" class="px-2.5 py-1.5 text-xs rounded border border-transparent text-primary font-medium" title="插入视频（最多 3 个；MP4/MOV/AVI/WMV/WebM）">视频</button>
+            <button type="button" @click="insertProcessTemplate()" class="px-2.5 py-1.5 text-xs rounded border border-transparent" title="插入标准工序模板">工序模板</button>
+            <span class="ml-auto text-[11px] text-ink-tertiary self-center hidden md:inline">约 <span x-text="editWordCount"></span> 字 · 视频 <span x-text="(editForm.videos&&editForm.videos.length)||0"></span>/3</span>
+          </div>
+        </div>
+
+        <div class="max-w-[1400px] mx-auto px-4 lg:px-6 py-5 flex gap-4 items-start">
+          <!-- 左侧目录大纲（帮助中心常见） -->
+          <aside class="hidden lg:block w-48 shrink-0 sticky top-[8.5rem]" x-show="editOutlineOpen">
+            <div class="bg-white rounded-lg border border-line-soft p-3 shadow-card">
+              <div class="text-xs font-semibold text-ink mb-2 px-1">本文目录</div>
+              <div class="wiki-outline space-y-0.5 max-h-[60vh] overflow-auto">
+                <template x-if="!editOutline.length">
+                  <p class="text-[11px] text-ink-tertiary px-2.5 py-2">输入 H2/H3 标题后自动生成</p>
+                </template>
+                <template x-for="(o, oi) in editOutline" :key="oi">
+                  <a href="javascript:;" :class="o.level" @click="jumpOutline(o)" x-text="o.text"></a>
+                </template>
+              </div>
+            </div>
+          </aside>
+
+          <!-- 中间文档画布 -->
+          <div class="flex-1 min-w-0 w-full bg-white rounded-lg shadow-card border border-line-soft overflow-hidden">
+            <div class="px-8 lg:px-14 pt-10 pb-3">
+              <input x-model="editForm.title" @input="markDirty()" type="text" class="wiki-doc-title" placeholder="无标题文档（须填写后才能保存草稿）" />
+              <textarea x-model="editForm.summary" @input="markDirty()" rows="2" class="wiki-summary mt-3" placeholder="一句话摘要（选填，列表与发布预览展示，类似公告导语）"></textarea>
+              <div class="mt-3 flex flex-wrap gap-2 text-[11px] text-ink-tertiary">
+                <span class="px-2 py-0.5 rounded bg-fill border border-line-soft" x-text="editForm.category || '未分类'"></span>
+                <span x-show="editForm.core">核心资产</span>
+                <span x-show="!editForm.core">非核心</span>
+              </div>
+            </div>
+            <div class="h-px bg-line-soft mx-8 lg:mx-14"></div>
+            <div class="px-8 lg:px-14 py-6">
+              <div x-ref="editor" contenteditable="true" class="rte-body text-[15px] text-ink"
+                   @input="onEditorInput()"
+                   data-placeholder="编写工序说明；可用工具栏插入标题、表格、提示块、图片与视频…"></div>
+            </div>
+          </div>
+
+          <!-- 右侧发布设置（公告/帮助中心后台式） -->
+          <aside class="w-full lg:w-72 shrink-0 space-y-3 sticky top-[8.5rem]" x-show="editMetaOpen" x-transition>
+            <div class="bg-white rounded-lg shadow-card border border-line-soft p-4 space-y-4">
+              <div class="text-sm font-semibold">发布设置</div>
+              <div class="text-sm space-y-2">
+                <span class="text-ink-secondary text-xs">内容分类</span>
+                <select x-model="editForm.category" @change="markDirty()" class="w-full border border-line rounded-md px-2 py-1.5 text-sm bg-white">
+                  <template x-for="c in enabledCraftCategories" :key="c.code">
+                    <option :value="c.name" x-text="c.name"></option>
+                  </template>
+                </select>
+                <p class="text-[11px] text-ink-tertiary">选项来自「系统设置 → 枚举管理 → 工艺内容分类」；仅已启用项可选。</p>
+              </div>
+              <div class="text-sm space-y-2">
+                <span class="text-ink-secondary text-xs">是否核心资产 <span class="text-primary">*</span></span>
+                <div class="flex gap-4">
+                  <label class="inline-flex items-center gap-1.5"><input type="radio" name="core" :checked="editForm.core" @change="setCore(true)" /> 是</label>
+                  <label class="inline-flex items-center gap-1.5"><input type="radio" name="core" :checked="!editForm.core" @change="setCore(false)" /> 否</label>
+                </div>
+              </div>
+              <div class="text-sm space-y-2">
+                <span class="text-ink-secondary text-xs">受众可见范围 <span class="text-primary">*</span></span>
+                <label class="flex items-center gap-1.5"><input type="checkbox" x-model="editForm.visMfr" @change="markDirty()" class="rounded border-line text-primary" /> 加工商</label>
+                <label class="flex items-center gap-1.5" :class="editForm.core ? 'opacity-40' : ''">
+                  <input type="checkbox" x-model="editForm.visDes" :disabled="editForm.core" @change="markDirty()" class="rounded border-line text-primary" /> 设计师（仅非核心）
+                </label>
+                <p class="text-[11px] text-ink-tertiary">发布后立即对可见角色生效，不走审批（对齐公告「发布即上线」）。</p>
+              </div>
+              <div class="text-sm space-y-2">
+                <div class="flex items-center justify-between gap-2">
+                  <span class="text-ink-secondary text-xs">关联商品编码 <span class="text-warning">强建议</span></span>
+                  <div class="flex gap-2">
+                    <button type="button" @click="importSkuText()" class="text-xs text-primary hover:underline">导入编码</button>
+                    <button type="button" @click="pickerOpen=true" class="text-xs text-primary hover:underline">勾选清单</button>
+                  </div>
+                </div>
+                <p class="text-[11px] text-warning bg-warning-bg border border-[#E6D7A8] rounded px-2 py-1.5">发布时将强引导关联。未关联仍可发布，但仅手册库按「分类+角色可见」兜底浏览，不进按码命中。</p>
+                <ul class="space-y-1 max-h-28 overflow-auto" x-show="editForm.skus && editForm.skus.length">
+                  <template x-for="(s,i) in editForm.skus" :key="s.code">
+                    <li class="flex items-center justify-between text-xs border border-line-soft rounded px-2 py-1.5">
+                      <span class="truncate" x-text="s.code + ' · ' + s.name"></span>
+                      <button @click="editForm.skus.splice(i,1); markDirty()" class="text-primary shrink-0 ml-2">删</button>
+                    </li>
+                  </template>
+                </ul>
+                <p class="text-[11px] text-primary" x-show="!editForm.skus || !editForm.skus.length">尚未关联 — 产线扫码将无法命中本文</p>
+              </div>
+              <div class="text-[11px] text-ink-tertiary border-t border-line-soft pt-3 space-y-1">
+                <div>正文内视频 <span class="text-ink font-medium" x-text="(editForm.videos && editForm.videos.length) || 0"></span> / 3</div>
+                <div>旧版再发布后自动归档，加工商只见最新版</div>
+              </div>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <!-- ===== 归档列表 ===== -->
+      <section x-show="page==='archiveList' && canMaintain" class="space-y-4">
+        <div class="bg-white rounded-lg shadow-card border border-line-soft">
+          <div class="px-5 py-4 border-b border-line-soft flex items-center gap-3">
+            <button @click="go('handbookList')" class="text-sm text-ink-secondary hover:text-primary">← 返回</button>
+            <h1 class="text-base font-semibold">归档 · <span x-text="archiveParent && archiveParent.title"></span></h1>
+          </div>
+          <p class="px-5 py-3 text-xs text-ink-tertiary">加工商只看最新已发布版；归档仅品牌可查。</p>
+          <div class="table-wrap">
+            <table class="w-full text-sm">
+              <thead class="bg-fill text-xs text-ink-secondary"><tr>
+                <th class="text-left px-4 py-3">版本说明</th><th class="text-left px-4 py-3">归档时间</th><th class="text-left px-4 py-3">操作</th>
+              </tr></thead>
+              <tbody>
+                <template x-for="row in (archiveParent ? archivesOf(archiveParent) : [])" :key="row.id">
+                  <tr class="border-t border-line-soft">
+                    <td class="px-4 py-3" x-text="row.title"></td>
+                    <td class="px-4 py-3 text-ink-secondary" x-text="row.updatedAt"></td>
+                    <td class="px-4 py-3"><button @click="openDetail(row,'archiveList')" class="text-primary hover:underline">查看</button></td>
+                  </tr>
+                </template>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== 6.3 工艺查询（识别入口 + 手册库同页合并） ===== -->
+      <section x-show="page==='queryLibrary' && canQuery" class="space-y-4">
+        <div class="bg-white rounded-lg shadow-card border border-line-soft">
+          <div class="px-5 py-4 border-b border-line-soft">
+            <h1 class="text-base font-semibold">工艺查询</h1>
+            <p class="mt-1 text-xs text-ink-tertiary">同一菜单内完成多通道识别与手册库浏览。产线优先扫码/SKU；名称联想走 D07 商品主数据；未命中可在下方手册库兜底查看。</p>
+          </div>
+
+          <!-- 多通道识别 -->
+          <div class="p-5 border-b border-line-soft bg-fill/30 space-y-4">
+            <div class="text-xs font-semibold text-ink tracking-wide">识别入口 · 多通道</div>
+            <div class="flex flex-col lg:flex-row gap-3">
+              <div class="flex-1 relative">
+                <label class="text-xs text-ink-secondary mb-1 block">货品条码 / SKU 码 / 商品名称</label>
+                <input x-model="queryInput" @input="onQueryInput()" @keydown.enter.prevent="doMultiQuery()" type="text"
+                       placeholder="扫码或输入 SKU / 条码；也可输入商品名称模糊联想（D07）"
+                       class="block w-full border border-line rounded-md px-3 py-2.5 text-sm" />
+                <div x-show="nameSuggests.length" class="absolute z-10 left-0 right-0 mt-1 bg-white border border-line-soft rounded-md shadow-card max-h-48 overflow-auto">
+                  <template x-for="s in nameSuggests" :key="s.code">
+                    <button type="button" @click="pickSuggest(s)" class="w-full text-left px-3 py-2 text-sm hover:bg-primary-bg flex justify-between gap-2">
+                      <span><span class="font-medium" x-text="s.name"></span> <span class="text-ink-tertiary" x-text="s.code"></span></span>
+                      <span class="text-[11px]" :class="s.authorized ? 'text-success' : 'text-ink-tertiary'" x-text="s.authorized ? '已授权' : '未授权'"></span>
+                    </button>
+                  </template>
+                </div>
+              </div>
+              <div class="flex items-end gap-2">
+                <button @click="doMultiQuery()" class="px-4 py-2.5 text-sm rounded-md bg-primary text-white hover:bg-primary-hover">识别查询</button>
+                <button @click="queryInput=''; nameSuggests=[]; queryMsg=''; queryHintLibrary=false" class="px-3 py-2.5 text-sm rounded-md border border-line hover:bg-fill">清空</button>
+              </div>
+            </div>
+            <div class="flex flex-wrap items-center gap-2 text-xs">
+              <span class="text-ink-tertiary shrink-0">历史查询</span>
+              <span class="text-[11px] text-ink-disabled">（正式：按账号服务端落库）</span>
+              <template x-if="!queryHistory.length">
+                <span class="text-ink-disabled">暂无；查询成功后自动记录</span>
+              </template>
+              <template x-for="(h, hi) in queryHistory" :key="hi">
+                <button type="button" @click="queryInput=h.code; doMultiQuery()"
+                        class="px-2 py-1 rounded border border-line-soft bg-white hover:border-primary hover:text-primary"
+                        x-text="h.label"></button>
+              </template>
+              <button x-show="queryHistory.length" type="button" @click="queryHistory=[]" class="text-ink-tertiary hover:text-primary ml-1">清空历史</button>
+            </div>
+            <div class="text-[11px] text-ink-tertiary leading-relaxed">
+              演示：
+              <button class="text-primary underline" @click="queryInput='SKU2001-A'; doMultiQuery()">SKU2001-A</button>（条码/SKU 命中）·
+              <button class="text-primary underline" @click="queryInput='打火机'; onQueryInput()">打火机</button>（名称联想）·
+              <button class="text-primary underline" @click="queryInput='SKU3001-B'; doMultiQuery()">SKU3001-B</button>（未授权）·
+              <button class="text-primary underline" @click="queryInput='SKU4001-C'; doMultiQuery()">SKU4001-C</button>（已授权无关联 → 手册库兜底）
+            </div>
+            <div x-show="queryMsg" class="rounded-md px-3 py-2 text-sm" :class="queryOk ? 'bg-success-bg text-success' : 'bg-primary-bg text-primary'" x-text="queryMsg"></div>
+            <button x-show="queryHintLibrary" @click="scrollToLibrary()" class="text-sm text-primary hover:underline">查看手册库兜底内容 ↓</button>
+          </div>
+
+          <!-- 手册库兜底 -->
+          <div id="query-library" class="p-5 space-y-3">
+            <div class="flex items-baseline justify-between gap-3 flex-wrap">
+              <div>
+                <div class="text-sm font-semibold">手册库</div>
+                <p class="text-xs text-ink-tertiary mt-0.5">兜底可见：已发布 ∩ 角色可见 ∩ 内容分类。含未关联编码。草稿/归档不出现。设计师不见核心资产。按码精确命中仍须「已关联该编码」。</p>
+              </div>
+            </div>
+            <div class="flex flex-wrap gap-3 items-end">
+              <input x-model="filters.lib.keyword" type="text" placeholder="标题 / 工序编号 / 分类" class="w-56 border border-line rounded-md px-2 py-1.5 text-sm" />
+              <select x-model="filters.lib.category" class="w-32 border border-line rounded-md px-2 py-1.5 text-sm bg-white">
+                <option value="">全部分类</option>
+                <option value="工序手册">工序手册</option>
+                <option value="安全规范">安全规范</option>
+                <option value="质检标准">质检标准</option>
+                <option value="通用说明">通用说明</option>
+              </select>
+              <select x-model="filters.lib.linked" class="w-32 border border-line rounded-md px-2 py-1.5 text-sm bg-white">
+                <option value="">关联状态</option>
+                <option value="Y">已关联编码</option>
+                <option value="N">未关联编码</option>
+              </select>
+              <button @click="searchWithLoading()" class="px-3 py-1.5 text-sm rounded-md bg-primary text-white hover:bg-primary-hover">筛选</button>
+            </div>
+            <template x-if="!libraryItems.length">
+              <div class="py-10 text-center text-sm text-ink-tertiary">暂无对你可见的工艺内容。</div>
+            </template>
+            <div class="divide-y border border-line-soft rounded-md" x-show="libraryItems.length">
+              <template x-for="row in libraryItems" :key="row.id">
+                <div class="px-4 py-3 flex items-center justify-between gap-3 hover:bg-fill/80">
+                  <div>
+                    <div class="text-sm font-medium" x-text="row.title"></div>
+                    <div class="text-xs text-ink-tertiary mt-0.5">
+                      <span x-text="row.category || '未分类'"></span>
+                      · <span x-text="row.typeLabel"></span>
+                      · <span x-text="row.skus.length ? '已关联编码' : '未关联 · 仅手册库'"></span>
+                      · <span x-text="row.updatedAt"></span>
+                    </div>
+                  </div>
+                  <button @click="openDetail(row,'queryLibrary')" class="text-sm text-primary hover:underline shrink-0">查看</button>
+                </div>
+              </template>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== 6.5 查询结果 ===== -->
+      <section x-show="page==='queryResult' && canQuery" class="space-y-4">
+        <div class="bg-white rounded-lg shadow-card border border-line-soft">
+          <div class="px-5 py-4 border-b border-line-soft flex items-center gap-3">
+            <button @click="go('queryLibrary')" class="text-sm text-ink-secondary hover:text-primary">← 返回工艺查询</button>
+            <h1 class="text-base font-semibold">查询结果</h1>
+            <span class="text-[11px] text-ink-tertiary" x-text="'识别通道：' + (queryHit.channel || 'SKU')"></span>
+          </div>
+          <div class="px-5 py-4 grid sm:grid-cols-2 gap-3 text-sm border-b border-line-soft bg-fill/40">
+            <div>商品编码 <span class="font-medium" x-text="queryHit.code"></span></div>
+            <div>名称 <span class="font-medium" x-text="queryHit.name"></span> <span class="text-xs text-ink-tertiary">（无价格）</span></div>
+          </div>
+          <div class="p-5 space-y-4">
+            <div>
+              <div class="text-xs text-ink-tertiary mb-2">命中内容（已关联该编码）</div>
+              <template x-for="row in queryHit.items" :key="row.id">
+                <div class="flex items-center justify-between border border-line-soft rounded-md px-4 py-3">
+                  <div>
+                    <div class="text-sm font-medium" x-text="row.title"></div>
+                    <div class="text-xs text-ink-tertiary" x-text="(row.category || '') + ' · ' + row.typeLabel + ' · ' + row.updatedAt"></div>
+                  </div>
+                  <div class="space-x-3 text-sm">
+                    <button @click="openDetail(row,'queryResult')" class="text-primary hover:underline">查看全文</button>
+                    <button x-show="row.videos && row.videos.length" @click="openDetail(row,'queryResult')" class="text-primary hover:underline">播放视频</button>
+                  </div>
+                </div>
+              </template>
+            </div>
+            <div>
+              <div class="text-xs text-ink-tertiary mb-2">工序 / 参数（摘要）</div>
+              <table class="w-full text-sm border border-line-soft rounded-md overflow-hidden">
+                <thead class="bg-fill text-xs text-ink-secondary"><tr>
+                  <th class="text-left px-3 py-2">工序</th><th class="text-left px-3 py-2">步骤</th><th class="text-left px-3 py-2">参数</th><th class="text-left px-3 py-2">关键控制点</th>
+                </tr></thead>
+                <tbody>
+                  <tr class="border-t"><td class="px-3 py-2">工序01</td><td class="px-3 py-2">下料</td><td class="px-3 py-2">板厚 0.8mm</td><td class="px-3 py-2">毛刺检查</td></tr>
+                  <tr class="border-t"><td class="px-3 py-2">工序02</td><td class="px-3 py-2">冲压</td><td class="px-3 py-2">温度 / 压力 / 时间 见全文</td><td class="px-3 py-2">合模对位</td></tr>
+                </tbody>
+              </table>
+              <p class="text-xs text-ink-tertiary mt-2">质检标准 / 安全规范见全文。未关联编码的同类手册请返回手册库按分类浏览。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== 6.6 受控详情 ===== -->
+      <section x-show="page==='handbookDetail'" class="space-y-4">
+        <div class="bg-white rounded-lg shadow-card border border-line-soft">
+          <div class="px-5 py-4 border-b border-line-soft flex items-center justify-between gap-3 flex-wrap">
+            <div class="flex items-center gap-3 min-w-0">
+              <button @click="go(detailFrom)" class="text-sm text-ink-secondary hover:text-primary shrink-0">← 返回</button>
+              <h1 class="text-base font-semibold truncate" x-text="currentDoc && currentDoc.title"></h1>
+              <span class="text-xs px-2 py-0.5 rounded border shrink-0" :class="currentDoc && statusClass(currentDoc.status)" x-text="currentDoc && statusLabel(currentDoc.status)"></span>
+            </div>
+            <div class="flex gap-2">
+              <button x-show="grantDownload && detailReady" @click="toast('已按 D12 下载权开始下载')" class="px-3 py-1.5 text-sm rounded-md border border-line hover:bg-fill">下载</button>
+              <a x-show="role==='MANUFACTURER' && detailReady" href="#wiki-talk" class="px-3 py-1.5 text-sm text-ink-secondary hover:text-primary">讨论</a>
+            </div>
+          </div>
+
+          <div x-show="!detailReady" class="p-12 text-center space-y-3">
+            <div class="text-base font-semibold">暂时无法记录查阅信息，请稍后重试</div>
+            <p class="text-sm text-ink-secondary">查阅记录写不成功则不允许查看正文或播放视频（F5）。不提供无审计的阅读备用。</p>
+            <button @click="retryDetail()" class="px-3 py-1.5 text-sm rounded-md bg-primary text-white">重试</button>
+          </div>
+
+          <div x-show="detailReady" class="p-5 lg:px-10 lg:py-6">
+            <div class="max-w-3xl mx-auto space-y-8">
+            <div class="relative bg-white protect min-h-[200px]"
+                 @contextmenu.prevent="toast('已禁止右键')"
+                 @copy.prevent="toast('已禁止复制')">
+              <div class="wm-layer" aria-hidden="true">
+                <template x-for="i in 18" :key="i">
+                  <span :style="'left:' + ((i%6)*18+4) + '%; top:' + (Math.floor(i/6)*34+10) + '%'" x-text="watermarkText"></span>
+                </template>
+              </div>
+              <div class="relative z-[3] text-[15px] leading-8 text-ink">
+                <div class="rte-body" x-html="currentDoc && currentDoc.body"></div>
+              </div>
+            </div>
+            <template x-for="(v, vi) in ((currentDoc && currentDoc.body && currentDoc.body.indexOf('wiki-video')>=0) ? [] : ((currentDoc && currentDoc.videos) || []))" :key="vi">
+              <div class="rounded-md overflow-hidden bg-brand-black text-white protect" @contextmenu.prevent>
+                <div class="flex items-center gap-4 p-4">
+                  <button @click="playing = (playing===vi ? -1 : vi)" class="w-10 h-10 rounded-full bg-primary flex items-center justify-center">▶</button>
+                  <div class="min-w-0">
+                    <div class="text-sm truncate" x-text="v.name"></div>
+                    <div class="text-xs text-white/50 mt-0.5" x-text="(playing===vi ? '播放中 · ' : '') + v.duration + ' · ' + v.format"></div>
+                  </div>
+                </div>
+                <div class="h-1 bg-white/15"><div class="h-1 bg-primary" :style="playing===vi ? 'width:18%' : 'width:0%'"></div></div>
+              </div>
+            </template>
+
+            <div id="wiki-talk" class="pt-2">
+              <div class="flex items-baseline justify-between border-b border-line-soft pb-2 mb-4">
+                <h2 class="text-sm font-semibold tracking-wide">讨论</h2>
+                <span class="text-xs text-ink-tertiary"><span x-text="currentTalk.length"></span> 条 · 对本页手册的改进建议</span>
+              </div>
+
+              <div class="space-y-0" x-show="currentTalk.length">
+                <template x-for="row in currentTalk" :key="row.id">
+                  <div class="wiki-talk-item py-4">
+                    <div class="flex items-start gap-3">
+                      <div class="w-8 h-8 rounded-full bg-fill text-ink-secondary text-xs font-semibold flex items-center justify-center shrink-0" x-text="row.author.slice(0,1)"></div>
+                      <div class="min-w-0 flex-1">
+                        <div class="flex flex-wrap items-center gap-2 text-xs text-ink-tertiary">
+                          <span class="text-ink font-medium text-sm" x-text="row.author"></span>
+                          <span x-text="row.at"></span>
+                          <span class="px-1.5 py-0.5 rounded border" :class="sgClass(row.status)" x-text="sgLabel(row.status)"></span>
+                        </div>
+                        <div class="mt-1 text-sm font-medium" x-text="row.title"></div>
+                        <p class="mt-1 text-sm text-ink-secondary leading-6" x-text="row.body"></p>
+                        <p class="mt-2 text-xs text-ink-tertiary" x-show="row.reply" x-text="'品牌回复：' + row.reply"></p>
+                      </div>
+                    </div>
+                  </div>
+                </template>
+              </div>
+              <p class="text-sm text-ink-tertiary py-4" x-show="!currentTalk.length">还没有讨论。加工商可在下方写下对本页的改进建议。</p>
+
+              <div x-show="role==='MANUFACTURER'" class="pt-4">
+                <div class="flex items-start gap-3">
+                  <div class="w-8 h-8 rounded-full bg-primary text-white text-xs font-semibold flex items-center justify-center shrink-0" x-text="currentUser.avatar"></div>
+                  <div class="flex-1 min-w-0">
+                    <div x-show="!sgComposerOpen">
+                      <button type="button" @click="sgComposerOpen=true" class="w-full text-left text-sm text-ink-tertiary border border-line-soft rounded-md px-3 py-2.5 bg-fill/60 hover:border-line hover:bg-white">
+                        写下对本页的改进建议…
+                      </button>
+                    </div>
+                    <div x-show="sgComposerOpen" class="space-y-2">
+                      <input x-model="inlineSg.title" type="text" placeholder="标题（必填）" class="w-full border border-line-soft rounded-md px-3 py-2 text-sm bg-white focus:outline-none focus:border-ink" />
+                      <textarea x-model="inlineSg.body" rows="3" placeholder="补充说明（必填）。提交后不可撤回。" class="w-full border border-line-soft rounded-md px-3 py-2 text-sm bg-white focus:outline-none focus:border-ink"></textarea>
+                      <div class="flex items-center gap-2">
+                        <button type="button" @click="submitInlineSuggest()" class="px-3 py-1.5 text-sm rounded-md bg-primary text-white hover:bg-primary-hover">发表</button>
+                        <button type="button" @click="sgComposerOpen=false; inlineSg={title:'',body:''}" class="px-3 py-1.5 text-sm text-ink-secondary hover:text-ink">取消</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== 6.7 改进建议列表 ===== -->
+      <section x-show="page==='suggestionList' && canHandle" class="space-y-4">
+        <div class="bg-white rounded-lg shadow-card border border-line-soft">
+          <div class="px-5 py-4 border-b border-line-soft flex items-start justify-between gap-4">
+            <div>
+              <h1 class="text-base font-semibold">改进建议</h1>
+            </div>
+          </div>
+          <div class="p-4 flex flex-wrap gap-3 items-end border-b border-line-soft bg-fill/50">
+            <select x-model="filters.sg.status" class="w-32 border border-line rounded-md px-2 py-1.5 text-sm bg-white">
+              <option value="">全部状态</option>
+              <option value="PENDING">待处理</option>
+              <option value="REPLIED">已回复</option>
+              <option value="ADOPTED">已采纳</option>
+              <option value="CLOSED">已关闭</option>
+            </select>
+            <input x-model="filters.sg.keyword" type="text" placeholder="标题 / 编码 / 内容标题" class="w-56 border border-line rounded-md px-2 py-1.5 text-sm" />
+            <button @click="searchWithLoading()" class="px-3 py-1.5 text-sm rounded-md bg-primary text-white hover:bg-primary-hover">搜索</button>
+          </div>
+          <div class="table-wrap">
+            <template x-if="!filteredSuggestions.length">
+              <div class="p-12 text-center text-sm text-ink-tertiary">暂无改进建议。</div>
+            </template>
+            <table class="w-full text-sm" x-show="filteredSuggestions.length">
+              <thead class="bg-fill text-xs text-ink-secondary">
+                <tr>
+                  <th class="text-left px-4 py-3">编号</th>
+                  <th class="text-left px-4 py-3">标题</th>
+                  <th class="text-left px-4 py-3">关联</th>
+                  <th class="text-left px-4 py-3">提交人</th>
+                  <th class="text-left px-4 py-3">时间</th>
+                  <th class="text-left px-4 py-3">状态</th>
+                  <th class="text-left px-4 py-3">操作</th>
+                </tr>
+              </thead>
+              <tbody>
+                <template x-for="row in pagedSuggestions" :key="row.id">
+                  <tr class="border-t border-line-soft hover:bg-primary-bg/40">
+                    <td class="px-4 py-3" x-text="row.no"></td>
+                    <td class="px-4 py-3 font-medium" x-text="row.title"></td>
+                    <td class="px-4 py-3 text-ink-secondary" x-text="row.ref"></td>
+                    <td class="px-4 py-3" x-text="row.author"></td>
+                    <td class="px-4 py-3 text-ink-secondary" x-text="row.at"></td>
+                    <td class="px-4 py-3"><span class="text-xs px-2 py-0.5 rounded border" :class="sgClass(row.status)" x-text="sgLabel(row.status)"></span></td>
+                    <td class="px-4 py-3 space-x-2">
+                      <button @click="openSuggest(row,false)" class="text-primary hover:underline">查看</button>
+                      <button x-show="canHandle && ['PENDING','REPLIED'].includes(row.status)" @click="openSuggest(row,true)" class="text-primary hover:underline">处理</button>
+                    </td>
+                  </tr>
+                </template>
+              </tbody>
+            </table>
+          </div>
+          <div class="px-4 py-3 border-t border-line-soft text-xs text-ink-tertiary flex items-center justify-between gap-3 flex-wrap" x-show="filteredSuggestions.length">
+            <span>共 <span x-text="filteredSuggestions.length"></span> 条</span>
+            <div class="flex items-center gap-2">
+              <select x-model.number="suggestionPageSize" @change="suggestionPage=1" class="border border-line rounded px-2 py-1 text-xs bg-white">
+                <option :value="20">20条/页</option><option :value="50">50条/页</option><option :value="100">100条/页</option>
+              </select>
+              <button type="button" @click="suggestionPage=Math.max(1,suggestionPage-1)" class="px-2 py-1 border border-line rounded">上一页</button>
+              <span x-text="suggestionPage+' / '+suggestionTotalPages"></span>
+              <button type="button" @click="suggestionPage=Math.min(suggestionTotalPages,suggestionPage+1)" class="px-2 py-1 border border-line rounded">下一页</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== 6.8 建议详情 ===== -->
+      <section x-show="page==='suggestionDetail' && canHandle" class="space-y-4">
+        <div class="bg-white rounded-lg shadow-card border border-line-soft">
+          <div class="px-5 py-4 border-b border-line-soft flex items-center gap-3">
+            <button @click="go('suggestionList')" class="text-sm text-ink-secondary hover:text-primary">← 返回</button>
+            <h1 class="text-base font-semibold" x-text="sgForm.mode==='new' ? '提交改进建议' : '改进建议详情'"></h1>
+          </div>
+          <div class="p-5 space-y-4 max-w-2xl">
+            <label class="text-sm space-y-1 block"><span>标题 <span class="text-primary">*</span></span>
+              <input x-model="sgForm.title" :disabled="sgForm.mode!=='new'" type="text" class="block w-full border border-line rounded-md px-3 py-2 text-sm disabled:bg-fill" />
+            </label>
+            <label class="text-sm space-y-1 block"><span>关联内容 / 商品编码（选填）</span>
+              <input x-model="sgForm.ref" :disabled="sgForm.mode!=='new'" type="text" class="block w-full border border-line rounded-md px-3 py-2 text-sm disabled:bg-fill" />
+            </label>
+            <label class="text-sm space-y-1 block"><span>建议说明 <span class="text-primary">*</span></span>
+              <textarea x-model="sgForm.body" :disabled="sgForm.mode!=='new'" rows="5" class="block w-full border border-line rounded-md px-3 py-2 text-sm disabled:bg-fill"></textarea>
+            </label>
+            <div class="text-xs text-ink-tertiary" x-show="sgForm.mode!=='new'">
+              提交人 <span x-text="sgForm.author"></span> · 时间 <span x-text="sgForm.at"></span> · 状态
+              <span class="ml-1 text-xs px-2 py-0.5 rounded border" :class="sgClass(sgForm.status)" x-text="sgLabel(sgForm.status)"></span>
+            </div>
+            <p class="text-xs text-ink-tertiary">无撤回按钮、无激励 / 回利字段。</p>
+            <div x-show="sgForm.mode==='new'">
+              <button @click="submitSuggest()" class="px-4 py-2 text-sm rounded-md bg-primary text-white hover:bg-primary-hover">提交</button>
+            </div>
+            <div x-show="sgForm.mode==='handle' && canHandle" class="border-t border-line-soft pt-4 space-y-3">
+              <div class="text-sm font-medium">品牌处理区</div>
+              <textarea x-model="sgForm.reply" rows="3" class="block w-full border border-line rounded-md px-3 py-2 text-sm" placeholder="回复内容"></textarea>
+              <div class="flex flex-wrap gap-2">
+                <button @click="handleSuggest('REPLIED')" class="px-3 py-1.5 text-sm rounded-md border border-line hover:bg-fill">回复</button>
+                <button @click="handleSuggest('ADOPTED')" class="px-3 py-1.5 text-sm rounded-md bg-success text-white">采纳</button>
+                <button @click="closeOpen=true" class="px-3 py-1.5 text-sm rounded-md border border-primary text-primary">关闭…</button>
+              </div>
+            </div>
+            <div x-show="sgForm.mode==='view' && sgForm.reply" class="text-sm bg-fill rounded-md px-3 py-2">品牌回复：<span x-text="sgForm.reply"></span></div>
+            <div x-show="sgForm.closeReason" class="text-sm bg-fill rounded-md px-3 py-2">关闭原因：<span x-text="sgForm.closeReason"></span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== 6.9 查阅记录 ===== -->
+      <section x-show="page==='auditList' && canAudit" class="space-y-4">
+        <div class="bg-white rounded-lg shadow-card border border-line-soft">
+          <div class="px-5 py-4 border-b border-line-soft">
+            <h1 class="text-base font-semibold">查阅记录</h1>
+            <p class="mt-1 text-xs text-ink-tertiary">用于泄密追溯。本期不导出。账号处置请到组织权限。无法防止拍照 / 录屏。</p>
+          </div>
+          <div class="p-4 flex flex-wrap gap-3 items-end border-b border-line-soft bg-fill/50">
+            <input x-model="filters.au.keyword" type="text" placeholder="账号 / 手机号 / IP" class="w-48 border border-line rounded-md px-2 py-1.5 text-sm" />
+            <select x-model="filters.au.content" class="w-48 border border-line rounded-md px-2 py-1.5 text-sm bg-white">
+              <option value="">全部内容</option>
+              <template x-for="c in publishedTitles" :key="c"><option :value="c" x-text="c"></option></template>
+            </select>
+            <button @click="searchWithLoading()" class="px-3 py-1.5 text-sm rounded-md bg-primary text-white hover:bg-primary-hover">搜索</button>
+          </div>
+          <div class="table-wrap">
+            <template x-if="!filteredAudits.length">
+              <div class="p-12 text-center text-sm text-ink-tertiary">暂无查阅记录。</div>
+            </template>
+            <table class="w-full text-sm" x-show="filteredAudits.length">
+              <thead class="bg-fill text-xs text-ink-secondary">
+                <tr>
+                  <th class="text-left px-4 py-3">时间</th>
+                  <th class="text-left px-4 py-3">账号 / 姓名</th>
+                  <th class="text-left px-4 py-3">手机号</th>
+                  <th class="text-left px-4 py-3">角色</th>
+                  <th class="text-left px-4 py-3">内容标题</th>
+                  <th class="text-left px-4 py-3">内容标识</th>
+                  <th class="text-left px-4 py-3">IP</th>
+                  <th class="text-left px-4 py-3">操作</th>
+                </tr>
+              </thead>
+              <tbody>
+                <template x-for="row in pagedAudits" :key="row.id">
+                  <tr class="border-t border-line-soft">
+                    <td class="px-4 py-3 whitespace-nowrap" x-text="row.at"></td>
+                    <td class="px-4 py-3" x-text="row.account + ' ' + row.name"></td>
+                    <td class="px-4 py-3" x-text="row.phone"></td>
+                    <td class="px-4 py-3" x-text="row.role"></td>
+                    <td class="px-4 py-3" x-text="row.title"></td>
+                    <td class="px-4 py-3 text-ink-secondary" x-text="row.docId"></td>
+                    <td class="px-4 py-3" x-text="row.ip"></td>
+                    <td class="px-4 py-3"><button @click="openDetailById(row.docId)" class="text-primary hover:underline">查看内容</button></td>
+                  </tr>
+                </template>
+              </tbody>
+            </table>
+          </div>
+          <div class="px-4 py-3 border-t border-line-soft text-xs text-ink-tertiary flex items-center justify-between gap-3 flex-wrap" x-show="filteredAudits.length">
+            <span>共 <span x-text="filteredAudits.length"></span> 条</span>
+            <div class="flex items-center gap-2">
+              <select x-model.number="auditPageSize" @change="auditPage=1" class="border border-line rounded px-2 py-1 text-xs bg-white">
+                <option :value="20">20条/页</option><option :value="50">50条/页</option><option :value="100">100条/页</option>
+              </select>
+              <button type="button" @click="auditPage=Math.max(1,auditPage-1)" class="px-2 py-1 border border-line rounded">上一页</button>
+              <span x-text="auditPage+' / '+auditTotalPages"></span>
+              <button type="button" @click="auditPage=Math.min(auditTotalPages,auditPage+1)" class="px-2 py-1 border border-line rounded">下一页</button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- 选品弹窗 -->
+  <div x-show="pickerOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40">
+    <div class="bg-white rounded-lg shadow-card w-full max-w-lg modal-enter" @click.outside="pickerOpen=false">
+      <div class="px-4 py-3 border-b font-medium">选择商品</div>
+      <div class="p-4 space-y-3">
+        <input x-model="pickerKw" type="text" placeholder="关键词 / 商品编码" class="w-full border border-line rounded-md px-2 py-1.5 text-sm" />
+        <div class="max-h-56 overflow-auto border border-line-soft rounded">
+          <template x-for="s in pickerSkus" :key="s.code">
+            <label class="flex items-center gap-2 px-3 py-2 text-sm hover:bg-fill cursor-pointer">
+              <input type="checkbox" :value="s.code" x-model="pickerSel" class="rounded border-line text-primary" />
+              <span x-text="s.code"></span>
+              <span class="text-ink-secondary" x-text="s.name"></span>
+              <span class="ml-auto text-xs text-ink-tertiary">已发布</span>
+            </label>
+          </template>
+        </div>
+      </div>
+      <div class="px-4 py-3 border-t flex justify-end gap-2">
+        <button @click="pickerOpen=false" class="px-3 py-1.5 text-sm rounded-md border">取消</button>
+        <button @click="confirmPicker()" class="px-3 py-1.5 text-sm rounded-md bg-primary text-white">确认</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 发布确认（公告式：发布说明 + 校验摘要） -->
+  <div x-show="confirmPublish" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40">
+    <div class="bg-white rounded-lg shadow-card w-full max-w-lg modal-enter p-5 space-y-4">
+      <div>
+        <div class="font-medium text-base">确认发布</div>
+        <p class="mt-1 text-sm text-ink-secondary">发布后立即对可见角色生效，不进入审批中心。若已有已发布版，旧版将归档，加工商只见新版。</p>
+      </div>
+      <div class="rounded-md border border-line-soft bg-fill/60 p-3 text-xs text-ink-secondary space-y-1.5">
+        <div>标题：<span class="text-ink font-medium" x-text="editForm.title || '（未填写）'"></span></div>
+        <div>分类：<span class="text-ink" x-text="editForm.category || '—'"></span></div>
+        <div>受众：
+          <span x-show="editForm.visMfr">加工商</span>
+          <span x-show="editForm.visMfr && editForm.visDes">、</span>
+          <span x-show="editForm.visDes">设计师</span>
+          <span x-show="!editForm.visMfr && !editForm.visDes" class="text-primary">未选择</span>
+        </div>
+        <div>关联 SKU：<span class="font-medium" :class="(editForm.skus && editForm.skus.length) ? 'text-ink' : 'text-primary'" x-text="(editForm.skus && editForm.skus.length) || 0"></span> 个
+          <span x-show="!editForm.skus || !editForm.skus.length">（未关联 → 仅手册库兜底）</span>
+        </div>
+      </div>
+      <div x-show="!editForm.skus || !editForm.skus.length" class="rounded-md border border-[#E6D7A8] bg-warning-bg p-3 space-y-2">
+        <div class="text-sm font-medium text-warning">强引导：建议先关联已授权 SKU</div>
+        <p class="text-xs text-ink-secondary">产线扫码/按码查询无法命中未关联内容。可勾选下方清单，或选择「仍发布（仅手册库可见）」。</p>
+        <div class="max-h-36 overflow-auto border border-line-soft rounded bg-white">
+          <template x-for="s in pickerPool" :key="'pub-'+s.code">
+            <label class="flex items-center gap-2 px-3 py-2 text-xs hover:bg-fill cursor-pointer border-b border-line-soft last:border-0">
+              <input type="checkbox" :value="s.code" x-model="publishLinkSel" class="rounded border-line text-primary" />
+              <span x-text="s.code"></span>
+              <span class="text-ink-secondary" x-text="s.name"></span>
+            </label>
+          </template>
+        </div>
+        <button type="button" @click="applyPublishLinkSel()" class="text-xs text-primary hover:underline">将勾选写入关联</button>
+      </div>
+      <label class="text-sm space-y-1 block">
+        <span class="text-ink-secondary text-xs">发布说明（选填，品牌侧备查）</span>
+        <textarea x-model="publishNote" rows="2" class="w-full border border-line rounded-md px-3 py-2 text-sm" placeholder="如：补充合模对位视频与质检口径"></textarea>
+      </label>
+      <div class="flex justify-end gap-2 pt-1 flex-wrap">
+        <button @click="confirmPublish=false" class="px-3 py-1.5 text-sm rounded-md border">取消</button>
+        <button x-show="!editForm.skus || !editForm.skus.length" @click="doPublish()" class="px-3 py-1.5 text-sm rounded-md border border-warning text-warning hover:bg-warning-bg">仍发布（仅手册库）</button>
+        <button @click="doPublish()" class="px-3 py-1.5 text-sm rounded-md bg-primary text-white">确认发布</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 批量关联编码 -->
+  <div x-show="batchLinkOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40">
+    <div class="bg-white rounded-lg shadow-card w-full max-w-lg modal-enter p-5 space-y-4">
+      <div class="font-medium">批量关联商品编码</div>
+      <p class="text-xs text-ink-tertiary">搜索并选择目标手册，再粘贴编码批量写入关联。写入后按码通道即可命中。不预置推荐商品清单。</p>
+      <div class="text-sm space-y-1 relative">
+        <span class="text-xs text-ink-secondary">目标手册（支持标题模糊搜索）</span>
+        <input type="text" x-model="batchLinkKw" @input="batchLinkDocId=''" placeholder="输入手册标题关键词…"
+               class="w-full border border-line rounded-md px-2 py-1.5 text-sm" />
+        <div class="mt-1 max-h-40 overflow-auto border border-line-soft rounded bg-white" x-show="batchLinkFiltered.length">
+          <template x-for="h in batchLinkFiltered" :key="h.id">
+            <button type="button" @click="pickBatchDoc(h)"
+                    class="w-full text-left px-3 py-2 text-sm hover:bg-primary-bg border-b border-line-soft last:border-0"
+                    :class="batchLinkDocId===h.id ? 'bg-primary-bg text-primary font-medium' : ''">
+              <span x-text="h.title"></span>
+              <span class="text-[11px] text-ink-tertiary ml-1" x-text="h.skus.length ? '已关联 '+h.skus.length : '未关联'"></span>
+            </button>
+          </template>
+        </div>
+        <p class="text-[11px] text-ink-tertiary" x-show="batchLinkKw && !batchLinkFiltered.length">无匹配标题，请换关键词</p>
+        <p class="text-xs text-ink" x-show="batchLinkDocId">
+          已选：<span class="font-medium" x-text="batchLinkSelectedTitle"></span>
+        </p>
+      </div>
+      <label class="text-sm space-y-1 block">
+        <span class="text-xs text-ink-secondary">粘贴商品编码（逗号 / 换行分隔，须存在于 D07）</span>
+        <textarea x-model="batchLinkPaste" rows="3" class="w-full border border-line rounded-md px-2 py-1.5 text-sm" placeholder="SKU2001-A&#10;SKU2001-B"></textarea>
+      </label>
+      <div class="flex justify-end gap-2">
+        <button @click="batchLinkOpen=false" class="px-3 py-1.5 text-sm rounded-md border">取消</button>
+        <button @click="confirmBatchLink()" class="px-3 py-1.5 text-sm rounded-md bg-primary text-white">确认关联</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 预览（帮助中心 / 公告发布前预览） -->
+  <div x-show="previewOpen" class="fixed inset-0 z-50 bg-black/45 overflow-auto">
+    <div class="min-h-full py-6 px-4">
+      <div class="max-w-3xl mx-auto bg-white rounded-lg shadow-card border border-line-soft preview-shell">
+        <div class="px-5 py-3 border-b border-line-soft flex items-center justify-between gap-3 sticky top-0 bg-white rounded-t-lg z-10">
+          <div class="text-sm font-medium">发布预览 · 读者所见</div>
+          <button @click="previewOpen=false" class="px-3 py-1.5 text-sm rounded-md border border-line hover:bg-fill">关闭预览</button>
+        </div>
+        <div class="px-8 lg:px-12 py-8">
+          <div class="text-[11px] text-ink-tertiary mb-2" x-text="(editForm.category || '未分类') + (editForm.core ? ' · 核心资产' : ' · 非核心')"></div>
+          <h1 class="text-2xl font-bold leading-snug" x-text="editForm.title || '无标题文档'"></h1>
+          <p class="mt-2 text-sm text-ink-secondary" x-show="editForm.summary" x-text="editForm.summary"></p>
+          <div class="mt-6 rte-body text-[15px] leading-8" x-html="editForm.body"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 关闭原因 -->
+  <div x-show="closeOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40">
+    <div class="bg-white rounded-lg shadow-card w-full max-w-md modal-enter p-5 space-y-3">
+      <div class="font-medium">关闭改进建议</div>
+      <p class="text-xs text-ink-tertiary">关闭原因必填。</p>
+      <textarea x-model="closeReason" rows="3" class="w-full border border-line rounded-md px-3 py-2 text-sm"></textarea>
+      <div class="flex justify-end gap-2">
+        <button @click="closeOpen=false" class="px-3 py-1.5 text-sm rounded-md border">取消</button>
+        <button @click="confirmClose()" class="px-3 py-1.5 text-sm rounded-md bg-primary text-white">确认关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <div x-show="toastMsg" x-transition class="fixed top-16 right-4 z-[60] toast-enter bg-brand-black text-white text-sm px-4 py-2.5 rounded-md shadow-card max-w-sm" x-text="toastMsg"></div>
+
+  <script>
+    function craftApp() {
+      const bodyStamp = [
+        '<h2>工序01 下料</h2>',
+        '<p>板厚 0.8mm。关键控制点：毛刺检查。</p>',
+        '<h2>工序02 冲压</h2>',
+        '<p>参数：温度 / 压力 / 时间以现场工装为准。合模对位示意见下图。</p>',
+        '<figure class="wiki-media wiki-image" contenteditable="false"><div class="wiki-img-ph">示意图：合模对位要点</div><figcaption>合模对位示意（演示图）</figcaption></figure>',
+        '<h3>质检标准</h3>',
+        '<p>外观无裂纹，尺寸公差见工装图纸。</p>',
+        '<h3>安全规范</h3>',
+        '<p>冲压工位须佩戴防护，停机后清理余料。</p>',
+        '<h2>工艺演示视频</h2>',
+        '<figure class="wiki-media wiki-video" contenteditable="false" data-vname="壳体冲压演示.mp4"><div class="wiki-video-frame"><div class="play">▶</div><div>壳体冲压演示.mp4 · 03:40 · MP4</div></div><figcaption>壳体冲压演示</figcaption></figure>',
+        '<figure class="wiki-media wiki-video" contenteditable="false" data-vname="合模对位要点.mp4"><div class="wiki-video-frame"><div class="play">▶</div><div>合模对位要点.mp4 · 02:15 · MP4</div></div><figcaption>合模对位要点</figcaption></figure>',
+      ].join('');
+      const demoVideos = [
+        { name: '壳体冲压演示.mp4', format: 'MP4', size: '86MB', duration: '03:40' },
+        { name: '合模对位要点.mp4', format: 'MP4', size: '42MB', duration: '02:15' },
+      ];
+      const now = () => {
+        const d = new Date();
+        const p = n => String(n).padStart(2,'0');
+        return d.getFullYear() + '-' + p(d.getMonth()+1) + '-' + p(d.getDate()) + ' ' + p(d.getHours()) + ':' + p(d.getMinutes()) + ':' + p(d.getSeconds());
+      };
+      return {
+        mobileNav: false,
+        // --- mock pad handbooks to 120 ---
+        _padHandbooks() {
+          const MOCK_HB_COUNT = 120;
+          if (this.handbooks.length < MOCK_HB_COUNT) {
+            const seed = this.handbooks.filter(h => !h.parentId);
+            const n0 = this.handbooks.length;
+            for (let i = n0; i < MOCK_HB_COUNT; i++) {
+              const s = seed[i % Math.max(1, seed.length)] || seed[0];
+              if (!s) break;
+              this.handbooks.push({
+                ...s,
+                id: 'c-mock-' + i,
+                title: (s.title || '工艺手册') + ' · #' + (i + 1),
+                status: ['PUBLISHED','PUBLISHED','DRAFT','ARCHIVED'][i % 4],
+                parentId: null,
+                updatedAt: '2026-08-' + String(1 + (i % 28)).padStart(2,'0') + ' 10:00',
+                summary: s.summary || '',
+                videos: [],
+                skus: (s.skus || []).slice(0, 1),
+              });
+            }
+          }
+          if (this.suggestions.length < 120) {
+            const seed = this.suggestions.slice();
+            while (this.suggestions.length < 120) {
+              const i = this.suggestions.length;
+              const s = seed[i % seed.length];
+              this.suggestions.push({
+                ...s,
+                id: 's-mock-' + i,
+                no: 'JY' + String(20000 + i),
+                title: (s.title || '改进建议') + ' · #' + (i + 1),
+                at: '2026-08-' + String(1 + (i % 28)).padStart(2,'0'),
+                status: ['PENDING','REPLIED','ADOPTED','CLOSED'][i % 4],
+              });
+            }
+          }
+          if (this.audits.length < 120) {
+            const seed = this.audits.slice();
+            const names = ['张工','周工','吴工','李工','王工'];
+            while (this.audits.length < 120) {
+              const i = this.audits.length;
+              const s = seed[i % Math.max(1, seed.length)] || { title: '打火机壳体冲压手册', docId: 'c1', role: '加工商', ip: '1.2.3.4', phone: '138****1234' };
+              this.audits.push({
+                ...s,
+                id: 'a-mock-' + i,
+                at: '2026-08-' + String(1 + (i % 28)).padStart(2,'0') + ' ' + String(8 + (i % 10)).padStart(2,'0') + ':' + String((i * 7) % 60).padStart(2,'0') + ':01',
+                account: 'zg' + String(i % 40).padStart(2,'0'),
+                name: names[i % names.length],
+                title: (s.title || '工艺手册') + (i > 1 ? ' · #' + (i + 1) : ''),
+                docId: s.docId || 'c1',
+              });
+            }
+          }
+        },
+
+        openTabs: [{ id: 'home', label: '工艺知识库', page: null }],
+        activeTabId: 'home',
+        activateTab(id) {
+          const t = this.openTabs.find(x => x.id === id);
+          if (!t) return;
+          this.activeTabId = id;
+          if (t.page && typeof this.go === 'function') this.go(t.page, true);
+        },
+        closeTab(id) {
+          if (this.openTabs.length <= 1) return;
+          const i = this.openTabs.findIndex(x => x.id === id);
+          if (i < 0) return;
+          this.openTabs.splice(i, 1);
+          if (this.activeTabId === id) {
+            const next = this.openTabs[Math.max(0, i - 1)];
+            this.activateTab(next.id);
+          }
+        },
+        ensureOpenTab(page, label) {
+          const id = 'p-' + page;
+          let t = this.openTabs.find(x => x.id === id);
+          if (!t) {
+            this.openTabs.push({ id, label, page });
+          } else {
+            t.label = label;
+          }
+          this.activeTabId = id;
+        },
+
+        role: 'BRAND_ADMIN',
+        page: 'handbookList',
+        loading: false,
+        toastMsg: '',
+        grantDownload: false,
+        grantDealerMenu: false,
+        auditFail: false,
+        pickerOpen: false, pickerKw: '', pickerSel: [],
+        confirmPublish: false,
+        publishNote: '',
+        previewOpen: false,
+        closeOpen: false, closeReason: '',
+        playing: -1,
+        sgComposerOpen: false,
+        inlineSg: { title: '', body: '' },
+        queryInput: '', queryMsg: '', queryOk: false, queryHintLibrary: false,
+        nameSuggests: [],
+        queryHistory: [
+          { code: 'SKU2001-A', label: 'SKU2001-A · 打火机·银' },
+        ],
+        queryHit: { code: '', name: '', items: [], channel: '' },
+        publishLinkSel: [],
+        batchLinkOpen: false, batchLinkDocId: '', batchLinkKw: '', batchLinkPaste: '',
+        currentDoc: null, detailFrom: 'handbookList', detailReady: true,
+        archiveParent: null,
+        actionMenuId: null,
+        editForm: {},
+        editMetaOpen: true,
+        editOutlineOpen: true,
+        editOutline: [],
+        editDirty: false,
+        autoSaveHint: '尚未保存',
+        _autoSaveTimer: null,
+        sgForm: { mode: 'new' },
+        filters: {
+          hb: { status: '', core: '', linked: '', keyword: '' },
+          lib: { keyword: '', type: '', category: '', linked: '' },
+          sg: { status: '', keyword: '' },
+          au: { keyword: '', content: '' },
+        },
+        handbookPage: 1,
+        handbookPageSize: 20,
+        suggestionPage: 1,
+        suggestionPageSize: 20,
+        auditPage: 1,
+        auditPageSize: 20,
+        pickerPool: [
+          { code: 'SKU2001-A', name: '打火机·银', barcode: '6901234567890', authorized: true },
+          { code: 'SKU2001-B', name: '打火机·黑', barcode: '6901234567891', authorized: true },
+          { code: 'SKU3001-B', name: '限量款', barcode: '6901234567892', authorized: false },
+          { code: 'SKU4001-C', name: '打火机·金（无工艺关联）', barcode: '6901234567893', authorized: true },
+        ],
+        /** 与 D13 枚举管理「工艺内容分类」同源演示数据；正式环境只读已启用项 */
+        craftCategories: [
+          { code: 'PROCESS', name: '工序手册', enabled: true },
+          { code: 'SAFETY', name: '安全规范', enabled: true },
+          { code: 'QC', name: '质检标准', enabled: true },
+          { code: 'GENERAL', name: '通用说明', enabled: true },
+        ],
+        handbooks: [
+          { id: 'c1', title: '打火机壳体冲压手册', category: '工序手册', summary: '壳体冲压工序、参数与合模对位要点。', typeLabel: '手册+视频', core: true, status: 'PUBLISHED', updater: '李四', updatedAt: '2026-08-14 10:00', visMfr: true, visDes: false, videos: demoVideos.slice(), skus: [{ code: 'SKU2001-A', name: '打火机·银' }], body: bodyStamp, parentId: null, publishNote: '补充合模视频' },
+          { id: 'c1a', title: '打火机壳体冲压手册（旧版）', category: '工序手册', summary: '', typeLabel: '手册+视频', core: true, status: 'ARCHIVED', updater: '李四', updatedAt: '2026-07-20 09:00', visMfr: true, visDes: false, videos: [demoVideos[0]], skus: [{ code: 'SKU2001-A', name: '打火机·银' }], body: '<p>旧版工序说明（归档）。加工商入口不可见本版。</p>', parentId: 'c1', publishNote: '' },
+          { id: 'c2', title: '通用安全规范', category: '安全规范', summary: '作业安全与光栅自检要求。', typeLabel: '手册', core: false, status: 'PUBLISHED', updater: '王五', updatedAt: '2026-08-10 09:20', visMfr: true, visDes: true, videos: [], skus: [], body: '<h3>安全规范</h3><p>作业前检查防护装置。禁止拆除安全光栅。</p><h3>质检标准</h3><p>安全点检表齐全。</p>', parentId: null, publishNote: '' },
+          { id: 'c3', title: '新品工序-未发', category: '工序手册', summary: '新品工序草稿，待补参数。', typeLabel: '手册', core: true, status: 'DRAFT', updater: '李四', updatedAt: '2026-08-14 11:02', visMfr: true, visDes: false, videos: [], skus: [{ code: 'SKU2001-A', name: '打火机·银' }, { code: 'SKU2001-B', name: '打火机·黑' }], body: '', parentId: null, publishNote: '' },
+        ],
+        suggestions: [
+          { id: 's1', no: 'JY00012', title: '冲压节拍建议', ref: '打火机壳体冲压手册', docId: 'c1', author: '张工', account: 'zg01', at: '2026-08-14', status: 'PENDING', body: '建议将工序02合模等待缩短 2 秒并复测良率。', reply: '', closeReason: '' },
+          { id: 's3', no: 'JY00011', title: '下料毛刺判定过严', ref: '打火机壳体冲压手册', docId: 'c1', author: '周工', account: 'zg02', at: '2026-08-13', status: 'REPLIED', body: '毛刺判定与现场量具不一致，建议统一口径。', reply: '已与质检对齐，下版手册补充量具型号。', closeReason: '' },
+          { id: 's4', no: 'JY00010', title: '视频看不清合模对位', ref: '打火机壳体冲压手册', docId: 'c1', author: '张工', account: 'zg01', at: '2026-08-12', status: 'PENDING', body: '合模对位要点视频光线偏暗，建议补拍特写。', reply: '', closeReason: '' },
+          { id: 's2', no: 'JY00008', title: '安全提示补充', ref: '通用安全规范', docId: 'c2', author: '张工', account: 'zg01', at: '2026-08-01', status: 'ADOPTED', body: '建议在安全规范中补充光栅自检步骤。', reply: '已纳入下一版手册。', closeReason: '' },
+          { id: 's5', no: 'JY00007', title: '停机清料步骤可否图示', ref: '通用安全规范', docId: 'c2', author: '吴工', account: 'zg03', at: '2026-07-28', status: 'CLOSED', body: '希望增加停机清料示意图。', reply: '', closeReason: '本期不做示意图，已在正文写清步骤。' },
+          { id: 's6', no: 'JY00006', title: '新品工序参数待确认', ref: '新品工序-未发', docId: 'c3', author: '张工', account: 'zg01', at: '2026-07-20', status: 'REPLIED', body: '草稿手册中的压力参数与现用模具不符。', reply: '待发布前会按现用模具改一版。', closeReason: '' },
+        ],
+        audits: [
+          { id: 'a1', at: '2026-08-14 14:20:01', account: 'zg01', name: '张工', phone: '138****1234', role: '加工商', title: '打火机壳体冲压手册', docId: 'c1', ip: '1.2.3.4' },
+          { id: 'a2', at: '2026-08-14 11:02:18', account: 'zg01', name: '张工', phone: '138****1234', role: '加工商', title: '通用安全规范', docId: 'c2', ip: '1.2.3.4' },
+        ],
+        users: {
+          BRAND_ADMIN: { name: '陈启明', avatar: '陈', label: '品牌管理员', phone: '139****8001', ip: '10.0.0.8' },
+          BRAND_OPERATOR: { name: '李薇', avatar: '李', label: '品牌业务', phone: '139****8002', ip: '10.0.0.9' },
+          MANUFACTURER: { name: '张工', avatar: '张', label: '加工商', phone: '138****1234', ip: '1.2.3.4' },
+          DESIGNER: { name: '林设计师', avatar: '林', label: '独立设计师', phone: '137****5566', ip: '8.8.8.8' },
+          DISTRIBUTOR: { name: '赵经销', avatar: '赵', label: '经销商', phone: '136****0001', ip: '2.2.2.2' },
+          RETAILER: { name: '钱零售', avatar: '钱', label: '零售商', phone: '135****0002', ip: '3.3.3.3' },
+        },
+        get currentUser() { return this.users[this.role]; },
+        get roleLabel() { return this.currentUser.label; },
+        get enabledCraftCategories() { return (this.craftCategories || []).filter(c => c.enabled); },
+        get canMaintain() { return this.role === 'BRAND_ADMIN' || this.role === 'BRAND_OPERATOR'; },
+        get canQuery() {
+          if (this.role === 'MANUFACTURER' || this.role === 'DESIGNER') return true;
+          if (this.role === 'BRAND_ADMIN' || this.role === 'BRAND_OPERATOR') return true;
+          if ((this.role === 'DISTRIBUTOR' || this.role === 'RETAILER') && this.grantDealerMenu) return true;
+          return false;
+        },
+        get canHandle() { return this.canMaintain; },
+        get currentTalk() {
+          if (!this.currentDoc) return [];
+          const id = this.currentDoc.parentId || this.currentDoc.id;
+          const title = (this.currentDoc.title || '').replace('（旧版）', '');
+          let list = this.suggestions.filter(s => s.docId === id || s.ref === title);
+          if (this.role === 'MANUFACTURER') list = list.filter(s => s.account === 'zg01');
+          return list;
+        },
+        get canAudit() { return this.canMaintain; },
+        get hasAnyMenu() { return this.canMaintain || this.canQuery || this.canHandle || this.canAudit; },
+        get pageTitle() {
+          return ({
+            handbookList: '工艺手册', handbookEdit: '工艺文档', archiveList: '归档',
+            queryLibrary: '工艺查询', queryResult: '查询结果',
+            handbookDetail: '手册详情', suggestionList: '改进建议', suggestionDetail: '改进建议详情', auditList: '查阅记录',
+          })[this.page] || '工艺知识库';
+        },
+        get filteredHandbooks() {
+          const f = this.filters.hb;
+          return this.handbooks.filter(h => {
+            if (h.parentId) return false;
+            if (f.status && h.status !== f.status) return false;
+            if (f.core === 'Y' && !h.core) return false;
+            if (f.core === 'N' && h.core) return false;
+            if (f.linked === 'Y' && !h.skus.length) return false;
+            if (f.linked === 'N' && h.skus.length) return false;
+            if (f.keyword) {
+              const k = f.keyword.toLowerCase();
+              const hit = h.title.toLowerCase().includes(k) || h.skus.some(s => s.code.toLowerCase().includes(k));
+              if (!hit) return false;
+            }
+            return true;
+          });
+        },
+        get libraryItems() {
+          const f = this.filters.lib;
+          return this.handbooks.filter(h => {
+            if (h.status !== 'PUBLISHED') return false;
+            if (this.role === 'DESIGNER') {
+              if (h.core || !h.visDes) return false;
+            }
+            if (this.role === 'MANUFACTURER' && !h.visMfr) return false;
+            if (f.category && h.category !== f.category) return false;
+            if (f.linked === 'Y' && !(h.skus && h.skus.length)) return false;
+            if (f.linked === 'N' && h.skus && h.skus.length) return false;
+            if (f.type === '手册' && h.typeLabel.indexOf('手册') < 0) return false;
+            if (f.type === '视频' && !(h.videos && h.videos.length)) return false;
+            if (f.keyword) {
+              const k = f.keyword;
+              const blob = (h.title || '') + (h.category || '') + (h.summary || '');
+              if (blob.indexOf(k) < 0) return false;
+            }
+            return true;
+          });
+        },
+        get batchLinkTargets() {
+          return this.handbooks.filter(h => !h.parentId && h.status !== 'ARCHIVED');
+        },
+        get batchLinkFiltered() {
+          const k = (this.batchLinkKw || '').trim();
+          const list = this.batchLinkTargets;
+          if (!k) return list.slice(0, 20);
+          return list.filter(h => (h.title || '').indexOf(k) >= 0 || (h.category || '').indexOf(k) >= 0).slice(0, 20);
+        },
+        get batchLinkSelectedTitle() {
+          const row = this.handbooks.find(h => h.id === this.batchLinkDocId);
+          return row ? row.title : '';
+        },
+        get filteredSuggestions() {
+          const f = this.filters.sg;
+          return this.suggestions.filter(s => {
+            if (f.status && s.status !== f.status) return false;
+            if (f.keyword && !(s.title + s.ref + s.no).includes(f.keyword)) return false;
+            return true;
+          });
+        },
+        get pagedHandbooks() {
+          const start = (this.handbookPage - 1) * this.handbookPageSize;
+          return this.filteredHandbooks.slice(start, start + this.handbookPageSize);
+        },
+        get handbookTotalPages() {
+          return Math.max(1, Math.ceil(this.filteredHandbooks.length / this.handbookPageSize));
+        },
+        get pagedSuggestions() {
+          const start = (this.suggestionPage - 1) * this.suggestionPageSize;
+          return this.filteredSuggestions.slice(start, start + this.suggestionPageSize);
+        },
+        get suggestionTotalPages() {
+          return Math.max(1, Math.ceil(this.filteredSuggestions.length / this.suggestionPageSize));
+        },
+        get pagedAudits() {
+          const start = (this.auditPage - 1) * this.auditPageSize;
+          return this.filteredAudits.slice(start, start + this.auditPageSize);
+        },
+        get auditTotalPages() {
+          return Math.max(1, Math.ceil(this.filteredAudits.length / this.auditPageSize));
+        },
+        get filteredAudits() {
+          const f = this.filters.au;
+          return this.audits.filter(a => {
+            if (f.content && a.title !== f.content) return false;
+            if (f.keyword) {
+              const k = f.keyword;
+              if (!(a.account + a.phone + a.ip + a.name).includes(k)) return false;
+            }
+            return true;
+          });
+        },
+        get publishedTitles() {
+          return [...new Set(this.handbooks.filter(h => h.status !== 'DRAFT').map(h => h.title.replace('（旧版）','')))];
+        },
+        get pickerSkus() {
+          const k = (this.pickerKw || '').toLowerCase();
+          return this.pickerPool.filter(s => !k || s.code.toLowerCase().includes(k) || s.name.includes(k));
+        },
+        get watermarkText() {
+          const u = this.currentUser;
+          return (u.phone || '') + '  |  ' + (u.ip || '') + '  |  ' + now();
+        },
+        toast(msg) {
+          this.toastMsg = msg;
+          clearTimeout(this._t);
+          this._t = setTimeout(() => this.toastMsg = '', 2600);
+        },
+        go(p) { this.page = p; this.playing = -1; },
+        onRoleChange() {
+          this.mobileNav = false;
+          if (!this.hasAnyMenu) { this.page = 'handbookList'; return; }
+          if (this.canMaintain) this.page = 'handbookList';
+          else if (this.canQuery) this.page = 'queryLibrary';
+          else if (this.canHandle) this.page = 'suggestionList';
+          this.toast('已切换为' + this.roleLabel + '（权限变更按重新登录生效，本演示立即切换）');
+        },
+        searchWithLoading() {
+          this.loading = true;
+          setTimeout(() => this.loading = false, 280);
+        },
+        statusLabel(s) { return { DRAFT: '草稿', PUBLISHED: '已发布', ARCHIVED: '已归档' }[s] || s; },
+        statusClass(s) {
+          return {
+            DRAFT: 'bg-fill text-ink-secondary border-line',
+            PUBLISHED: 'bg-success-bg text-success border-success/20',
+            ARCHIVED: 'bg-warning-bg text-warning border-[#E6D7A8]',
+          }[s] || 'bg-fill';
+        },
+        sgLabel(s) { return { PENDING: '待处理', REPLIED: '已回复', ADOPTED: '已采纳', CLOSED: '已关闭' }[s]; },
+        sgClass(s) {
+          return {
+            PENDING: 'bg-warning-bg text-warning border-[#E6D7A8]',
+            REPLIED: 'bg-primary-bg text-primary border-primary/20',
+            ADOPTED: 'bg-success-bg text-success border-success/20',
+            CLOSED: 'bg-fill text-ink-secondary border-line',
+          }[s];
+        },
+        archivesOf(row) { return this.handbooks.filter(h => h.parentId === row.id); },
+        handbookActions(row) {
+          const acts = [];
+          if (row.status !== 'DRAFT') acts.push({ key: 'view', label: '查看' });
+          if (row.status !== 'ARCHIVED') acts.push({ key: 'edit', label: '编辑' });
+          if (row.status === 'PUBLISHED' && this.archivesOf(row).length) acts.push({ key: 'archive', label: '归档' });
+          if (row.status === 'DRAFT') acts.push({ key: 'delete', label: '删除' });
+          return acts;
+        },
+        handbookPrimaryActions(row) {
+          const acts = this.handbookActions(row);
+          return acts.length > 2 ? acts.slice(0, 2) : acts;
+        },
+        handbookOverflowActions(row) {
+          const acts = this.handbookActions(row);
+          return acts.length > 2 ? acts.slice(2) : [];
+        },
+        runHandbookAction(row, key) {
+          this.actionMenuId = null;
+          if (key === 'view') this.openDetail(row, 'handbookList');
+          else if (key === 'edit') this.openEdit(row);
+          else if (key === 'archive') this.openArchives(row);
+          else if (key === 'delete') this.deleteDraft(row);
+        },
+        get editWordCount() {
+          const t = (this.editForm.title || '') + (this.editForm.summary || '') + ((this.editForm.body || '').replace(/<[^>]+>/g, ' '));
+          return (t.replace(/\s+/g, '').length) || 0;
+        },
+        focusEditor() {
+          if (this.$refs.editor) this.$refs.editor.focus();
+        },
+        markDirty() {
+          this.editDirty = true;
+          this.autoSaveHint = '有未保存更改';
+          this.scheduleAutoSave();
+        },
+        scheduleAutoSave() {
+          if (this._autoSaveTimer) clearTimeout(this._autoSaveTimer);
+          this._autoSaveTimer = setTimeout(() => this.autoSaveDraft(), 2500);
+        },
+        autoSaveDraft() {
+          this.syncEditor();
+          if (!(this.editForm.title || '').trim()) {
+            this.autoSaveHint = '填写标题后可自动保存草稿';
+            return;
+          }
+          this.upsert(false);
+          this.editDirty = false;
+          this.autoSaveHint = '草稿已自动保存 ' + now().slice(11, 16);
+        },
+        onEditorInput() {
+          this.syncEditor();
+          this.refreshOutline();
+          this.markDirty();
+        },
+        refreshOutline() {
+          const html = this.editForm.body || '';
+          const re = /<(h2|h3)[^>]*>(.*?)<\/\1>/gi;
+          const list = [];
+          let m;
+          while ((m = re.exec(html))) {
+            list.push({
+              level: m[1].toLowerCase(),
+              text: m[2].replace(/<[^>]+>/g, '').trim() || '未命名标题',
+            });
+          }
+          this.editOutline = list;
+        },
+        jumpOutline(o) {
+          const ed = this.$refs.editor;
+          if (!ed) return;
+          const nodes = ed.querySelectorAll(o.level);
+          for (const n of nodes) {
+            if ((n.textContent || '').trim() === o.text) {
+              n.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              break;
+            }
+          }
+        },
+        fmt(cmd) {
+          this.focusEditor();
+          document.execCommand(cmd, false, null);
+          this.onEditorInput();
+        },
+        fmtHeading(tag) {
+          this.focusEditor();
+          document.execCommand('formatBlock', false, tag || 'h3');
+          this.onEditorInput();
+        },
+        fmtQuote() {
+          this.focusEditor();
+          document.execCommand('formatBlock', false, 'blockquote');
+          this.onEditorInput();
+        },
+        insertHtml(html) {
+          this.focusEditor();
+          document.execCommand('insertHTML', false, html + '<p><br></p>');
+          this.onEditorInput();
+        },
+        insertImage() {
+          const n = ((this.editForm.body || '').match(/wiki-image/g) || []).length + 1;
+          this.insertHtml(
+            '<figure class="wiki-media wiki-image" contenteditable="false">' +
+            '<div class="wiki-img-ph">已插入图片 ' + n + '（演示占位）</div>' +
+            '<figcaption>工艺示意图 ' + n + '</figcaption></figure>'
+          );
+          this.toast('已在文档中插入图片');
+        },
+        insertVideo() {
+          if (!this.editForm.videos) this.editForm.videos = [];
+          if (this.editForm.videos.length >= 3) { this.toast('正文内视频最多 3 个'); return; }
+          const n = this.editForm.videos.length + 1;
+          const v = { name: '工艺演示-' + n + '.mp4', format: 'MP4', size: '68MB', duration: '03:10' };
+          this.editForm.videos.push(v);
+          this.insertHtml(
+            '<figure class="wiki-media wiki-video" contenteditable="false" data-vname="' + v.name + '">' +
+            '<div class="wiki-video-frame"><div class="play">▶</div><div>' + v.name + ' · ' + v.duration + ' · ' + v.format + '</div></div>' +
+            '<figcaption>' + v.name.replace('.mp4','') + '</figcaption></figure>'
+          );
+          this.toast('已在文档中插入视频（MP4/MOV/AVI/WMV/WebM，单个 ≤ 200MB）');
+        },
+        insertTable() {
+          this.insertHtml(
+            '<table><thead><tr><th>工序</th><th>步骤</th><th>参数</th><th>关键控制点</th></tr></thead>' +
+            '<tbody><tr><td>工序01</td><td>下料</td><td></td><td></td></tr>' +
+            '<tr><td>工序02</td><td>冲压</td><td></td><td></td></tr></tbody></table>'
+          );
+          this.toast('已插入参数表');
+        },
+        insertDivider() {
+          this.insertHtml('<hr class="wiki-hr" />');
+        },
+        insertCallout() {
+          this.insertHtml('<div class="wiki-callout" contenteditable="true"><strong>注意：</strong>请在此填写关键安全/质检提示（公告式提示块）。</div>');
+        },
+        insertProcessTemplate() {
+          this.insertHtml(
+            '<h2>工序XX 名称</h2>' +
+            '<p>步骤说明……</p>' +
+            '<table><thead><tr><th>参数</th><th>标准值</th><th>备注</th></tr></thead>' +
+            '<tbody><tr><td>温度</td><td></td><td></td></tr><tr><td>压力</td><td></td><td></td></tr><tr><td>时间</td><td></td><td></td></tr></tbody></table>' +
+            '<div class="wiki-callout"><strong>关键控制点：</strong>……</div>' +
+            '<h3>质检标准</h3><p>……</p><h3>安全规范</h3><p>……</p>'
+          );
+          this.toast('已插入标准工序模板');
+        },
+        syncEditor() {
+          if (this.$refs.editor) this.editForm.body = this.$refs.editor.innerHTML;
+        },
+        fillEditor() {
+          this.$nextTick(() => {
+            if (this.$refs.editor) this.$refs.editor.innerHTML = this.editForm.body || '';
+            this.refreshOutline();
+          });
+        },
+        openNew() {
+          this.editForm = { id: '', title: '', summary: '', category: '工序手册', core: true, visMfr: true, visDes: false, body: '', videos: [], skus: [], publishNote: '' };
+          this.publishNote = '';
+          this.editMetaOpen = true;
+          this.editOutlineOpen = true;
+          this.editDirty = false;
+          this.autoSaveHint = '尚未保存';
+          this.go('handbookEdit');
+          this.fillEditor();
+        },
+        openEdit(row) {
+          this.editForm = JSON.parse(JSON.stringify({
+            id: row.id, title: row.title, summary: row.summary || '', category: row.category || '工序手册',
+            core: row.core, visMfr: row.visMfr, visDes: row.visDes && !row.core,
+            body: row.body, videos: (row.videos || []).slice(), skus: row.skus.slice(),
+            publishNote: row.publishNote || '',
+          }));
+          this.publishNote = row.publishNote || '';
+          this.editMetaOpen = true;
+          this.editOutlineOpen = true;
+          this.editDirty = false;
+          this.autoSaveHint = '已载入 · ' + (row.updatedAt || '');
+          this.go('handbookEdit');
+          this.fillEditor();
+        },
+        openPreview() {
+          this.syncEditor();
+          this.previewOpen = true;
+        },
+        setCore(v) {
+          this.editForm.core = v;
+          this.markDirty();
+          if (v) { this.editForm.visDes = false; this.toast('核心资产不可对设计师可见，已取消设计师勾选'); }
+        },
+        saveDraft() {
+          this.syncEditor();
+          if (!(this.editForm.title || '').trim()) { this.toast('标题必填，空标题不可保存草稿'); return; }
+          this.upsert(false);
+          this.editDirty = false;
+          this.autoSaveHint = '草稿已保存 ' + now().slice(11, 16);
+          this.toast('已保存草稿（加工商手册库不可见）');
+          this.go('handbookList');
+        },
+        doPublish() {
+          this.syncEditor();
+          if (!(this.editForm.title || '').trim()) { this.toast('标题必填'); this.confirmPublish = false; return; }
+          if (!this.editForm.visMfr && !this.editForm.visDes) { this.toast('发布时受众可见范围至少选一项'); this.confirmPublish = false; return; }
+          this.editForm.publishNote = this.publishNote || '';
+          this.upsert(true);
+          this.confirmPublish = false;
+          this.editDirty = false;
+          this.toast('已发布，立即对可见角色生效（无审批待办）');
+          this.go('handbookList');
+        },
+        upsert(publish) {
+          const f = this.editForm;
+          const bodyHasVideo = (f.body || '').indexOf('wiki-video') >= 0;
+          const hasV = (f.videos && f.videos.length) || bodyHasVideo;
+          const typeLabel = hasV ? ((f.body || '').replace(/<[^>]+>/g, '').trim() ? '手册+视频' : '视频') : '手册';
+          if (f.id) {
+            const old = this.handbooks.find(h => h.id === f.id);
+            if (publish && old && old.status === 'PUBLISHED') {
+              this.handbooks.push({
+                ...JSON.parse(JSON.stringify(old)),
+                id: old.id + '-arc-' + Date.now(),
+                title: old.title + '（旧版）',
+                status: 'ARCHIVED',
+                parentId: old.id,
+                updatedAt: now().slice(0, 16),
+              });
+            }
+            Object.assign(old, {
+              title: f.title, summary: f.summary || '', category: f.category || '工序手册',
+              core: f.core, visMfr: f.visMfr, visDes: f.visDes && !f.core,
+              body: f.body, videos: f.videos, skus: f.skus, typeLabel, publishNote: f.publishNote || '',
+              updater: this.currentUser.name, updatedAt: now().slice(0, 16),
+              status: publish ? 'PUBLISHED' : 'DRAFT', parentId: null,
+            });
+          } else {
+            const nid = 'c' + Date.now();
+            this.handbooks.unshift({
+              id: nid, title: f.title, summary: f.summary || '', category: f.category || '工序手册',
+              typeLabel, core: f.core,
+              status: publish ? 'PUBLISHED' : 'DRAFT', updater: this.currentUser.name,
+              updatedAt: now().slice(0, 16), visMfr: f.visMfr, visDes: f.visDes && !f.core,
+              videos: f.videos, skus: f.skus, body: f.body, parentId: null, publishNote: f.publishNote || '',
+            });
+            this.editForm.id = nid;
+          }
+        },
+        deleteDraft(row) {
+          if (row.status !== 'DRAFT') { this.toast('仅草稿可删除'); return; }
+          this.handbooks = this.handbooks.filter(h => h.id !== row.id);
+          this.toast('草稿已删除');
+        },
+        openArchives(row) { this.archiveParent = row; this.go('archiveList'); },
+        confirmPicker() {
+          const map = Object.fromEntries(this.pickerPool.map(s => [s.code, s]));
+          this.editForm.skus = this.pickerSel.map(c => ({ code: map[c].code, name: map[c].name })).filter(Boolean);
+          this.pickerOpen = false;
+          this.markDirty();
+        },
+        openPublish() {
+          this.syncEditor();
+          this.publishLinkSel = (this.editForm.skus || []).map(s => s.code);
+          this.confirmPublish = true;
+        },
+        applyPublishLinkSel() {
+          const map = Object.fromEntries(this.pickerPool.map(s => [s.code, s]));
+          this.editForm.skus = this.publishLinkSel.map(c => map[c]).filter(Boolean).map(s => ({ code: s.code, name: s.name }));
+          this.markDirty();
+          this.toast('已写入关联编码 ' + this.editForm.skus.length + ' 个');
+        },
+        importSkuText() {
+          const raw = window.prompt('粘贴商品编码（逗号或换行分隔）', 'SKU2001-A,SKU2001-B');
+          if (raw == null) return;
+          const codes = raw.split(/[,，\s\n]+/).map(x => x.trim()).filter(Boolean);
+          const map = Object.fromEntries(this.pickerPool.map(s => [s.code, s]));
+          const cur = new Map((this.editForm.skus || []).map(s => [s.code, s]));
+          codes.forEach(c => {
+            if (map[c]) cur.set(c, { code: map[c].code, name: map[c].name });
+            else this.toast('未识别编码：' + c + '（须存在于 D07）');
+          });
+          this.editForm.skus = Array.from(cur.values());
+          this.markDirty();
+        },
+        openBatchLink() {
+          this.batchLinkDocId = '';
+          this.batchLinkKw = '';
+          this.batchLinkPaste = '';
+          this.batchLinkOpen = true;
+        },
+        pickBatchDoc(h) {
+          this.batchLinkDocId = h.id;
+          this.batchLinkKw = h.title;
+        },
+        confirmBatchLink() {
+          if (!this.batchLinkDocId) { this.toast('请先搜索并选择目标手册'); return; }
+          const row = this.handbooks.find(h => h.id === this.batchLinkDocId);
+          if (!row) return;
+          const map = Object.fromEntries(this.pickerPool.map(s => [s.code, s]));
+          const codes = (this.batchLinkPaste || '').split(/[,，\s\n]+/).map(x => x.trim()).filter(Boolean);
+          if (!codes.length) { this.toast('请粘贴至少一个商品编码'); return; }
+          const cur = new Map((row.skus || []).map(s => [s.code, s]));
+          let miss = 0;
+          codes.forEach(c => {
+            if (map[c]) cur.set(c, { code: map[c].code, name: map[c].name });
+            else miss++;
+          });
+          row.skus = Array.from(cur.values());
+          row.updatedAt = now().slice(0, 16);
+          this.batchLinkOpen = false;
+          this.toast('已关联 ' + row.skus.length + ' 个编码到「' + row.title + '」' + (miss ? '；'+miss+' 个编码未在 D07 识别' : ''));
+        },
+        onQueryInput() {
+          const q = (this.queryInput || '').trim();
+          this.nameSuggests = [];
+          if (!q || /^SKU/i.test(q) || /^\d{8,}$/.test(q)) return;
+          this.nameSuggests = this.pickerPool.filter(s => s.name.indexOf(q) >= 0).slice(0, 6);
+        },
+        pickSuggest(s) {
+          this.queryInput = s.code;
+          this.nameSuggests = [];
+          this.doMultiQuery();
+        },
+        scrollToLibrary() {
+          this.$nextTick(() => {
+            const el = document.getElementById('query-library');
+            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          });
+        },
+        pushHistory(code, name) {
+          const label = code + (name ? ' · ' + name : '');
+          this.queryHistory = [{ code, label }, ...this.queryHistory.filter(h => h.code !== code)].slice(0, 8);
+        },
+        resolveProduct(raw) {
+          const q = (raw || '').trim();
+          if (!q) return null;
+          return this.pickerPool.find(s => s.code === q || s.barcode === q)
+            || this.pickerPool.find(s => s.name === q)
+            || null;
+        },
+        doMultiQuery() {
+          const raw = (this.queryInput || '').trim();
+          this.queryMsg = ''; this.queryOk = false; this.queryHintLibrary = false; this.nameSuggests = [];
+          if (!raw) { this.queryMsg = '请输入货品条码、SKU 或商品名称'; return; }
+          if (this.role === 'DESIGNER') {
+            this.queryMsg = '无权限查看该商品工艺';
+            return;
+          }
+          let product = this.resolveProduct(raw);
+          let channel = 'SKU/条码';
+          if (!product && !/^SKU/i.test(raw) && !/^\d{8,}$/.test(raw)) {
+            const fuzzy = this.pickerPool.filter(s => s.name.indexOf(raw) >= 0);
+            if (fuzzy.length === 1) { product = fuzzy[0]; channel = '名称联想(D07)'; }
+            else if (fuzzy.length > 1) {
+              this.nameSuggests = fuzzy;
+              this.queryMsg = '匹配到多条商品，请从联想列表选择';
+              return;
+            }
+          }
+          if (!product) {
+            this.queryMsg = '未识别到商品（请确认条码/SKU，或从 D07 名称联想选择）';
+            this.queryHintLibrary = true;
+            return;
+          }
+          if (!product.authorized && this.role === 'MANUFACTURER') {
+            this.queryMsg = '无权限查看该商品工艺';
+            return;
+          }
+          const code = product.code;
+          const items = this.handbooks.filter(h =>
+            h.status === 'PUBLISHED' &&
+            h.skus.some(s => s.code === code) &&
+            (this.role === 'BRAND_ADMIN' || this.role === 'BRAND_OPERATOR' || (this.role === 'MANUFACTURER' ? h.visMfr : (!h.core && h.visDes)))
+          );
+          if (!items.length) {
+            this.queryMsg = '暂无按码可查内容（该商品未关联工艺，或内容对你不可见）。可在下方手册库按分类兜底浏览。';
+            this.queryHintLibrary = true;
+            this.pushHistory(code, product.name);
+            this.filters.lib.keyword = '';
+            return;
+          }
+          this.pushHistory(code, product.name);
+          this.queryHit = { code, name: product.name, items, channel };
+          this.go('queryResult');
+        },
+        openDetail(row, from) {
+          if (this.role === 'DESIGNER' && row.core) {
+            this.toast('无权限查看该内容（核心资产不对设计师开放）');
+            return;
+          }
+          if (this.role === 'MANUFACTURER' && row.status === 'ARCHIVED') {
+            this.toast('加工商不可查看归档');
+            return;
+          }
+          this.currentDoc = row;
+          this.detailFrom = from || 'handbookList';
+          this.playing = -1;
+          this.inlineSg = { title: '', body: '' };
+          this.sgComposerOpen = false;
+          if (this.auditFail) {
+            this.detailReady = false;
+            this.go('handbookDetail');
+            return;
+          }
+          this.detailReady = true;
+          this.audits.unshift({
+            id: 'a' + Date.now(), at: now(), account: this.role === 'MANUFACTURER' ? 'zg01' : 'brand01',
+            name: this.currentUser.name, phone: this.currentUser.phone, role: this.roleLabel,
+            title: row.title.replace('（旧版）',''), docId: row.parentId || row.id, ip: this.currentUser.ip,
+          });
+          this.go('handbookDetail');
+        },
+        retryDetail() {
+          if (this.auditFail) { this.toast('查阅记录仍无法写入，请稍后重试'); return; }
+          this.openDetail(this.currentDoc, this.detailFrom);
+        },
+        openDetailById(id) {
+          const row = this.handbooks.find(h => h.id === id);
+          if (row) this.openDetail(row, 'auditList');
+        },
+        submitInlineSuggest() {
+          if (!(this.inlineSg.title || '').trim() || !(this.inlineSg.body || '').trim()) { this.toast('标题与说明必填'); return; }
+          const no = 'JY' + String(10000 + this.suggestions.length + 1);
+          this.suggestions.unshift({
+            id: 's' + Date.now(), no, title: this.inlineSg.title,
+            ref: this.currentDoc ? this.currentDoc.title : '—',
+            docId: this.currentDoc ? (this.currentDoc.parentId || this.currentDoc.id) : '',
+            author: this.currentUser.name, account: 'zg01', at: now().slice(0, 10),
+            status: 'PENDING', body: this.inlineSg.body, reply: '', closeReason: '',
+          });
+          this.inlineSg = { title: '', body: '' };
+          this.sgComposerOpen = false;
+          this.toast('已发表，状态为待处理（不可撤回）');
+        },
+        openSuggest(row, handle) {
+          this.sgForm = Object.assign({ mode: handle ? 'handle' : 'view' }, JSON.parse(JSON.stringify(row)));
+          this.go('suggestionDetail');
+        },
+        submitSuggest() {
+          if (!(this.sgForm.title || '').trim() || !(this.sgForm.body || '').trim()) { this.toast('标题与说明必填'); return; }
+          const no = 'JY' + String(10000 + this.suggestions.length + 1);
+          this.suggestions.unshift({
+            id: 's' + Date.now(), no, title: this.sgForm.title, ref: this.sgForm.ref || '—',
+            author: this.currentUser.name, account: 'zg01', at: now().slice(0, 10),
+            status: 'PENDING', body: this.sgForm.body, reply: '', closeReason: '',
+          });
+          this.toast('已提交，状态为待处理（不可撤回）');
+          this.go('suggestionList');
+        },
+        handleSuggest(st) {
+          const row = this.suggestions.find(s => s.id === this.sgForm.id);
+          if (!row) return;
+          row.status = st;
+          row.reply = this.sgForm.reply || row.reply;
+          this.sgForm.status = st;
+          this.toast(st === 'REPLIED' ? '已回复' : '已采纳');
+        },
+        confirmClose() {
+          if (!(this.closeReason || '').trim()) { this.toast('关闭原因必填'); return; }
+          const row = this.suggestions.find(s => s.id === this.sgForm.id);
+          row.status = 'CLOSED';
+          row.closeReason = this.closeReason;
+          this.sgForm.status = 'CLOSED';
+          this.sgForm.closeReason = this.closeReason;
+          this.closeOpen = false;
+          this.closeReason = '';
+          this.toast('已关闭');
+        },
+      };
+    }
+  </script>
+<script src="view-guard.js"></script>
+</body>
+
+<script>
+/* ZIPPO_GLOBAL_SHELL_V2 */
+(function(){
+  if(window.__zippoShellV2) return;
+  window.__zippoShellV2 = 1;
+  document.querySelectorAll('.card').forEach(function(card){
+    if(card.querySelector('.table-wrap table')) card.classList.add('has-table');
+  });
+  document.querySelectorAll('.pager, .pagination').forEach(function(p){
+    p.classList.add('zippo-pager-sticky');
+  });
+  function wrapAvatar(el){
+    if(!el || el.closest('.zippo-user-menu')) return;
+    var wrap = document.createElement('div');
+    wrap.className = 'zippo-user-menu';
+    var panel = document.createElement('div');
+    panel.className = 'zippo-user-menu-panel';
+    panel.innerHTML = '<button type="button" data-act="profile">个人中心</button><button type="button" data-act="logout">退出登录</button>';
+    el.parentNode.insertBefore(wrap, el);
+    wrap.appendChild(el);
+    wrap.appendChild(panel);
+    el.style.cursor = 'pointer';
+    el.addEventListener('click', function(e){ e.stopPropagation(); wrap.classList.toggle('open'); });
+    panel.querySelector('[data-act=profile]').onclick = function(){
+      wrap.classList.remove('open');
+      var t=document.getElementById('toast'); if(t){t.textContent='个人中心';t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1600);} else alert('个人中心');
+    };
+    panel.querySelector('[data-act=logout]').onclick = function(){
+      wrap.classList.remove('open');
+      var t=document.getElementById('toast'); if(t){t.textContent='已退出登录';t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1600);} else alert('已退出登录');
+    };
+    document.addEventListener('click', function(){ wrap.classList.remove('open'); });
+  }
+  document.querySelectorAll('[aria-label="账号"], [title="管理员"], .d05-avatar, .d03-avatar, .zippo-avatar-trigger').forEach(wrapAvatar);
+  document.querySelectorAll('.top-right span[title], .global-topbar .top-right > span[style*="border-radius:50%"]').forEach(function(el){
+    if(el.textContent && el.textContent.length<=2) wrapAvatar(el);
+  });
+  document.querySelectorAll('.w-8.h-8.rounded-full, .rounded-full.bg-primary').forEach(function(el){
+    if(el.closest('header') && !el.closest('.zippo-user-menu')) wrapAvatar(el);
+  });
+})();
+</script>
+
+</html>

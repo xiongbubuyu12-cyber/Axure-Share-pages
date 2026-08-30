@@ -1,0 +1,2156 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>D07 素材管理 · 黑红品牌版原型 V2.5</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: { DEFAULT: 'var(--color-primary)', hover: 'var(--color-primary-hover)', active: 'var(--color-primary-active)', bg: 'var(--color-primary-bg)' },
+            ink: { DEFAULT: 'var(--color-ink)', secondary: 'var(--color-ink-secondary)', tertiary: 'var(--color-ink-tertiary)', disabled: 'var(--color-ink-disabled)' },
+            line: { DEFAULT: 'var(--color-line)', soft: 'var(--color-line-soft)' },
+            page: 'var(--color-bg-page)',
+            fill: 'var(--color-bg-fill)',
+            brand: { black: 'var(--color-brand-black)', red: 'var(--color-primary)', gray: 'var(--color-brand-gray)', white: 'var(--color-brand-white)' },
+            success: { DEFAULT: 'var(--color-success)', bg: 'var(--color-success-bg)' },
+            warning: { DEFAULT: 'var(--color-warning)', bg: 'var(--color-warning-bg)' },
+            danger: { DEFAULT: 'var(--color-danger)', bg: 'var(--color-danger-bg)' },
+          },
+          fontFamily: { sans: ['-apple-system', '"PingFang SC"', '"Microsoft YaHei"', 'system-ui', 'sans-serif'] },
+          boxShadow: { card: 'var(--shadow-1)', 'card-hover': 'var(--shadow-2)' },
+          borderRadius: { sm: 'var(--radius-sm)', md: 'var(--radius-md)', lg: 'var(--radius-lg)' },
+        },
+      },
+    };
+  </script>
+  <style>
+    :root {
+      --color-primary: #C8102E;
+      --color-primary-hover: #A00D25;
+      --color-primary-active: #7A0A1C;
+      --color-primary-bg: #FDE8EC;
+      --color-success: #2F6B3A;
+      --color-success-bg: #EAF5EC;
+      --color-warning: #8A6A1A;
+      --color-warning-bg: #F7F1DE;
+      --color-danger: #DC2626;
+      --color-danger-bg: #FEF2F2;
+      --color-ink: #0A0A0A;
+      --color-ink-secondary: #4A4A4A;
+      --color-ink-tertiary: #8A8A8A;
+      --color-ink-disabled: #B8B8B8;
+      --color-line: #D4D4D4;
+      --color-line-soft: #EBEBEB;
+      --color-bg-page: #EDEDED;
+      --color-bg-fill: #F7F7F7;
+      --color-brand-black: #0A0A0A;
+      --color-brand-gray: #6B6B6B;
+      --color-brand-white: #FFFFFF;
+      --shadow-1: 0 1px 2px rgba(0,0,0,.06), 0 1px 4px rgba(0,0,0,.04);
+      --shadow-2: 0 4px 12px rgba(0,0,0,.08);
+      --shadow-focus: 0 0 0 2px rgba(200,16,46,.25);
+      --shadow-selected: 0 0 0 2px rgba(200,16,46,.18);
+      --spacing-xs: 4px;
+      --spacing-sm: 8px;
+      --spacing-md: 16px;
+      --spacing-lg: 24px;
+      --spacing-xl: 32px;
+      --spacing-xxl: 48px;
+      --header-h: 56px;
+      --nav-w: 260px;
+      --proto-nav-w: 200px;
+      --detail-drawer-w: 400px;
+      --radius-sm: 4px;
+      --radius-md: 6px;
+      --radius-lg: 8px;
+    }
+    [x-cloak] { display: none !important; }
+    .brand-stripe { height: 4px; background: linear-gradient(90deg, var(--color-brand-black) 0%, var(--color-brand-black) 72%, var(--color-primary) 72%, var(--color-primary) 100%); }
+    .thumb-placeholder { background: linear-gradient(135deg, #2a2a2a 0%, #555 50%, #C8102E 100%); }
+    .app-shell { display: flex; height: calc(100vh - var(--header-h) - 4px); overflow: hidden; }
+    .proto-sidebar { width: var(--proto-nav-w); background: #0A0A0A; border-right: 0; flex-shrink: 0; display: flex; flex-direction: column; overflow: hidden; color: #cfcfcf; }
+    .proto-sidebar-title { flex: 0 0 auto; padding: 14px 14px 10px; border-bottom: 1px solid #363636; font-size: 12px; font-weight: 600; color: #8f8f8f; letter-spacing: .06em; }
+    .proto-sidebar-nav { flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 8px; }
+    .proto-nav-item { display: flex; align-items: center; gap: var(--spacing-sm); width: 100%; text-align: left; padding: var(--spacing-sm) 12px; min-height: 40px; border-radius: var(--radius-sm); font-size: 13px; color: #cfcfcf; transition: background .15s, color .15s; border-left: 3px solid transparent; }
+    .proto-nav-item:hover { background: #2d2d2d; color: #fff; }
+    .proto-nav-item.active { background: #2d2d2d; color: #fff; font-weight: 600; border-left-color: var(--color-primary); }
+    .proto-nav-group { padding: var(--spacing-sm) 12px 4px; font-size: 12px; font-weight: 600; color: #8f8f8f; letter-spacing: .05em; }
+    .dam-layout { display: flex; flex: 1; overflow: hidden; min-height: 0; background: var(--color-bg-page); }
+    .dam-left { width: var(--nav-w); background: #fff; border-right: 1px solid var(--color-line-soft); display: flex; flex-direction: column; flex-shrink: 0; }
+    .dam-center { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
+    .dam-right { width: 0; background: #fff; border-left: 1px solid var(--color-line-soft); overflow: hidden; transition: width .28s ease; flex-shrink: 0; }
+    .dam-right.open { width: var(--detail-drawer-w); overflow-y: auto; }
+    .space-box { display: flex; align-items: center; justify-content: space-between; padding: var(--spacing-sm) 12px; background: var(--color-primary-bg); border-radius: var(--radius-md); cursor: pointer; }
+    .space-tag { font-size: 10px; background: var(--color-primary); color: #fff; padding: 2px 6px; border-radius: 3px; }
+    .tree-item { display: flex; align-items: center; gap: var(--spacing-xs); padding: 5px var(--spacing-sm); border-radius: var(--radius-sm); cursor: pointer; font-size: 13px; color: var(--color-ink-secondary); }
+    .tree-item:hover { background: var(--color-bg-fill); }
+    .tree-item.active { background: var(--color-primary-bg); color: var(--color-primary); font-weight: 600; }
+    .tree-count { margin-left: auto; font-size: 12px; color: var(--color-ink-tertiary); background: var(--color-bg-fill); padding: 1px 6px; border-radius: 10px; }
+    .tag-pill { font-size: 10px; padding: 2px 6px; border-radius: var(--radius-sm); line-height: 1.2; }
+    .tree-item.active .tree-count { background: rgba(200,16,46,.12); color: var(--color-primary); }
+    .material-card { background: #fff; border: 1px solid var(--color-line-soft); border-radius: var(--radius-md); overflow: hidden; cursor: pointer; transition: all .2s; position: relative; }
+    .material-card:hover { box-shadow: var(--shadow-2); border-color: var(--color-primary); }
+    .material-card.selected { border-color: var(--color-primary); box-shadow: var(--shadow-selected); }
+    button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, [tabindex]:focus-visible {
+      outline: none; box-shadow: var(--shadow-focus);
+    }
+    button:disabled, button[disabled] { opacity: 0.45; cursor: not-allowed; }
+    .card-overlay { position: absolute; inset: 0; background: rgba(10,10,10,.55); display: none; align-items: center; justify-content: center; gap: var(--spacing-sm); }
+    .material-card:hover .card-overlay { display: flex; }
+    .card-overlay-btn { background: rgba(255,255,255,.92); border: none; padding: 6px 12px; border-radius: var(--radius-sm); cursor: pointer; font-size: 12px; color: var(--color-ink); }
+    .card-overlay-btn:hover { background: #fff; color: var(--color-primary); }
+    .batch-bar-fixed { position: fixed; bottom: var(--spacing-lg); left: 50%; transform: translateX(-50%); background: var(--color-brand-black); color: #fff; padding: 10px 20px; border-radius: var(--radius-lg); display: flex; align-items: center; gap: 12px; box-shadow: var(--shadow-2); z-index: 150; }
+    .space-card:hover { border-color: var(--color-primary); box-shadow: var(--shadow-2); }
+    .seg-tab { padding: 6px 14px; font-size: 13px; border-radius: var(--radius-sm); transition: all .15s; }
+    .seg-tab.active { background: var(--color-primary); color: #fff; font-weight: 500; }
+    .seg-tab:not(.active) { background: transparent; color: var(--color-ink-secondary); }
+    .seg-tab:not(.active):hover { color: var(--color-ink); }
+    .open-tab {
+      display: inline-flex; align-items: center; gap: 6px; max-width: 160px;
+      padding: 6px 10px; font-size: 13px; border-radius: var(--radius-sm);
+      color: rgba(255,255,255,.72); white-space: nowrap; transition: all .15s;
+      border-bottom: 2px solid transparent;
+    }
+    .open-tab:hover { color: #fff; background: rgba(255,255,255,.08); }
+    .open-tab.active { color: #fff; font-weight: 600; border-bottom-color: var(--color-primary); background: rgba(200,16,46,.18); }
+    .open-tab .tab-close { opacity: .55; font-size: 12px; line-height: 1; padding: 2px 4px; border-radius: 3px; }
+    .open-tab .tab-close:hover { opacity: 1; background: rgba(255,255,255,.15); }
+    .sidebar-scroll::-webkit-scrollbar { width: 4px; }
+    .sidebar-scroll::-webkit-scrollbar-thumb { background: var(--color-line); border-radius: 4px; }
+    .toast-enter { animation: toastIn .25s ease; }
+    @keyframes toastIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
+    .drawer-enter { animation: drawerIn .22s ease; }
+    @keyframes drawerIn { from { transform: translateX(100%); } to { transform: none; } }
+  
+    /* App shell: header+sidebar fixed; only main scrolls */
+    html, body { height: 100%; overflow: hidden; }
+    .zippo-shell { display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+    .zippo-shell > header.sticky,
+    .zippo-shell > header.global-topbar,
+    body > header.sticky,
+    body > header.global-topbar { flex: 0 0 auto; position: sticky; top: 0; z-index: 50; }
+    .zippo-body {
+      flex: 1 1 auto; min-height: 0; display: flex; overflow: hidden;
+    }
+    .zippo-body > aside,
+    .zippo-body > .sidebar {
+      flex: 0 0 auto; height: 100%; overflow-y: auto; position: relative !important;
+      top: auto !important; inset: auto !important;
+    }
+    .zippo-main {
+      flex: 1 1 auto; min-width: 0; min-height: 0; overflow-y: auto;
+      background: #EDEDED;
+    }
+
+
+    /* body 纵向壳：顶栏固定，下方 zippo-body 占满剩余高度 */
+    body.overflow-hidden, body.zippo-fixed, body.d06-shell {
+      display: flex !important; flex-direction: column !important; height: 100vh !important; margin: 0;
+    }
+    body > header, body > .brand-stripe, body > .h-1.brand-stripe, body > div.h-1 {
+      flex: 0 0 auto !important;
+    }
+    .zippo-body { flex: 1 1 auto !important; min-height: 0 !important; height: auto !important; }
+    main.zippo-main, .zippo-main {
+      flex: 1 1 auto !important; min-width: 0 !important; min-height: 0 !important;
+      overflow-y: auto !important;
+    }
+
+
+
+
+/* ZIPPO_NAV_HIERARCHY_V3 */
+details.nav-group { margin: 0 0 6px; border: 0; }
+details.nav-group > summary.nav-l1 {
+  list-style: none; cursor: pointer; user-select: none;
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  min-height: 40px; padding: 0 12px; margin: 0; border-radius: 4px;
+  font-size: 13px !important; font-weight: 600 !important; line-height: 1.2;
+  color: #FFFFFF !important; letter-spacing: 0 !important; text-transform: none !important;
+  background: transparent;
+}
+details.nav-group > summary.nav-l1::-webkit-details-marker { display: none; }
+details.nav-group > summary.nav-l1 .nav-chev {
+  font-size: 10px; color: rgba(255,255,255,.7); transition: transform .15s;
+}
+details.nav-group:not([open]) > summary.nav-l1 .nav-chev { transform: rotate(-90deg); }
+details.nav-group > summary.nav-l1:hover { background: #2d2d2d; }
+.nav-l2-wrap { display: flex; flex-direction: column; gap: 2px; padding: 2px 0 6px; }
+.nav-l2-wrap .proto-nav-item,
+.nav-l2-wrap > button,
+.nav-l2-wrap .nav-item,
+aside .nav-l2-wrap button {
+  font-size: 13px !important;
+  color: #E8E8E8 !important;
+  min-height: 40px;
+}
+/* dark sidebar contrast: kill low-contrast tertiary / selected white block */
+aside.proto-sidebar, aside.sidebar, aside.module-sidebar, .proto-sidebar {
+  color: #E8E8E8 !important;
+}
+aside.proto-sidebar .text-ink-secondary,
+aside.proto-sidebar .text-ink-tertiary,
+aside.proto-sidebar .text-ink,
+aside .nav-label {
+  color: #E8E8E8 !important;
+}
+aside.proto-sidebar button.text-ink-secondary,
+aside.proto-sidebar a.text-ink-secondary {
+  color: #E8E8E8 !important;
+}
+aside.proto-sidebar .bg-\[\#F5F5F5\],
+aside.proto-sidebar button.bg-\[\#F5F5F5\] {
+  background: #2d2d2d !important;
+  color: #FFFFFF !important;
+}
+aside.proto-sidebar .hover\:bg-fill:hover,
+aside.proto-sidebar button:hover {
+  background: #2d2d2d !important;
+  color: #FFFFFF !important;
+}
+/* L1 labels that are not yet details */
+.nav-label, .proto-nav-group, .proto-sidebar-title {
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  color: #FFFFFF !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+}
+.proto-nav-item, .nav button, aside .nav button {
+  color: #E8E8E8 !important;
+  font-size: 13px !important;
+}
+.proto-nav-item.active, .nav button.active {
+  color: #FFFFFF !important;
+}
+/* hide sidebar bottom notes / brand footnotes */
+.sidebar-note, .sidebar-foot, .sidebar-footer,
+aside .zippo-sidebar-note,
+aside nav > .mt-6.px-3.py-3.rounded-lg {
+  display: none !important;
+}
+
+/* ZIPPO_NAV_SPACING_V2 */
+.nav, .proto-sidebar-nav, aside .nav, .sidebar .nav {
+  gap: 4px !important;
+}
+.proto-nav-item, .nav button, .nav-item, .side-nav a, .menu-item {
+  min-height: 40px !important;
+  height: auto !important;
+  max-height: none !important;
+  padding-top: 8px !important;
+  padding-bottom: 8px !important;
+  box-sizing: border-box !important;
+  flex-shrink: 0 !important;
+}
+.nav-label, .proto-sidebar-title .label {
+  padding-top: 10px !important;
+  padding-bottom: 4px !important;
+}
+
+/* ZIPPO_GLOBAL_SHELL_V2 */
+.card.has-table { display:flex; flex-direction:column; min-height:0; }
+.card.has-table > .table-wrap { flex:1 1 auto; min-height:0; overflow:auto; }
+.card > .pager, .card > .pager.pagination, .pager.zippo-pager-sticky {
+  position:sticky; bottom:0; z-index:5; flex-shrink:0;
+  background:#fff; border-top:1px solid #EBEBEB; margin-top:0;
+  box-shadow:0 -4px 12px rgba(0,0,0,.04);
+}
+.sidebar-foot, .sidebar-footer { display:none !important; }
+.zippo-user-menu { position:relative; display:inline-flex; }
+.zippo-user-menu-panel {
+  display:none; position:absolute; right:0; top:calc(100% + 6px); min-width:128px;
+  background:#fff; color:#0A0A0A; border:1px solid #EBEBEB; border-radius:6px;
+  box-shadow:0 8px 24px rgba(0,0,0,.12); padding:4px; z-index:80;
+}
+.zippo-user-menu.open .zippo-user-menu-panel { display:block; }
+.zippo-user-menu-panel button {
+  display:block; width:100%; text-align:left; border:0; background:transparent;
+  padding:8px 10px; font-size:13px; border-radius:4px; cursor:pointer; color:#0A0A0A;
+}
+.zippo-user-menu-panel button:hover { background:#F5F5F5; }
+
+</style>
+</head>
+<body class="bg-page text-ink font-sans antialiased overflow-hidden" x-data="damApp()" x-init="init()" x-cloak @keydown.escape.window="onEsc()">
+  <!-- Global Header 56px：已打开页面 Tab（非一级模块菜单）；无全局搜索 -->
+  <header class="sticky top-0 z-50 bg-brand-black text-white" style="height: var(--header-h)">
+    <div class="flex items-center h-full px-4 lg:px-6 gap-3">
+      <button @click="mobileNav=!mobileNav" class="lg:hidden p-2 rounded hover:bg-white/10 shrink-0" aria-label="菜单">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+      </button>
+      <div class="flex items-center gap-2 shrink-0">
+        <span class="text-base font-bold tracking-wider">ZIPPO</span>
+      </div>
+      <nav class="flex items-center gap-0.5 overflow-x-auto flex-1 min-w-0 py-1" aria-label="已打开页面">
+        <template x-for="t in openTabs" :key="t.id">
+          <button type="button" @click="activateTab(t.id)" class="open-tab" :class="activeTabId===t.id ? 'active' : ''" :title="t.label">
+            <span class="truncate" x-text="t.label"></span>
+            <span class="tab-close" @click.stop="closeTab(t.id)" title="关闭">✕</span>
+          </button>
+        </template>
+      </nav>
+      <div class="flex items-center gap-2 shrink-0">
+        <select x-model="role" @change="onRoleChange()" class="hidden md:block border border-white/20 rounded-md px-2 py-1 text-xs bg-black/50 text-white max-w-[120px]">
+          <option value="BRAND_ADMIN">品牌管理员</option>
+          <option value="CHANNEL_ADMIN">渠道管理员</option>
+          <option value="DEALER_ADMIN">经销商管理员</option>
+          <option value="VIEWER">普通用户</option>
+        </select>
+        <button @click="toast('3 条未读通知')" class="relative w-8 h-8 flex items-center justify-center rounded hover:bg-white/10 text-white/70" aria-label="通知">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+          <span class="absolute top-1 right-1 w-2 h-2 bg-primary rounded-full"></span>
+        </button>
+        <div class="w-8 h-8 rounded-full bg-primary text-white text-xs font-semibold flex items-center justify-center cursor-pointer" title="张三">张</div>
+      </div>
+    </div>
+  </header>
+  <div class="brand-stripe"></div>
+
+  <div class="app-shell">
+    <!-- 白底原型侧栏 200px -->
+    <aside class="proto-sidebar sidebar-scroll fixed lg:static inset-y-0 left-0 z-40 transform transition-transform lg:translate-x-0"
+           :class="mobileNav ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'"
+           style="top: calc(var(--header-h) + 4px); height: calc(100vh - var(--header-h) - 4px);">
+      <nav class="proto-sidebar-nav space-y-0.5"><details class="nav-group" open><summary class="nav-l1">素材管理<span class="nav-chev">▾</span></summary><div class="nav-l2-wrap">
+        <button @click="go('library'); mobileNav=false" class="proto-nav-item" :class="page==='library' ? 'active' : ''">
+          <svg class="w-4 h-4 shrink-0 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+          <span>素材库</span>
+        </button>
+        <button x-show="canManageSpace" @click="go('spaces'); mobileNav=false" class="proto-nav-item" :class="page==='spaces' ? 'active' : ''">
+          <svg class="w-4 h-4 shrink-0 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+          <span>空间管理</span>
+        </button>
+        <button @click="go('search'); mobileNav=false" class="proto-nav-item" :class="page==='search' ? 'active' : ''">
+          <svg class="w-4 h-4 shrink-0 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+          <span>以图搜图</span>
+        </button>
+        <button @click="go('searchProduct'); mobileNav=false" class="proto-nav-item" :class="page==='searchProduct' ? 'active' : ''">
+          <svg class="w-4 h-4 shrink-0 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A2 2 0 013 12V7a4 4 0 014-4z"/></svg>
+          <span>以图搜款</span>
+        </button>
+        <button @click="go('recycle'); mobileNav=false" class="proto-nav-item" :class="page==='recycle' ? 'active' : ''">
+          <svg class="w-4 h-4 shrink-0 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+          <span>回收站</span>
+        </button>
+        </div></details><details class="nav-group" open><summary class="nav-l1">嵌入演示<span class="nav-chev">▾</span></summary><div class="nav-l2-wrap">
+        <button @click="go('picker'); mobileNav=false" class="proto-nav-item" :class="page==='picker' ? 'active' : ''">
+          <svg class="w-4 h-4 shrink-0 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+          <span>渠道选图器</span>
+        </button>
+        <button @click="go('legal'); mobileNav=false" class="proto-nav-item" :class="page==='legal' ? 'active' : ''">
+          <svg class="w-4 h-4 shrink-0 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+          <span>法务取消</span>
+        </button>
+      </div></details></nav>
+    </aside>
+    <div x-show="mobileNav" @click="mobileNav=false" class="fixed inset-0 z-30 bg-black/40 lg:hidden" style="top: calc(var(--header-h) + 4px);"></div>
+
+    <!-- 主内容区 bg #EDEDED -->
+    <main class="zippo-main flex-1 min-w-0 flex flex-col overflow-hidden bg-page">
+      <!-- 跨模块已打开页占位（顶栏 Tab 演示） -->
+      <section x-show="page==='external'" class="p-6 space-y-4 overflow-y-auto flex-1">
+        <div class="bg-white rounded-lg border border-line-soft shadow-card p-10 text-center max-w-xl mx-auto">
+          <div class="text-xl font-semibold mb-2" x-text="activeTabLabel"></div>
+          <p class="text-sm text-ink-secondary">其它模块页面占位 · 本文件聚焦素材管理交互</p>
+          <button @click="go('library')" class="mt-6 px-4 py-2 text-sm bg-primary text-white rounded-md">回到素材库</button>
+        </div>
+      </section>
+<!-- ===== LIBRARY ===== -->
+      <section x-show="page==='library'" class="dam-layout flex-1 min-h-0">
+        <!-- 左：空间 + 文件夹树 -->
+        <aside class="dam-left hidden md:flex">
+          <div class="p-3 border-b border-line-soft relative">
+            <div class="text-xs text-ink-tertiary uppercase tracking-wide mb-1.5">当前素材空间</div>
+            <div class="space-box" @click="spaceDropdownOpen=!spaceDropdownOpen">
+              <div class="flex items-center gap-2 min-w-0">
+                <span class="font-semibold text-primary text-sm truncate" x-text="currentSpace.name"></span>
+                <span class="space-tag shrink-0" x-text="currentSpace.shortType"></span>
+              </div>
+              <span class="text-primary text-xs">▼</span>
+            </div>
+            <div x-show="spaceDropdownOpen" @click.outside="spaceDropdownOpen=false" class="absolute left-3 right-3 top-full mt-1 bg-white border border-line rounded-md shadow-lg z-50 max-h-64 overflow-y-auto">
+              <template x-for="s in spaces.filter(x=>x.status==='ENABLED')" :key="s.id">
+                <button @click="selectSpace(s.id)" class="w-full text-left px-3 py-2 text-sm flex justify-between hover:bg-primary-bg"
+                        :class="currentSpaceId===s.id ? 'bg-primary-bg text-primary font-medium' : ''">
+                  <span x-text="s.name"></span>
+                  <span class="space-tag" x-text="s.shortType"></span>
+                </button>
+              </template>
+            </div>
+          </div>
+          <div class="flex-1 overflow-y-auto p-2">
+            <div class="flex justify-between items-center px-2 pb-2">
+              <span class="text-xs font-semibold text-ink-tertiary">文件夹</span>
+              <button @click="modal.newFolder=true" class="text-xs text-primary" x-show="canEdit">+ 新建</button>
+            </div>
+            <template x-for="f in folderTree" :key="f.id">
+              <div class="flex items-center group" :style="'padding-left:'+(8+f.level*14)+'px'">
+                <button @click="currentFolderId=f.id" class="tree-item flex-1 text-left min-w-0" :class="currentFolderId===f.id ? 'active' : ''">
+                  <span x-text="f.open===false ? '▶' : (f.open===true ? '▼' : '')" class="w-4 text-xs text-ink-tertiary"></span>
+                  <span x-text="f.icon || '📁'"></span>
+                  <span class="truncate" x-text="f.name"></span>
+                  <span class="tree-count" x-text="f.count"></span>
+                </button>
+                <div class="hidden group-hover:flex gap-0.5 pr-1" x-show="canEdit">
+                  <button @click="renameFolder(f)" class="text-xs text-primary px-1" title="重命名" aria-label="重命名">✎</button>
+                  <button @click="toast('演示：移动「'+f.name+'」到其它文件夹（同空间）')" class="text-xs text-ink-tertiary px-1" title="移动" aria-label="移动">↕</button>
+                  <button @click="deleteFolder(f)" class="text-xs text-primary px-1" title="删除" aria-label="删除">✕</button>
+                </div>
+              </div>
+            </template>
+            <button @click="go('recycle')" class="tree-item w-full text-left mt-2 pt-2 border-t border-line-soft">
+              <span class="w-4"></span><span>🗑️</span><span>回收站</span><span class="tree-count" x-text="recycleItems.length"></span>
+            </button>
+          </div>
+          <div class="p-3 border-t border-line-soft">
+            <div class="text-xs text-ink-tertiary" x-text="currentSpace.storage"></div>
+            <div class="h-1 bg-fill rounded-full mt-1.5 overflow-hidden"><div class="h-full bg-primary rounded-full" :style="'width:'+(currentSpace.storagePct||48)+'%'"></div></div>
+          </div>
+        </aside>
+        <!-- 中：工具栏 + 素材区 -->
+        <div class="dam-center">
+          <!-- 工具栏（参考图布局） -->
+          <div class="bg-white border-b border-line-soft px-6 py-3 flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center gap-4 flex-wrap">
+              <h1 class="text-xl font-semibold text-ink leading-tight">商品素材</h1>
+              <div class="flex items-center gap-0.5 p-0.5 bg-fill rounded-md">
+                <template x-for="vt in viewTabs" :key="vt.id">
+                  <button @click="viewTab=vt.id; applyViewTab()" class="seg-tab"
+                          :class="viewTab===vt.id ? 'active' : ''">
+                    <span x-text="vt.label"></span>
+                    <span x-show="vt.count" class="ml-1 opacity-80 text-xs" x-text="'('+vt.count+')'"></span>
+                  </button>
+                </template>
+              </div>
+              <div class="hidden lg:flex items-center gap-1 text-xs text-ink-tertiary">
+                <span x-text="currentSpace.name"></span><span>/</span><span x-text="currentFolderName"></span>
+              </div>
+              <template x-for="chip in activeFilterChips" :key="chip.key">
+                <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-primary-bg text-primary rounded-full text-xs">
+                  <span x-text="chip.label"></span>
+                  <button @click="clearChip(chip.key)" class="hover:text-primary-hover">✕</button>
+                </span>
+              </template>
+            </div>
+            <div class="flex items-center gap-2 flex-wrap">
+              <div class="flex items-center border border-line rounded-md px-3 py-1.5 bg-white w-52">
+                <svg class="w-4 h-4 text-ink-tertiary mr-2 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                <input x-model="filters.keyword" @keydown.enter="filterMaterials()" class="flex-1 text-sm outline-none min-w-0 bg-transparent" placeholder="名称 / 编号 / 标签 / OCR" />
+              </div>
+              <button @click="filterPanelOpen=!filterPanelOpen" class="px-3 py-1.5 text-sm border border-line rounded-md bg-white hover:border-primary">高级筛选</button>
+              <button @click="go('spaces')" class="px-3 py-1.5 text-sm border border-line rounded-md bg-white hover:border-primary" x-show="canManageSpace">空间管理</button>
+              <button @click="modal.upload=true" class="px-4 py-1.5 text-sm bg-primary text-white rounded-md hover:bg-primary-hover font-medium" x-show="canUpload">上传文件</button>
+            </div>
+          </div>
+          <!-- 次级工具（保留演示能力） -->
+          <div class="bg-white border-b border-line-soft px-6 py-2 flex flex-wrap items-center gap-2 text-xs" x-show="canEdit || canAi">
+            <button @click="modal.ai=true" class="px-2.5 py-1 border border-line rounded-md bg-white hover:border-primary" x-show="canAi">AI 主图</button>
+            <button @click="modal.txt2img=true" class="px-2.5 py-1 border border-line rounded-md bg-white hover:border-primary" x-show="canAi">文生图</button>
+            <button @click="modal.optimize=true" class="px-2.5 py-1 border border-line rounded-md bg-white hover:border-primary" x-show="canAi">智能优化</button>
+            <button @click="modal.newFolder=true" class="px-2.5 py-1 border border-line rounded-md bg-white" x-show="canEdit">新建文件夹</button>
+            <button @click="modal.upload=true; toast('文件夹拖拽上传：12 个文件入队')" class="px-2.5 py-1 border border-line rounded-md bg-white" x-show="canUpload">上传文件夹</button>
+            <span class="flex-1"></span>
+            <div class="flex border border-line rounded-md overflow-hidden">
+              <button @click="viewMode='grid'" class="px-2.5 py-1" :class="viewMode==='grid' ? 'bg-primary text-white' : 'bg-white'">▦</button>
+              <button @click="viewMode='list'" class="px-2.5 py-1" :class="viewMode==='list' ? 'bg-primary text-white' : 'bg-white'">☰</button>
+            </div>
+          </div>
+          <!-- 高级筛选 -->
+          <div x-show="filterPanelOpen" class="bg-white border-b border-line-soft px-4 py-3">
+            <div class="flex flex-wrap gap-3 items-center text-xs">
+              <label class="text-ink-tertiary">标签
+                <select x-model="filters.tag" @change="filterMaterials()" class="ml-1 border border-line rounded px-2 py-1 text-sm bg-white">
+                  <option value="">全部</option><option value="主图">主图</option><option value="白底">白底</option><option value="活动">活动</option>
+                </select>
+              </label>
+              <label class="text-ink-tertiary">关联
+                <select x-model="filters.linked" @change="filterMaterials()" class="ml-1 border border-line rounded px-2 py-1 text-sm bg-white">
+                  <option value="">全部</option><option value="yes">已关联</option><option value="no">未关联</option>
+                </select>
+              </label>
+              <button @click="filterPanelOpen=false" class="text-primary hover:underline ml-auto">收起</button>
+            </div>
+          </div>
+          <!-- 素材网格/列表 -->
+          <div class="flex-1 overflow-y-auto p-6 bg-page">
+            <div x-show="loading" class="text-center py-16 text-ink-tertiary text-sm">加载中…</div>
+            <div x-show="viewMode==='grid' && !loading" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4">
+              <template x-for="m in pagedMaterials" :key="m.id">
+                <div class="material-card" :class="selectedIds.includes(m.id) ? 'selected' : ''" @click="openDetail(m)">
+                  <input type="checkbox" class="absolute top-2 left-2 z-10 accent-[#C8102E]" @click.stop="toggleSelect(m.id)" :checked="selectedIds.includes(m.id)" />
+                  <div class="aspect-square bg-fill relative flex items-center justify-center overflow-hidden">
+                    <img :src="thumbSvg(m.thumbLabel || m.name)" class="w-full h-full object-cover" alt="" />
+                    <div class="absolute top-1.5 right-1.5 flex flex-col gap-1 items-end">
+                      <span x-show="m.skuCount>0" class="tag-pill rounded bg-success-bg text-success border border-success/20">已关联</span>
+                      <span x-show="m.isMainPic" class="tag-pill rounded bg-primary text-white">主图</span>
+                    </div>
+                    <div class="card-overlay">
+                      <button class="card-overlay-btn" @click.stop="openDetail(m)">预览</button>
+                      <button class="card-overlay-btn" @click.stop="toast('下载任务已创建')" x-show="canDownload">下载</button>
+                    </div>
+                  </div>
+                  <div class="p-2.5">
+                    <div class="text-sm font-medium truncate" x-text="m.name"></div>
+                    <div class="flex justify-between text-xs text-ink-tertiary mt-1">
+                      <span x-text="m.format+' · '+m.size"></span>
+                      <span x-text="m.skuCount ? m.skuCount+'个引用' : '未关联'"></span>
+                    </div>
+                    <div class="flex flex-wrap gap-1 mt-1.5">
+                      <template x-for="t in m.tags.slice(0,2)" :key="t">
+                        <span class="tag-pill rounded bg-fill text-ink-secondary" x-text="t"></span>
+                      </template>
+                    </div>
+                  </div>
+                </div>
+              </template>
+            </div>
+            <div x-show="viewMode==='list' && !loading" class="bg-white rounded-lg border border-line-soft overflow-x-auto">
+              <table class="w-full text-sm">
+                <thead class="bg-fill text-xs text-ink-secondary"><tr>
+                  <th class="p-3 w-8"><input type="checkbox" class="accent-[#C8102E]" :checked="pageAllSelected" @change="selectAll($event.target.checked)" /></th>
+                  <th class="p-3 text-left">素材</th><th class="p-3 text-left">编号</th><th class="p-3 text-left">大小</th><th class="p-3 text-left">引用</th><th class="p-3 text-left">操作</th>
+                </tr></thead>
+                <tbody>
+                  <template x-for="m in pagedMaterials" :key="m.id">
+                    <tr class="border-t border-line-soft hover:bg-fill/50" :class="selectedIds.includes(m.id)?'bg-primary-bg/40':''">
+                      <td class="p-3"><input type="checkbox" @click.stop="toggleSelect(m.id)" :checked="selectedIds.includes(m.id)" class="accent-[#C8102E]" /></td>
+                      <td class="p-3 font-medium" x-text="m.name"></td>
+                      <td class="p-3 text-ink-tertiary text-xs" x-text="m.assetNo"></td>
+                      <td class="p-3 text-xs" x-text="m.size"></td>
+                      <td class="p-3 text-xs" x-text="m.skuCount||'—'"></td>
+                      <td class="p-3"><button @click="openDetail(m)" class="text-primary text-xs">详情</button></td>
+                    </tr>
+                  </template>
+                </tbody>
+              </table>
+            </div>
+            <div class="flex flex-wrap items-center justify-between gap-2 mt-4 text-sm text-ink-secondary">
+              <span>共 <b x-text="filteredMaterials.length"></b> 条 · 第 <span x-text="pageNo"></span>/<span x-text="totalPages"></span> 页</span>
+              <div class="flex items-center gap-2">
+                <select x-model.number="pageSize" @change="pageNo=1" class="border border-line rounded px-2 py-1 text-xs bg-white">
+                  <option :value="20">20条/页</option><option :value="50">50条/页</option><option :value="100">100条/页</option>
+                </select>
+                <button @click="prevPage()" class="px-2 py-1 border border-line rounded bg-white text-xs" :disabled="pageNo<=1">上一页</button>
+                <button @click="nextPage()" class="px-2 py-1 border border-line rounded bg-white text-xs" :disabled="pageNo>=totalPages">下一页</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- 右：详情侧栏 -->
+        <aside class="dam-right hidden lg:block" :class="detailPanelOpen ? 'open' : ''">
+          <template x-if="currentMaterial">
+            <div>
+              <div class="sticky top-0 bg-white z-10 flex items-center justify-between px-4 py-3 border-b border-line-soft">
+                <span class="font-semibold text-sm">素材详情</span>
+                <button @click="closeDetail()" class="text-ink-tertiary hover:text-ink">✕</button>
+              </div>
+              <div class="aspect-square bg-fill flex items-center justify-center p-4">
+                <img :src="thumbSvg(currentMaterial.thumbLabel || currentMaterial.name)" class="max-w-full max-h-full object-contain rounded" alt="" />
+              </div>
+              <div class="px-4 py-2 border-b border-line-soft flex gap-1 overflow-x-auto text-xs">
+                <button @click="detailTab='info'" class="px-3 py-2 border-b-2 -mb-px whitespace-nowrap" :class="detailTab==='info'?'border-primary text-primary font-medium':'border-transparent text-ink-tertiary'">基本信息</button>
+                <button @click="detailTab='sku'" class="px-3 py-2 border-b-2 -mb-px whitespace-nowrap" :class="detailTab==='sku'?'border-primary text-primary font-medium':'border-transparent text-ink-tertiary'">关联商品</button>
+                <button @click="detailTab='channel'" class="px-3 py-2 border-b-2 -mb-px whitespace-nowrap" :class="detailTab==='channel'?'border-primary text-primary font-medium':'border-transparent text-ink-tertiary'">渠道引用</button>
+                <button @click="detailTab='version'" class="px-3 py-2 border-b-2 -mb-px whitespace-nowrap" :class="detailTab==='version'?'border-primary text-primary font-medium':'border-transparent text-ink-tertiary'">版本</button>
+                <button @click="detailTab='log'" class="px-3 py-2 border-b-2 -mb-px whitespace-nowrap" :class="detailTab==='log'?'border-primary text-primary font-medium':'border-transparent text-ink-tertiary'">替换日志</button>
+              </div>
+              <div class="p-4 text-sm space-y-3" x-show="detailTab==='info'">
+                <div><div class="text-xs text-ink-tertiary">素材编号</div><div class="font-medium" x-text="currentMaterial.assetNo"></div></div>
+                <div><div class="text-xs text-ink-tertiary">素材名称</div>
+                  <div class="flex gap-2 items-center"><span x-text="currentMaterial.name"></span>
+                    <button @click="toast('名称已保存')" class="text-xs text-primary" x-show="canEdit">✎</button></div>
+                </div>
+                <div><div class="text-xs text-ink-tertiary">格式 / 大小 / 尺寸</div><div x-text="currentMaterial.format+' / '+currentMaterial.size+' / 2000×2000'"></div></div>
+                <div><div class="text-xs text-ink-tertiary">所属文件夹</div><div x-text="currentFolderName"></div></div>
+                <div><div class="text-xs text-ink-tertiary">标签</div>
+                  <div class="flex flex-wrap gap-1 mt-1">
+                    <template x-for="t in currentMaterial.tags" :key="t"><span class="text-xs px-2 py-0.5 bg-fill rounded" x-text="t"></span></template>
+                    <button @click="modal.batchTag=true" class="text-xs px-2 py-0.5 border border-dashed border-primary text-primary rounded" x-show="canEdit">＋</button>
+                  </div>
+                </div>
+                <div class="flex flex-wrap gap-2 pt-2 border-t border-line-soft">
+                  <button @click="toast('下载任务已创建')" class="px-2.5 py-1 text-xs border border-line rounded" x-show="canDownload">下载</button>
+                  <button @click="modal.replace=true" class="px-2.5 py-1 text-xs border border-line rounded" x-show="canEdit">替换</button>
+                  <button @click="modal.crop=true" class="px-2.5 py-1 text-xs border border-line rounded" x-show="canUpload && currentMaterial.format!=='PDF'">裁剪</button>
+                  <button @click="modal.share=true" class="px-2.5 py-1 text-xs border border-line rounded" x-show="canShare">分发</button>
+                  <button @click="modal.push=true" class="px-2.5 py-1 text-xs border border-line rounded" x-show="canPush">推送</button>
+                  <button @click="askMoveOneToRecycle()" class="px-2.5 py-1 text-xs border border-line rounded text-primary" x-show="canDelete">删除</button>
+                </div>
+              </div>
+              <div class="p-4 text-sm" x-show="detailTab==='sku'">
+                <div class="flex justify-between items-center mb-2">
+                  <p class="text-ink-tertiary text-xs">关联 SKU <span x-text="currentMaterial.skuCount"></span> 个</p>
+                  <button @click="openLinkSku()" class="text-xs text-primary" x-show="canEdit">管理关联</button>
+                </div>
+                <template x-for="i in Math.max(1, Math.min(currentMaterial.skuCount,4))" :key="i">
+                  <div class="flex items-center gap-2 p-2 bg-fill rounded mb-2 text-xs" x-show="currentMaterial.skuCount>0">
+                    <div class="w-8 h-8 bg-line-soft rounded flex items-center justify-center">🔥</div>
+                    <div class="flex-1"><div class="font-medium" x-text="'SKU2026'+String(i).padStart(4,'0')"></div><div class="text-ink-tertiary">Zippo 经典款</div></div>
+                    <span x-show="i===1" class="tag-pill rounded bg-primary text-white">主图</span>
+                    <button @click="toast('已解除关联')" class="text-ink-tertiary" x-show="canEdit">✕</button>
+                  </div>
+                </template>
+                <p x-show="!currentMaterial.skuCount" class="text-xs text-ink-tertiary py-4 text-center">暂无关联 · 可从搜款结果或管理关联添加</p>
+              </div>
+              <div class="p-4 text-sm space-y-3" x-show="detailTab==='channel'">
+                <label class="flex items-center gap-2"><input type="checkbox" class="accent-[#C8102E]" x-model="channelAuth.tmall" :disabled="!canEdit" /> 天猫</label>
+                <label class="flex items-center gap-2"><input type="checkbox" class="accent-[#C8102E]" x-model="channelAuth.jd" :disabled="!canEdit" /> 京东</label>
+                <label class="flex items-center gap-2"><input type="checkbox" class="accent-[#C8102E]" x-model="channelAuth.douyin" :disabled="!canEdit" /> 抖音</label>
+                <button @click="toast('渠道授权已保存 · 记审计')" class="px-3 py-1.5 text-xs bg-primary text-white rounded-md" x-show="canEdit">保存</button>
+              </div>
+              <div class="p-4 text-sm space-y-2" x-show="detailTab==='version'">
+                <template x-for="(v,i) in versions" :key="i">
+                  <div class="flex items-center gap-3 p-2 border border-line-soft rounded">
+                    <img :src="thumbSvg(v.label)" class="w-12 h-12 rounded object-cover" alt="" />
+                    <div class="flex-1 text-xs"><div class="font-medium" x-text="v.ver"></div><div class="text-ink-tertiary" x-text="v.at+' · '+v.by"></div></div>
+                    <button @click="toast('已切换预览 '+v.ver)" class="text-primary text-xs">查看</button>
+                  </div>
+                </template>
+              </div>
+              <div class="p-4 text-sm space-y-3" x-show="detailTab==='log'">
+                <template x-for="(log, idx) in replaceLogs" :key="idx">
+                  <div class="border border-line-soft rounded p-3">
+                    <div class="text-xs text-ink-tertiary mb-2" x-text="log.at+' · '+log.operator"></div>
+                    <div class="flex items-center gap-3">
+                      <div class="text-center"><img :src="thumbSvg('替换前')" class="w-16 h-16 rounded" alt="" /><div class="text-xs text-ink-tertiary mt-1">替换前</div></div>
+                      <span class="text-ink-tertiary">→</span>
+                      <div class="text-center"><img :src="thumbSvg('替换后')" class="w-16 h-16 rounded" alt="" /><div class="text-xs text-ink-tertiary mt-1">替换后</div></div>
+                    </div>
+                    <div class="text-xs text-ink-secondary mt-2" x-text="log.note"></div>
+                  </div>
+                </template>
+              </div>
+            </div>
+          </template>
+        </aside>
+      </section>
+      <!-- 底部批量操作条 (参考 Workbuddy) -->
+      <div x-show="page==='library' && selectedIds.length" class="batch-bar-fixed text-sm">
+        <span>已选 <b x-text="selectedIds.length"></b> 项</span>
+        <span class="w-px h-4 bg-white/20"></span>
+        <button @click="modal.batchMove=true" x-show="canEdit">移动</button>
+        <button @click="toast('已在同空间复制为新记录')" x-show="canEdit">复制</button>
+        <button @click="toast('打包下载 ZIP 任务已创建')" x-show="canDownload">下载</button>
+        <button @click="modal.batchTag=true" x-show="canEdit">打标签</button>
+        <button @click="modal.share=true" x-show="canShare">分发</button>
+        <button @click="modal.push=true" x-show="canPush">跨空间推送</button>
+        <button @click="askMoveToRecycle()" x-show="canDelete">删除</button>
+        <button @click="selectedIds=[]" class="ml-2 opacity-70">✕</button>
+      </div>
+      <!-- ===== 以图搜图 ===== -->
+      <section x-show="page==='search'" class="p-6 space-y-4 overflow-y-auto flex-1">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div class="text-sm text-ink-tertiary">首页 / 素材管理 / <span class="text-ink">以图搜图</span></div>
+          <div class="flex items-center gap-2">
+            <span class="text-xs text-ink-tertiary">当前空间</span>
+            <select x-model="currentSpaceId" @change="onSpaceChange()" class="border border-line rounded-md px-3 py-1.5 text-sm bg-white min-w-[200px]">
+              <template x-for="s in spaces" :key="s.id"><option :value="s.id" x-text="s.name"></option></template>
+            </select>
+          </div>
+        </div>
+        <div class="bg-white rounded-lg shadow-card border border-line-soft p-6 space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div class="flex gap-2">
+              <button @click="searchScope='internal'" class="px-4 py-2 text-sm rounded-md" :class="searchScope==='internal' ? 'bg-primary text-white' : 'bg-fill'">内部素材</button>
+              <button @click="searchScope='external'" class="px-4 py-2 text-sm rounded-md" :class="searchScope==='external' ? 'bg-primary text-white' : 'bg-fill'">外部平台</button>
+            </div>
+            <span class="text-xs text-ink-tertiary" x-show="searchScope==='internal'">阿里云 ProductSearch · 有权限空间（非仅当前）</span>
+            <span class="text-xs text-ink-tertiary" x-show="searchScope==='external'">淘宝/天猫 · 京东 拍立淘 · 结果不入库</span>
+          </div>
+          <!-- 内部 -->
+          <div x-show="searchScope==='internal'" class="border-2 border-dashed border-line rounded-lg p-8 text-center bg-fill/30">
+            <div class="w-32 h-32 mx-auto thumb-placeholder rounded-lg mb-4"></div>
+            <p class="text-sm font-medium">拖拽参考图或从本空间选择素材</p>
+            <p class="text-xs text-ink-tertiary mt-1">底层：阿里云 ProductSearch · 检索账号可访问空间 · 阈值 ≥85% · 不做上传侵权检测</p>
+            <div class="mt-4 flex justify-center gap-2 flex-wrap">
+              <button @click="runSearch()" class="px-4 py-2 text-sm bg-primary text-white rounded-md">开始搜图</button>
+              <button @click="toast('临时 upload-token 15min（Q-E）')" class="px-4 py-2 text-sm border border-line rounded-md bg-white">上传参考图</button>
+              <button @click="toast('从当前空间选择素材')" class="px-4 py-2 text-sm border border-line rounded-md bg-white">选已有素材</button>
+            </div>
+          </div>
+          <!-- 外部 -->
+          <div x-show="searchScope==='external'" class="space-y-4">
+            <div class="flex gap-2">
+              <button @click="externalPlatform='tmall'" class="px-3 py-1.5 text-xs rounded-md border" :class="externalPlatform==='tmall' ? 'border-primary bg-primary-bg text-primary font-medium' : 'border-line'">淘宝 / 天猫 拍立淘</button>
+              <button @click="externalPlatform='jd'" class="px-3 py-1.5 text-xs rounded-md border" :class="externalPlatform==='jd' ? 'border-primary bg-primary-bg text-primary font-medium' : 'border-line'">京东 拍立淘</button>
+            </div>
+            <div class="border-2 border-dashed border-line rounded-lg p-8 text-center bg-fill/30">
+              <div class="w-32 h-32 mx-auto thumb-placeholder rounded-lg mb-4"></div>
+              <p class="text-sm font-medium" x-text="externalPlatform==='tmall' ? '检索淘宝 + 天猫公域同款 / 相似款' : '检索京东公域同款 / 相似款'"></p>
+              <p class="text-xs text-ink-tertiary mt-1">开放能力：淘宝拍立淘 / 京东开放平台识图 · 不自动写入素材库 · 失败不阻断内部搜图</p>
+              <div class="mt-4 flex justify-center gap-2 flex-wrap">
+                <button @click="runExternalSearch()" class="px-4 py-2 text-sm bg-primary text-white rounded-md">开始搜全网</button>
+                <button @click="simulateExternalFail()" class="px-4 py-2 text-sm border border-warning text-warning rounded-md bg-white">模拟外部失败</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- 内部结果 -->
+        <div x-show="searchScope==='internal' && searchResults.length">
+          <div class="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            <template x-for="(r,i) in pagedSearchResults" :key="i">
+            <div class="bg-white rounded-lg border border-line-soft overflow-hidden">
+              <div class="aspect-square relative">
+                <img :src="thumbSvg(r.name)" class="w-full h-full object-cover" alt="" />
+                <span class="absolute top-2 left-2 tag-pill bg-brand-black text-white">本域素材</span>
+                <span class="absolute top-2 right-2 text-xs font-bold bg-black/70 text-white px-2 py-0.5 rounded" x-text="r.score+'%'"></span>
+              </div>
+              <div class="p-3">
+                <div class="text-sm font-medium truncate" x-text="r.name"></div>
+                <div class="text-xs text-ink-tertiary" x-text="(r.spaceName||'')+' · '+r.assetNo"></div>
+                <div class="mt-2 flex flex-wrap gap-2">
+                  <button @click="openAnalyze(r)" class="text-xs text-primary hover:underline">剖析</button>
+                  <button @click="modal.linkSku=true" class="text-xs text-primary hover:underline">关联商品</button>
+                  <button @click="toast('打开详情')" class="text-xs text-primary hover:underline">详情</button>
+                  <button @click="toast('下载任务已创建')" class="text-xs text-primary hover:underline">下载</button>
+                </div>
+              </div>
+            </div>
+          </template>
+          </div>
+          <div class="flex flex-wrap items-center justify-between gap-2 mt-4 text-sm text-ink-secondary">
+            <span>共 <b x-text="searchResults.length"></b> 条 · 第 <span x-text="searchPageNo"></span>/<span x-text="searchTotalPages"></span> 页</span>
+            <div class="flex items-center gap-2">
+              <select x-model.number="searchPageSize" @change="searchPageNo=1" class="border border-line rounded px-2 py-1 text-xs bg-white">
+                <option :value="20">20条/页</option><option :value="50">50条/页</option><option :value="100">100条/页</option>
+              </select>
+              <button @click="prevSearchPage()" class="px-2 py-1 border border-line rounded bg-white text-xs" :disabled="searchPageNo<=1">上一页</button>
+              <button @click="nextSearchPage()" class="px-2 py-1 border border-line rounded bg-white text-xs" :disabled="searchPageNo>=searchTotalPages">下一页</button>
+            </div>
+          </div>
+        </div>
+        <!-- 外部结果 -->
+        <div x-show="searchScope==='external' && externalResults.length">
+          <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <template x-for="(r,i) in pagedExternalResults" :key="i">
+            <div class="bg-white rounded-lg border border-line-soft overflow-hidden">
+              <div class="aspect-square relative bg-fill">
+                <img :src="thumbSvg(r.title.slice(0,6))" class="w-full h-full object-cover" alt="" />
+                <span class="absolute top-2 left-2 text-[10px] px-1.5 py-0.5 rounded text-white" :class="r.platform==='jd' ? 'bg-[#E1251B]' : 'bg-[#FF5000]'" x-text="r.platformLabel"></span>
+                <span class="absolute top-2 right-2 text-xs font-bold bg-black/70 text-white px-2 py-0.5 rounded" x-text="r.matchRate+'%'"></span>
+              </div>
+              <div class="p-3 text-sm">
+                <div class="font-medium line-clamp-2" x-text="r.title"></div>
+                <div class="flex justify-between mt-1 text-xs">
+                  <span class="text-primary font-semibold" x-text="'¥'+r.price"></span>
+                  <span class="text-ink-tertiary truncate ml-2" x-text="r.shop"></span>
+                </div>
+                <div class="mt-2 flex gap-2">
+                  <button @click="toast('打开原链：'+r.detailUrl)" class="text-xs text-primary hover:underline">打开原链</button>
+                  <button @click="toast('已收藏为竞品参考 · 未入库素材')" class="text-xs text-primary hover:underline">收藏参考</button>
+                </div>
+              </div>
+            </div>
+          </template>
+          </div>
+          <div class="flex flex-wrap items-center justify-between gap-2 mt-4 text-sm text-ink-secondary">
+            <span>共 <b x-text="externalResults.length"></b> 条 · 第 <span x-text="externalPageNo"></span>/<span x-text="externalTotalPages"></span> 页</span>
+            <div class="flex items-center gap-2">
+              <select x-model.number="externalPageSize" @change="externalPageNo=1" class="border border-line rounded px-2 py-1 text-xs bg-white">
+                <option :value="20">20条/页</option><option :value="50">50条/页</option><option :value="100">100条/页</option>
+              </select>
+              <button @click="prevExternalPage()" class="px-2 py-1 border border-line rounded bg-white text-xs" :disabled="externalPageNo<=1">上一页</button>
+              <button @click="nextExternalPage()" class="px-2 py-1 border border-line rounded bg-white text-xs" :disabled="externalPageNo>=externalTotalPages">下一页</button>
+            </div>
+          </div>
+        </div>
+        <p x-show="searchScope==='external' && externalFailed" class="text-sm text-warning bg-warning-bg border border-warning/20 rounded-lg px-4 py-3">
+          外部平台鉴权/配额暂不可用· <b>内部搜图仍可正常使用</b>
+        </p>
+      </section>
+      <!-- ===== 以图搜款 ===== -->
+      <section x-show="page==='searchProduct'" class="p-6 space-y-4 overflow-y-auto flex-1">
+        <div class="text-sm text-ink-tertiary">首页 / 素材管理 / <span class="text-ink">以图搜款</span></div>
+        <div class="bg-white rounded-lg border border-line-soft shadow-card p-6 space-y-4">
+          <div class="flex justify-between items-start">
+            <div>
+              <h1 class="text-xl font-semibold">以图搜款</h1>
+              <p class="text-xs text-ink-tertiary mt-1">独立菜单 · 检索商品主数据（D12 商品数据范围）· 非拍立淘 · 非本域素材索引</p>
+            </div>
+          </div>
+          <div class="border-2 border-dashed border-line rounded-lg p-8 text-center bg-fill/30">
+            <div class="w-32 h-32 mx-auto thumb-placeholder rounded-lg mb-4"></div>
+            <p class="text-sm font-medium">上传或选择图片 · 在商品库找相似 SPU/SKU</p>
+            <button @click="runSearchProduct()" class="mt-4 px-4 py-2 text-sm bg-primary text-white rounded-md">开始搜款</button>
+          </div>
+        </div>
+        <div x-show="productResults.length">
+          <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <template x-for="(p,i) in pagedProductResults" :key="i">
+            <div class="bg-white border border-line-soft rounded-lg p-3 flex gap-4">
+              <div class="w-16 h-16 thumb-placeholder rounded shrink-0"></div>
+              <div class="flex-1 min-w-0">
+                <div class="text-sm font-medium" x-text="p.sku"></div>
+                <div class="text-xs text-ink-tertiary" x-text="p.name"></div>
+                <div class="text-xs text-primary mt-1" x-text="'相似度 '+p.score+'%'"></div>
+                <div class="flex gap-2 mt-2">
+                  <button @click="toast('跳转商品详情页 · '+p.sku+'（演示 · 无素材权限时商品侧将提示不可查看）')" class="text-xs text-primary hover:underline">打开商品详情</button>
+                  <button @click="toast('已关联当前素材 → '+p.sku)" class="text-xs text-primary hover:underline">关联素材</button>
+                </div>
+              </div>
+            </div>
+          </template>
+          </div>
+          <div class="flex flex-wrap items-center justify-between gap-2 mt-4 text-sm text-ink-secondary">
+            <span>共 <b x-text="productResults.length"></b> 条 · 第 <span x-text="productPageNo"></span>/<span x-text="productTotalPages"></span> 页</span>
+            <div class="flex items-center gap-2">
+              <select x-model.number="productPageSize" @change="productPageNo=1" class="border border-line rounded px-2 py-1 text-xs bg-white">
+                <option :value="20">20条/页</option><option :value="50">50条/页</option><option :value="100">100条/页</option>
+              </select>
+              <button @click="prevProductPage()" class="px-2 py-1 border border-line rounded bg-white text-xs" :disabled="productPageNo<=1">上一页</button>
+              <button @click="nextProductPage()" class="px-2 py-1 border border-line rounded bg-white text-xs" :disabled="productPageNo>=productTotalPages">下一页</button>
+            </div>
+          </div>
+        </div>
+      </section>
+      <!-- ===== 空间管理 ===== -->
+      <section x-show="page==='spaces'" class="p-6 space-y-4 overflow-y-auto flex-1">
+        <div class="text-sm text-ink-tertiary">首页 / 素材管理 / <span class="text-ink">空间管理</span></div>
+        <div class="bg-white rounded-lg border border-line-soft shadow-card p-6 space-y-4">
+          <div class="flex justify-between items-center">
+            <h1 class="text-xl font-semibold">空间管理</h1>
+            <button @click="modal.newSpace=true" class="px-3 py-1.5 text-sm bg-primary text-white rounded-md">新建空间</button>
+          </div>
+          <div class="grid sm:grid-cols-2 xl:grid-cols-3 gap-4">
+            <template x-for="s in spaces" :key="s.id">
+              <div class="space-card bg-white rounded-lg border border-line-soft p-4 transition cursor-pointer" @click="selectSpace(s.id); go('library')">
+                <div class="flex justify-between items-start mb-3">
+                  <span class="font-semibold" x-text="s.name"></span>
+                  <span class="tag-pill rounded border" :class="s.typeClass" x-text="s.shortType"></span>
+                </div>
+                <div class="flex gap-6 mb-3">
+                  <div><div class="text-xl font-bold" x-text="s.assetCount"></div><div class="text-xs text-ink-tertiary">素材数</div></div>
+                  <div><div class="text-xl font-bold" x-text="s.userCount"></div><div class="text-xs text-ink-tertiary">用户数</div></div>
+                </div>
+                <div class="text-xs text-ink-tertiary space-y-1">
+                  <div>存储：<span x-text="s.storage"></span></div>
+                  <div>状态：<span :class="s.status==='ENABLED'?'text-success':(s.status==='ARCHIVED'?'text-ink-tertiary':'text-warning')" x-text="s.status==='ENABLED'?'启用':(s.status==='ARCHIVED'?'已归档':'停用')"></span></div>
+                </div>
+                <div class="flex flex-wrap gap-2 mt-3 pt-3 border-t border-line-soft" @click.stop>
+                  <button @click="openSpaceUsers(s)" class="text-xs text-primary hover:underline">用户分配</button>
+                  <button @click="configSpace=s; modal.spaceConfig=true" class="text-xs text-primary hover:underline">配置</button>
+                  <button x-show="s.status==='ENABLED' && canManageSpaceOps(s)" @click="disableSpace(s)" class="text-xs text-ink-tertiary hover:underline">停用</button>
+                  <button x-show="s.status==='DISABLED' && canManageSpaceOps(s)" @click="enableSpace(s)" class="text-xs text-success hover:underline">启用</button>
+                  <button x-show="s.status!=='ARCHIVED' && canManageSpaceOps(s)" @click="archiveSpace(s)" class="text-xs text-ink-tertiary hover:underline">归档</button>
+                  <button @click="toast('审计日志：空间 '+s.name+' · SPACE_ENTERED / UPLOAD / DISABLE…')" class="text-xs text-ink-tertiary hover:underline">审计</button>
+                </div>
+              </div>
+            </template>
+          </div>
+          <div class="flex flex-wrap gap-4">
+            <button @click="modal.deptDict=true" class="text-sm text-primary hover:underline">部门字典维护 →</button>
+            <button @click="modal.landing=true" class="text-sm text-primary hover:underline">系统来源落点 →</button>
+          </div>
+        </div>
+      </section>
+      <!-- ===== 用户分配 ===== -->
+      <section x-show="page==='spaceUsers'" class="p-6 space-y-4 overflow-y-auto flex-1">
+        <div class="text-sm text-ink-tertiary">首页 / 素材管理 / <span class="text-ink">用户分配</span></div>
+        <div class="bg-white rounded-lg border border-line-soft shadow-card p-6 space-y-4">
+          <h1 class="text-xl font-semibold">空间用户分配 · <span x-text="currentSpace.name"></span></h1>
+          <div class="flex gap-2 flex-wrap">
+            <button @click="modal.addUser=true" class="px-3 py-1.5 text-sm bg-primary text-white rounded-md">添加用户</button>
+            <button @click="toast('批量导入模板已下载')" class="px-3 py-1.5 text-sm border border-line rounded-md bg-white">批量</button>
+          </div>
+          <div class="rounded-lg border border-line-soft overflow-hidden">
+            <table class="w-full text-sm">
+              <thead class="bg-fill text-xs text-ink-secondary"><tr><th class="p-3 text-left">账号</th><th class="p-3 text-left">组织</th><th class="p-3 text-left">组织角色</th><th class="p-3 text-left">状态</th><th class="p-3 text-left">操作</th></tr></thead>
+              <tbody>
+                <template x-for="u in pagedSpaceUsers" :key="u.id">
+                  <tr class="border-t border-line-soft">
+                    <td class="p-3" x-text="u.name"></td>
+                    <td class="p-3 text-ink-tertiary" x-text="u.org"></td>
+                    <td class="p-3 text-ink-tertiary" x-text="u.orgRole"></td>
+                    <td class="p-3"><span class="text-xs" :class="u.enabled?'text-success':'text-ink-tertiary'" x-text="u.enabled?'启用':'停用'"></span></td>
+                    <td class="p-3 space-x-2">
+                      <button @click="removeSpaceUser(u)" class="text-xs text-primary">移除分配</button>
+                      <button @click="u.enabled=!u.enabled; toast(u.enabled?'已启用':'已停用')" class="text-xs text-ink-tertiary" x-text="u.enabled?'停用':'启用'"></button>
+                    </td>
+                  </tr>
+                </template>
+              </tbody>
+            </table>
+          </div>
+          <div class="flex flex-wrap items-center justify-between gap-2 text-sm text-ink-secondary">
+            <span>共 <b x-text="spaceUsers.length"></b> 人 · 第 <span x-text="spaceUserPageNo"></span>/<span x-text="spaceUserTotalPages"></span> 页</span>
+            <div class="flex items-center gap-2">
+              <select x-model.number="spaceUserPageSize" @change="spaceUserPageNo=1" class="border border-line rounded px-2 py-1 text-xs bg-white">
+                <option :value="20">20条/页</option><option :value="50">50条/页</option><option :value="100">100条/页</option>
+              </select>
+              <button @click="prevSpaceUserPage()" class="px-2 py-1 border border-line rounded bg-white text-xs" :disabled="spaceUserPageNo<=1">上一页</button>
+              <button @click="nextSpaceUserPage()" class="px-2 py-1 border border-line rounded bg-white text-xs" :disabled="spaceUserPageNo>=spaceUserTotalPages">下一页</button>
+            </div>
+          </div>
+          <p class="text-xs text-ink-tertiary">可进空间 = 本页分配 ∪ 组织权限「素材空间管辖范围」；空间内操作权见组织权限</p>
+        </div>
+      </section>
+      <!-- ===== 回收站 ===== -->
+      <section x-show="page==='recycle'" class="p-6 space-y-4 overflow-y-auto flex-1">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div class="text-sm text-ink-tertiary">首页 / 素材管理 / <span class="text-ink">回收站</span></div>
+          <div class="flex items-center gap-2">
+            <span class="text-xs text-ink-tertiary">当前空间</span>
+            <select x-model="currentSpaceId" @change="onSpaceChange()" class="border border-line rounded-md px-3 py-1.5 text-sm bg-white min-w-[200px]">
+              <template x-for="s in spaces" :key="s.id"><option :value="s.id" x-text="s.name"></option></template>
+            </select>
+          </div>
+        </div>
+        <div class="bg-white rounded-lg border border-line-soft shadow-card p-6 space-y-4">
+          <div class="flex flex-wrap justify-between items-center gap-2">
+            <div>
+              <h1 class="text-xl font-semibold">回收站 · <span x-text="currentSpace.name"></span></h1>
+              <p class="text-sm text-ink-secondary">保留期 30 天（空间可配 7–90 天）</p>
+            </div>
+            <div class="flex gap-2">
+              <button @click="batchRestoreRecycle()" class="px-3 py-1.5 text-sm border border-line rounded-md bg-white" :disabled="!selectedRecycleIds.length" :class="!selectedRecycleIds.length?'opacity-40 cursor-not-allowed':''">批量恢复</button>
+              <button @click="askPurgeRecycle()" class="px-3 py-1.5 text-sm border border-line rounded-md bg-white text-primary" :disabled="!selectedRecycleIds.length" :class="!selectedRecycleIds.length?'opacity-40 cursor-not-allowed':''">彻底删除</button>
+            </div>
+          </div>
+          <div x-show="selectedRecycleIds.length" class="flex items-center gap-3 text-sm bg-primary-bg text-primary rounded-md px-3 py-2">
+            <span>已选 <b x-text="selectedRecycleIds.length"></b> 项</span>
+            <button @click="selectedRecycleIds=[]" class="text-xs underline">取消选择</button>
+          </div>
+          <div class="rounded-lg border border-line-soft overflow-hidden">
+            <table class="w-full text-sm">
+              <thead class="bg-fill text-xs"><tr>
+                <th class="p-3 w-8"><input type="checkbox" class="accent-[#C8102E]" :checked="recyclePageAllSelected" @change="selectAllRecyclePage($event.target.checked)" /></th>
+                <th class="p-3 text-left">素材</th><th class="p-3 text-left">删除时间</th><th class="p-3 text-left">剩余</th><th class="p-3 text-left">操作</th>
+              </tr></thead>
+              <tbody>
+                <template x-for="r in pagedRecycleItems" :key="r.id">
+                  <tr class="border-t border-line-soft" :class="selectedRecycleIds.includes(r.id)?'bg-primary-bg/40':''">
+                    <td class="p-3"><input type="checkbox" class="accent-[#C8102E]" :checked="selectedRecycleIds.includes(r.id)" @change="toggleRecycleSelect(r.id)" /></td>
+                    <td class="p-3" x-text="r.name"></td>
+                    <td class="p-3 text-ink-tertiary" x-text="r.deletedAt"></td>
+                    <td class="p-3" x-text="r.daysLeft+' 天'"></td>
+                    <td class="p-3">
+                      <button @click="restoreRecycleOne(r)" class="text-primary text-xs mr-2">恢复</button>
+                      <button @click="askPurgeRecycleOne(r)" class="text-ink-tertiary text-xs">彻底删除</button>
+                    </td>
+                  </tr>
+                </template>
+              </tbody>
+            </table>
+          </div>
+          <div class="flex flex-wrap items-center justify-between gap-2 text-sm text-ink-secondary">
+            <span>共 <b x-text="recycleItems.length"></b> 条 · 第 <span x-text="recyclePageNo"></span>/<span x-text="recycleTotalPages"></span> 页</span>
+            <div class="flex items-center gap-2">
+              <select x-model.number="recyclePageSize" @change="recyclePageNo=1" class="border border-line rounded px-2 py-1 text-xs bg-white">
+                <option :value="20">20条/页</option><option :value="50">50条/页</option><option :value="100">100条/页</option>
+              </select>
+              <button @click="prevRecyclePage()" class="px-2 py-1 border border-line rounded bg-white text-xs" :disabled="recyclePageNo<=1">上一页</button>
+              <button @click="nextRecyclePage()" class="px-2 py-1 border border-line rounded bg-white text-xs" :disabled="recyclePageNo>=recycleTotalPages">下一页</button>
+            </div>
+          </div>
+        </div>
+      </section>
+      <!-- ===== 选图器 ===== -->
+      <section x-show="page==='picker'" class="p-6 space-y-4 overflow-y-auto flex-1">
+        <div class="text-sm text-ink-tertiary">首页 / 素材管理 / <span class="text-ink">渠道选图器</span></div>
+        <div class="bg-brand-black text-white rounded-lg p-6 text-sm flex flex-wrap justify-between gap-2 items-center">
+          <span>D08 渠道商品编辑 · 嵌入选图器 · 当前渠道：<span x-text="pickerChannel==='tmall'?'天猫旗舰店':(pickerChannel==='jd'?'京东旗舰店':'抖音店铺')"></span></span>
+          <div class="flex gap-2 text-xs">
+            <button @click="pickerChannel='tmall'" class="px-2 py-1 rounded" :class="pickerChannel==='tmall'?'bg-primary text-white':'bg-white/10'">天猫</button>
+            <button @click="pickerChannel='jd'" class="px-2 py-1 rounded" :class="pickerChannel==='jd'?'bg-primary text-white':'bg-white/10'">京东</button>
+            <button @click="pickerChannel='douyin'" class="px-2 py-1 rounded" :class="pickerChannel==='douyin'?'bg-primary text-white':'bg-white/10'">抖音</button>
+          </div>
+        </div>
+        <div class="bg-white rounded-lg shadow-card border border-line-soft p-6">
+          <div class="flex flex-wrap gap-2 mb-3 text-xs">
+            <span class="px-2 py-1 bg-primary text-white rounded">本渠道空间</span>
+            <span class="px-2 py-1 bg-fill text-ink-secondary rounded">总控·已授权</span>
+            <span class="px-2 py-1 bg-fill text-ink-tertiary rounded">本渠道∪授权</span>
+            <span class="px-2 py-1 bg-warning-bg text-warning rounded">源已删除示例</span>
+          </div>
+          <div class="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-2">
+            <template x-for="m in pagedPickerMaterials" :key="m.id">
+              <button @click="togglePicker(m)"
+                      class="border rounded-lg p-2 text-left transition relative"
+                      :class="m.selectable ? (pickerSelected.includes(m.id) ? 'border-primary ring-2 ring-primary/20' : 'border-line hover:border-primary') : 'opacity-40 cursor-not-allowed'">
+                <div class="aspect-square thumb-placeholder rounded mb-1 relative overflow-hidden">
+                  <img :src="thumbSvg(m.thumbLabel)" class="w-full h-full object-cover" alt="" />
+                  <span x-show="!m.selectable" class="absolute inset-0 bg-black/40 text-white text-xs flex items-center justify-center px-1 text-center" x-text="m.reason"></span>
+                </div>
+                <div class="text-xs truncate" x-text="m.assetNo"></div>
+                <div class="text-xs text-ink-tertiary" x-text="m.source||'本渠道空间'"></div>
+              </button>
+            </template>
+          </div>
+          <div class="flex flex-wrap items-center justify-between gap-2 mt-3 text-sm text-ink-secondary">
+            <span>共 <b x-text="pickerMaterials.length"></b> 张 · 第 <span x-text="pickerPageNo"></span>/<span x-text="pickerTotalPages"></span> 页</span>
+            <div class="flex items-center gap-2">
+              <select x-model.number="pickerPageSize" @change="pickerPageNo=1" class="border border-line rounded px-2 py-1 text-xs bg-white">
+                <option :value="20">20条/页</option><option :value="50">50条/页</option><option :value="100">100条/页</option>
+              </select>
+              <button @click="prevPickerPage()" class="px-2 py-1 border border-line rounded bg-white text-xs" :disabled="pickerPageNo<=1">上一页</button>
+              <button @click="nextPickerPage()" class="px-2 py-1 border border-line rounded bg-white text-xs" :disabled="pickerPageNo>=pickerTotalPages">下一页</button>
+            </div>
+          </div>
+          <div class="flex justify-between items-center mt-4 pt-3 border-t border-line-soft text-sm">
+            <span>已选 <b x-text="pickerSelected.length"></b> 张（挂到 1:1 主图；多渠道可共用编号）</span>
+            <div class="flex gap-2">
+              <button @click="pickerSelected=[]; toast('已取消')" class="px-3 py-1.5 border border-line rounded-md text-xs">取消</button>
+              <button @click="toast('已确认引用 · Listing 挂接 '+pickerSelected.length+' 个编号')" class="px-3 py-1.5 bg-primary text-white rounded-md text-xs">确认引用</button>
+            </div>
+          </div>
+        </div>
+      </section>
+      <!-- ===== 法务取消 ===== -->
+      <section x-show="page==='legal'" class="p-6 space-y-4 overflow-y-auto flex-1">
+        <div class="text-sm text-ink-tertiary">首页 / 素材管理 / <span class="text-ink">法务复核（已取消）</span></div>
+        <div class="bg-white rounded-lg border border-line-soft shadow-card p-6 max-w-3xl">
+          <h1 class="text-xl font-semibold">法务复核 · 本期取消</h1>
+          <p class="text-sm text-ink-secondary mt-3 leading-relaxed">
+            按最新裁定：<b>不再</b>在上传/替换/AI 入库时做 AI 侵权检测，也<b>不再</b>因此自动创建素材复核待办。本页仅作说明，<b>不提供</b>放行/确认侵权等操作入口。
+          </p>
+          <ul class="mt-4 text-sm text-ink-secondary list-disc pl-5 space-y-1">
+            <li>以图搜图（内部）范围 = 账号有权限的空间并集（结果标所属空间）</li>
+            <li>文件夹搜索 / OCR 仍为当前空间</li>
+          </ul>
+        </div>
+      </section>
+    </main>
+  </div>
+<!-- 移动端详情抽屉 -->
+  <div x-show="modal.detail" class="fixed inset-0 z-[200] flex justify-end lg:hidden" x-transition>
+    <div class="absolute inset-0 bg-black/40" @click="closeDetail()"></div>
+    <div class="relative w-full max-w-lg bg-white h-full shadow-xl drawer-enter overflow-y-auto">
+      <template x-if="currentMaterial">
+        <div class="p-5">
+          <div class="flex justify-between items-start mb-4">
+            <div>
+              <h2 class="text-lg font-semibold" x-text="currentMaterial.name"></h2>
+              <p class="text-xs text-ink-tertiary" x-text="currentMaterial.assetNo"></p>
+            </div>
+            <button @click="closeDetail()" class="text-ink-tertiary hover:text-ink">✕</button>
+          </div>
+          <div class="aspect-video thumb-placeholder rounded-lg mb-4"></div>
+          <div class="flex gap-2 border-b border-line-soft mb-4">
+            <button @click="detailTab='info'" class="px-3 py-2 text-sm border-b-2 -mb-px" :class="detailTab==='info' ? 'border-primary text-primary font-medium' : 'border-transparent text-ink-tertiary'">基本信息</button>
+            <button @click="detailTab='log'" class="px-3 py-2 text-sm border-b-2 -mb-px" :class="detailTab==='log' ? 'border-primary text-primary font-medium' : 'border-transparent text-ink-tertiary'">替换日志</button>
+          </div>
+          <div class="flex flex-wrap gap-2 mb-4" x-show="detailTab==='info'">
+            <button @click="modal.replace=true" class="px-3 py-1.5 text-xs border border-line rounded-md" x-show="canEdit">替换</button>
+            <button @click="modal.crop=true" class="px-3 py-1.5 text-xs border border-line rounded-md" x-show="canUpload">裁剪</button>
+            <button @click="modal.share=true" class="px-3 py-1.5 text-xs border border-line rounded-md" x-show="canShare">分发</button>
+            <button @click="toast('下载任务已创建')" class="px-3 py-1.5 text-xs border border-line rounded-md" x-show="canDownload">下载</button>
+            <button @click="modal.push=true" class="px-3 py-1.5 text-xs border border-line rounded-md" x-show="canPush">跨空间推送</button>
+          </div>
+          <div class="text-sm space-y-2" x-show="detailTab==='info'">
+            <div class="flex justify-between"><span class="text-ink-tertiary">关联 SKU</span><span x-text="currentMaterial.skuCount+' 个'"></span></div>
+            <div class="flex justify-between"><span class="text-ink-tertiary">更新时间</span><span x-text="currentMaterial.updatedAt"></span></div>
+          </div>
+          <div x-show="detailTab==='log'" class="text-sm space-y-3">
+            <template x-for="(log, idx) in replaceLogs" :key="idx">
+              <div class="border-l-2 border-primary pl-3 py-1">
+                <div class="text-xs text-ink-tertiary" x-text="log.at"></div>
+                <div class="font-medium" x-text="log.operator"></div>
+                <div class="text-ink-secondary" x-text="log.note"></div>
+              </div>
+            </template>
+          </div>
+        </div>
+      </template>
+    </div>
+  </div>
+  <!-- Upload modal -->
+  <div x-show="modal.upload" class="fixed inset-0 z-[300] flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/45" @click="modal.upload=false"></div>
+    <div class="relative bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+      <div class="px-5 py-4 border-b font-semibold flex justify-between">上传素材 <button @click="modal.upload=false">✕</button></div>
+      <div class="p-5 space-y-4">
+        <div class="border-2 border-dashed border-primary/40 rounded-lg p-8 text-center bg-primary-bg/30">
+          <p class="text-sm">拖拽文件到此处 · 单图 ≤200MB</p>
+          <p class="text-xs text-ink-tertiary mt-1">大文件走分片会话 · 支持断点续传（upload-session TTL 24h · AC-46）</p>
+          <div class="mt-3 flex justify-center gap-2 flex-wrap">
+            <button @click="simulateUpload()" class="px-4 py-2 bg-primary text-white text-sm rounded-md">模拟上传 3 张图片</button>
+            <button @click="simulateResumeUpload()" class="px-4 py-2 border border-line bg-white text-sm rounded-md">模拟断点续传</button>
+            <button @click="toast('422-DAM-STORAGE_FULL · 存储达上限禁上传')" class="px-4 py-2 border border-warning text-warning text-sm rounded-md bg-white">模拟存储满</button>
+          </div>
+        </div>
+        <div x-show="uploadSessionHint" class="text-xs bg-fill rounded-md px-3 py-2 text-ink-secondary" x-text="uploadSessionHint"></div>
+        <div x-show="uploadQueue.length" class="space-y-2">
+          <div class="text-xs text-ink-tertiary" x-text="'成功 '+uploadOk+' / 失败 '+uploadFail+' / 进行中 '+uploadBusy+' / 共 '+uploadQueue.length"></div>
+          <template x-for="(u,i) in uploadQueue" :key="i">
+            <div class="flex items-center gap-3 text-sm border-b border-line-soft pb-2">
+              <span class="flex-1 truncate" x-text="u.name"></span>
+              <div class="w-24 h-1.5 bg-fill rounded-full overflow-hidden"><div class="h-full transition-all" :class="u.status==='失败'?'bg-primary':'bg-primary'" :style="'width:'+u.progress+'%'"></div></div>
+              <span class="text-xs w-16" :class="u.status==='失败'?'text-primary':''" x-text="u.status"></span>
+            </div>
+          </template>
+        </div>
+      </div>
+      <div class="px-5 py-3 border-t flex justify-end gap-2">
+        <button @click="modal.upload=false" class="px-3 py-1.5 text-sm border rounded-md">取消</button>
+        <button @click="modal.upload=false; toast('上传完成 · 本期不做侵权检测')" class="px-3 py-1.5 text-sm bg-primary text-white rounded-md">完成</button>
+      </div>
+    </div>
+  </div>
+  <!-- Share modal §6.9 / §7.19 -->
+  <div x-show="modal.share" class="fixed inset-0 z-[300] flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/45" @click="modal.share=false"></div>
+    <div class="relative bg-white rounded-lg w-full max-w-md p-5 max-h-[90vh] overflow-y-auto">
+      <h3 class="font-semibold mb-1">分发</h3>
+      <p class="text-xs text-ink-tertiary mb-4">对象：已选素材 / 当前文件夹 · 到期失效 · 不做永久链接</p>
+      <div class="flex gap-2 mb-3">
+        <button class="flex-1 py-2 text-sm border rounded-md" :class="shareType==='internal' ? 'border-primary bg-primary-bg' : ''" @click="shareType='internal'">对内（须登录）</button>
+        <button class="flex-1 py-2 text-sm border rounded-md" :class="shareType==='external' ? 'border-primary bg-primary-bg' : ''" @click="shareType='external'">对外（限时链接）</button>
+      </div>
+      <div x-show="shareType==='internal'" class="mb-3">
+        <label class="text-xs text-ink-secondary">指定账号
+          <select class="mt-1 w-full border border-line rounded-md px-2 py-1.5 text-sm"><option>李四（经销商运营）</option><option>王五（法务）</option></select>
+        </label>
+      </div>
+      <div class="mb-3 text-sm space-y-1">
+        <div class="text-xs text-ink-tertiary mb-1">授予权限</div>
+        <label class="flex items-center gap-2"><input type="radio" name="sharePerm" value="view" x-model="sharePerm" class="accent-[#C8102E]" /> 仅查看</label>
+        <label class="flex items-center gap-2"><input type="radio" name="sharePerm" value="download" x-model="sharePerm" class="accent-[#C8102E]" /> 查看 + 下载</label>
+      </div>
+      <label class="text-xs text-ink-secondary block mb-3">到期时间（必填）
+        <input type="datetime-local" class="mt-1 w-full border border-line rounded-md px-2 py-1.5 text-sm" value="2026-09-01T18:00" />
+      </label>
+      <div x-show="shareLink" class="mb-3 p-2 bg-fill rounded text-xs break-all flex gap-2 items-start">
+        <span class="flex-1" x-text="shareLink"></span>
+        <button @click="toast('已复制')" class="text-primary shrink-0">复制</button>
+      </div>
+      <p class="text-xs text-warning mb-3" x-show="shareType==='external'">⚠ 对外下载将记录分发人（本账号），即使访客未登录</p>
+      <div class="flex justify-end gap-2">
+        <button @click="modal.share=false; shareLink=''" class="px-3 py-1.5 text-sm border rounded-md">取消</button>
+        <button @click="shareLink='https://zippo.example/share/abc123…'; toast('链接已生成 · 记分发人审计')" class="px-3 py-1.5 text-sm bg-primary text-white rounded-md">生成链接</button>
+      </div>
+    </div>
+  </div>
+  <!-- Replace §6.13 -->
+  <div x-show="modal.replace" class="fixed inset-0 z-[300] flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/45" @click="modal.replace=false"></div>
+    <div class="relative bg-white rounded-lg w-full max-w-lg p-5">
+      <h3 class="font-semibold mb-1">替换素材</h3>
+      <p class="text-xs text-ink-tertiary mb-4">编号不变；SKU 关联与渠道引用将保留 · 本期不做替换后侵权过检</p>
+      <div class="flex items-center justify-center gap-4 mb-4">
+        <div class="text-center"><img :src="thumbSvg(currentMaterial?.thumbLabel||'当前')" class="w-28 h-28 rounded border border-line-soft" alt="" /><div class="text-xs text-ink-tertiary mt-1">当前</div></div>
+        <span class="text-ink-tertiary">→</span>
+        <div class="text-center"><div class="w-28 h-28 rounded border-2 border-dashed border-primary/40 bg-primary-bg/30 flex items-center justify-center text-xs text-primary cursor-pointer" @click="toast('已选择新文件')">选择文件</div><div class="text-xs text-ink-tertiary mt-1">新文件</div></div>
+      </div>
+      <div class="flex justify-end gap-2">
+        <button @click="modal.replace=false" class="px-3 py-1.5 text-sm border rounded-md">取消</button>
+        <button @click="modal.replace=false; toast('替换成功 · 引用处已展示新图 · 日志已留双缩略图')" class="px-3 py-1.5 text-sm bg-primary text-white rounded-md">确认替换</button>
+      </div>
+    </div>
+  </div>
+  <!-- Crop §6.11 -->
+  <div x-show="modal.crop" class="fixed inset-0 z-[300] flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/45" @click="modal.crop=false"></div>
+    <div class="relative bg-white rounded-lg w-full max-w-xl p-5">
+      <h3 class="font-semibold mb-3">在线裁剪（框选）</h3>
+      <div class="aspect-video bg-fill rounded-lg relative mb-3 overflow-hidden flex items-center justify-center">
+        <img :src="thumbSvg(currentMaterial?.thumbLabel||'原图')" class="max-h-full opacity-80" alt="" />
+        <div class="absolute border-2 border-primary bg-primary/10" style="width:40%;height:45%;left:30%;top:25%"></div>
+      </div>
+      <p class="text-xs text-ink-tertiary mb-3">保存位置：当前空间 · 来源素材保留 · 白底去背景请走 AI 白底</p>
+      <div class="flex justify-end gap-2">
+        <button @click="toast('裁剪图已下载')" class="px-3 py-1.5 text-sm border rounded-md">下载</button>
+        <button @click="modal.crop=false; toast('已保存为当前空间新素材（不做侵权检测）')" class="px-3 py-1.5 text-sm bg-primary text-white rounded-md" x-show="canUpload">保存到当前空间</button>
+      </div>
+    </div>
+  </div>
+  <!-- AI 主图 §6.12 / §7.15 -->
+  <div x-show="modal.ai" class="fixed inset-0 z-[300] flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/45" @click="modal.ai=false"></div>
+    <div class="relative bg-white rounded-lg w-full max-w-lg p-5 max-h-[90vh] overflow-y-auto">
+      <h3 class="font-semibold mb-3">AI 主图 / 白底</h3>
+      <p class="text-xs text-ink-tertiary mb-3">原图：当前空间静物/模特图 · 不自动写 Listing</p>
+      <div class="text-sm space-y-2 mb-3">
+        <div class="text-xs text-ink-tertiary">生成类型</div>
+        <label class="flex items-center gap-2"><input type="checkbox" checked class="accent-[#C8102E]" /> 棚拍主图</label>
+        <label class="flex items-center gap-2"><input type="checkbox" checked class="accent-[#C8102E]" /> 场景</label>
+        <label class="flex items-center gap-2"><input type="checkbox" class="accent-[#C8102E]" /> 搭配</label>
+        <label class="flex items-center gap-2"><input type="checkbox" checked class="accent-[#C8102E]" /> 白底图</label>
+        <div class="text-xs text-ink-tertiary pt-2">规格</div>
+        <label class="inline-flex items-center gap-1 mr-3"><input type="checkbox" checked class="accent-[#C8102E]" /> 1:1</label>
+        <label class="inline-flex items-center gap-1"><input type="checkbox" checked class="accent-[#C8102E]" /> 3:4</label>
+      </div>
+      <div class="grid grid-cols-3 gap-2 mb-4" x-show="aiPreview">
+        <div class="aspect-square thumb-placeholder rounded text-white text-xs flex items-center justify-center">1:1</div>
+        <div class="aspect-[3/4] thumb-placeholder rounded text-white text-xs flex items-center justify-center">3:4</div>
+        <div class="aspect-square bg-white border border-line rounded text-xs flex items-center justify-center text-ink-tertiary">白底</div>
+      </div>
+      <div class="flex justify-end gap-2">
+        <button @click="aiPreview=true; toast('生成中…')" class="px-3 py-1.5 text-sm border rounded-md">生成 / 重新生成</button>
+        <button @click="modal.ai=false; aiPreview=false; toast('已入库当前空间 · Listing 须选图器引用')" class="px-3 py-1.5 text-sm bg-primary text-white rounded-md">确认入库</button>
+      </div>
+    </div>
+  </div>
+  <!-- 文生图 §7.14 -->
+  <div x-show="modal.txt2img" class="fixed inset-0 z-[300] flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/45" @click="modal.txt2img=false"></div>
+    <div class="relative bg-white rounded-lg w-full max-w-md p-5">
+      <h3 class="font-semibold mb-3">文生图</h3>
+      <textarea class="w-full border border-line rounded-md p-2 text-sm mb-3" rows="3" placeholder="描述：黑色磨砂 Zippo 打火机，棚拍白底，正面 45°…"></textarea>
+      <p class="text-xs text-ink-tertiary mb-3">结果为当前空间新记录，不覆盖原图（不做侵权检测）</p>
+      <div class="flex justify-end gap-2">
+        <button @click="modal.txt2img=false" class="px-3 py-1.5 text-sm border rounded-md">取消</button>
+        <button @click="modal.txt2img=false; toast('文生图已入库 · 当前空间新记录')" class="px-3 py-1.5 text-sm bg-primary text-white rounded-md">生成并入库</button>
+      </div>
+    </div>
+  </div>
+  <!-- 智能优化 §7.14 -->
+  <div x-show="modal.optimize" class="fixed inset-0 z-[300] flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/45" @click="modal.optimize=false"></div>
+    <div class="relative bg-white rounded-lg w-full max-w-md p-5">
+      <h3 class="font-semibold mb-3">图片智能优化</h3>
+      <p class="text-sm text-ink-secondary mb-3">对已有图增强，结果为新记录不覆盖原图 · 落入当前空间（不做侵权检测）</p>
+      <div class="flex justify-end gap-2">
+        <button @click="modal.optimize=false" class="px-3 py-1.5 text-sm border rounded-md">取消</button>
+        <button @click="modal.optimize=false; toast('优化图已入库')" class="px-3 py-1.5 text-sm bg-primary text-white rounded-md">确认优化</button>
+      </div>
+    </div>
+  </div>
+  <!-- 新建空间 §6.5 -->
+  <div x-show="modal.newSpace" class="fixed inset-0 z-[300] flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/45" @click="modal.newSpace=false"></div>
+    <div class="relative bg-white rounded-lg w-full max-w-md p-5">
+      <h3 class="font-semibold mb-3">新建素材空间</h3>
+      <label class="text-xs text-ink-secondary block mb-2">空间名称<input class="mt-1 w-full border border-line rounded-md px-2 py-1.5 text-sm" placeholder="如：市场部素材空间" /></label>
+      <label class="text-xs text-ink-secondary block mb-2">空间类型
+        <select class="mt-1 w-full border border-line rounded-md px-2 py-1.5 text-sm"><option>部门空间</option><option>品牌总控（每品牌仅 1 个）</option></select>
+      </label>
+      <label class="text-xs text-ink-secondary block mb-2">部门标签（部门空间必选）
+        <select class="mt-1 w-full border border-line rounded-md px-2 py-1.5 text-sm"><option>新品部门</option><option>法务 IP</option><option>市场部</option></select>
+      </label>
+      <label class="text-xs text-ink-secondary block mb-3">存储上限
+        <select class="mt-1 w-full border border-line rounded-md px-2 py-1.5 text-sm"><option>继承租户默认</option><option>自定义 50 GB</option></select>
+      </label>
+      <p class="text-xs text-warning mb-3">⚠ 渠道空间请在渠道管理对接成功后自动出现，不可在此手工再建</p>
+      <div class="flex justify-end gap-2">
+        <button @click="modal.newSpace=false" class="px-3 py-1.5 text-sm border rounded-md">取消</button>
+        <button @click="modal.newSpace=false; toast('空间已创建')" class="px-3 py-1.5 text-sm bg-primary text-white rounded-md">确认创建</button>
+      </div>
+    </div>
+  </div>
+  <!-- 部门字典 §6.16 -->
+  <div x-show="modal.deptDict" class="fixed inset-0 z-[300] flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/45" @click="modal.deptDict=false"></div>
+    <div class="relative bg-white rounded-lg w-full max-w-md p-5">
+      <div class="flex justify-between mb-3"><h3 class="font-semibold">部门字典 — ZIPPO</h3><button @click="modal.deptDict=false">✕</button></div>
+      <div class="flex gap-2 mb-3">
+        <input x-model="newDeptName" class="flex-1 border border-line rounded-md px-2 py-1.5 text-sm" placeholder="新部门名称" />
+        <button @click="addDept()" class="px-3 py-1.5 text-sm bg-primary text-white rounded-md">新增</button>
+      </div>
+      <div class="space-y-2 max-h-64 overflow-y-auto">
+        <template x-for="(d,i) in deptDict" :key="i">
+          <div class="flex justify-between items-center text-sm border-b border-line-soft py-2">
+            <span x-text="d.name"></span>
+            <div class="flex gap-2 items-center">
+              <span class="text-xs" :class="d.enabled?'text-success':'text-ink-tertiary'" x-text="d.enabled?'启用':'停用'"></span>
+              <button @click="d.enabled=!d.enabled" class="text-xs text-primary" x-text="d.enabled?'停用':'启用'"></button>
+            </div>
+          </div>
+        </template>
+      </div>
+      <p class="text-xs text-ink-tertiary mt-3">名称自主定义；不进 D12 组织树</p>
+    </div>
+  </div>
+  <!-- 跨空间推送 §7.18 -->
+  <div x-show="modal.push" class="fixed inset-0 z-[300] flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/45" @click="modal.push=false"></div>
+    <div class="relative bg-white rounded-lg w-full max-w-md p-5">
+      <h3 class="font-semibold mb-3">跨空间推送</h3>
+      <p class="text-xs text-ink-tertiary mb-3">目标空间生成新 assetNo；不带商品引用 · 源删除不影响目标已有记录</p>
+      <label class="text-xs text-ink-secondary block mb-3">目标空间
+        <select class="mt-1 w-full border border-line rounded-md px-2 py-1.5 text-sm">
+          <template x-for="s in spaces.filter(x=>x.id!==currentSpaceId && x.status==='ENABLED')" :key="s.id">
+            <option :value="s.id" x-text="s.name"></option>
+          </template>
+        </select>
+      </label>
+      <div class="flex gap-2 mb-3 text-sm">
+        <label class="flex-1 border rounded-md p-2 cursor-pointer" :class="pushMode==='direct'?'border-primary bg-primary-bg':''"><input type="radio" class="accent-[#C8102E] mr-1" value="direct" x-model="pushMode" /> 直推（品牌/总控）</label>
+        <label class="flex-1 border rounded-md p-2 cursor-pointer" :class="pushMode==='apply'?'border-primary bg-primary-bg':''"><input type="radio" class="accent-[#C8102E] mr-1" value="apply" x-model="pushMode" /> 申请确认</label>
+      </div>
+      <div class="flex justify-end gap-2">
+        <button @click="modal.push=false" class="px-3 py-1.5 text-sm border rounded-md">取消</button>
+        <button @click="modal.push=false; toast(pushMode==='direct'?'直推成功 · 目标空间已有新编号':'推送申请已提交，待品牌管理员确认')" class="px-3 py-1.5 text-sm bg-primary text-white rounded-md">确认</button>
+      </div>
+    </div>
+  </div>
+  <!-- 相似度剖析 §6.7 -->
+  <div x-show="modal.analyze" class="fixed inset-0 z-[300] flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/45" @click="modal.analyze=false"></div>
+    <div class="relative bg-white rounded-lg w-full max-w-2xl p-5 max-h-[90vh] overflow-y-auto">
+      <div class="flex justify-between mb-3">
+        <h3 class="font-semibold">相似度剖析</h3>
+        <div class="flex gap-2">
+          <button @click="modal.suggest=true" class="text-xs text-primary border border-primary/30 px-2 py-1 rounded">提交建议</button>
+          <button @click="modal.analyze=false">✕</button>
+        </div>
+      </div>
+      <div class="flex gap-4 mb-4">
+        <div class="text-center flex-1"><img :src="thumbSvg('参考图')" class="w-full aspect-square object-cover rounded" alt="" /><div class="text-xs text-ink-tertiary mt-1">参考图</div></div>
+        <div class="text-center flex-1"><img :src="thumbSvg(analyzeTarget?.name||'结果')" class="w-full aspect-square object-cover rounded" alt="" /><div class="text-xs text-ink-tertiary mt-1">本条结果 · <span class="text-primary font-bold" x-text="(analyzeTarget?.score||92)+'%'"></span></div></div>
+      </div>
+      <div class="space-y-3 text-sm mb-4">
+        <div><div class="flex justify-between text-xs mb-1"><span>线条相似度</span><span>88%</span></div><div class="h-2 bg-fill rounded-full overflow-hidden"><div class="h-full bg-primary" style="width:88%"></div></div><p class="text-xs text-ink-tertiary mt-1">轮廓走向接近，局部转折不同</p></div>
+        <div><div class="flex justify-between text-xs mb-1"><span>文字相似度</span><span>61%</span></div><div class="h-2 bg-fill rounded-full overflow-hidden"><div class="h-full bg-brand-gray" style="width:61%"></div></div><p class="text-xs text-ink-tertiary mt-1">字体接近，排版字数不同（维度来自 D13 剖析模板）</p></div>
+      </div>
+      <div class="flex gap-2">
+        <button @click="modal.linkSku=true" class="px-3 py-1.5 text-xs border border-line rounded">关联商品</button>
+        <button @click="toast('打开详情')" class="px-3 py-1.5 text-xs border border-line rounded">详情</button>
+        <button @click="toast('下载任务已创建')" class="px-3 py-1.5 text-xs border border-line rounded">下载</button>
+      </div>
+    </div>
+  </div>
+  <!-- 提交建议 -->
+  <div x-show="modal.suggest" class="fixed inset-0 z-[310] flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/45" @click="modal.suggest=false"></div>
+    <div class="relative bg-white rounded-lg w-full max-w-md p-5">
+      <h3 class="font-semibold mb-3">提交剖析建议</h3>
+      <textarea class="w-full border border-line rounded-md p-2 text-sm mb-3" rows="3" placeholder="这条剖析哪里不准 / 希望怎么改…"></textarea>
+      <p class="text-xs text-ink-tertiary mb-3">进入待审池，不即时改模板</p>
+      <div class="flex justify-end gap-2">
+        <button @click="modal.suggest=false" class="px-3 py-1.5 text-sm border rounded-md">取消</button>
+        <button @click="modal.suggest=false; toast('建议已提交待审')" class="px-3 py-1.5 text-sm bg-primary text-white rounded-md">提交</button>
+      </div>
+    </div>
+  </div>
+  <!-- 新建文件夹 -->
+  <div x-show="modal.newFolder" class="fixed inset-0 z-[300] flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/45" @click="modal.newFolder=false"></div>
+    <div class="relative bg-white rounded-lg w-full max-w-sm p-5">
+      <h3 class="font-semibold mb-3">新建文件夹</h3>
+      <input x-model="newFolderName" class="w-full border border-line rounded-md px-2 py-1.5 text-sm mb-2" placeholder="文件夹名称" />
+      <p class="text-xs text-ink-tertiary mb-3">最多 5 层 · 同级不可重名 · 不可跨空间移动</p>
+      <div class="flex justify-end gap-2">
+        <button @click="modal.newFolder=false" class="px-3 py-1.5 text-sm border rounded-md">取消</button>
+        <button @click="createFolder()" class="px-3 py-1.5 text-sm bg-primary text-white rounded-md">创建</button>
+      </div>
+    </div>
+  </div>
+  <!-- 批量移动 / 打标签 / 关联 SKU / 添加用户 / 空间配置 -->
+  <div x-show="modal.batchMove" class="fixed inset-0 z-[300] flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/45" @click="modal.batchMove=false"></div>
+    <div class="relative bg-white rounded-lg w-full max-w-sm p-5">
+      <h3 class="font-semibold mb-3">批量移动（同空间）</h3>
+      <select class="w-full border border-line rounded-md px-2 py-1.5 text-sm mb-3">
+        <template x-for="f in folderTree" :key="f.id"><option :value="f.id" x-text="f.name"></option></template>
+      </select>
+      <p class="text-xs text-ink-tertiary mb-3">跨空间请走「推送」，不提供批量跨空间移动</p>
+      <div class="flex justify-end gap-2">
+        <button @click="modal.batchMove=false" class="px-3 py-1.5 text-sm border rounded-md">取消</button>
+        <button @click="modal.batchMove=false; selectedIds=[]; toast('已移动至目标文件夹')" class="px-3 py-1.5 text-sm bg-primary text-white rounded-md">确认</button>
+      </div>
+    </div>
+  </div>
+  <div x-show="modal.batchTag" class="fixed inset-0 z-[300] flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/45" @click="modal.batchTag=false"></div>
+    <div class="relative bg-white rounded-lg w-full max-w-sm p-5">
+      <h3 class="font-semibold mb-3">打标签</h3>
+      <div class="flex flex-wrap gap-2 mb-3">
+        <template x-for="t in ['主图','白底','活动','春夏','渠道']" :key="t">
+          <button @click="toast('已打标签：'+t); modal.batchTag=false" class="px-2 py-1 text-xs border border-line rounded hover:border-primary" x-text="t"></button>
+        </template>
+      </div>
+      <input class="w-full border border-line rounded-md px-2 py-1.5 text-sm" placeholder="自定义标签后回车" @keydown.enter="modal.batchTag=false; toast('标签已保存')" />
+    </div>
+  </div>
+  <div x-show="modal.linkSku" class="fixed inset-0 z-[300] flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/45" @click="modal.linkSku=false"></div>
+    <div class="relative bg-white rounded-lg w-full max-w-md p-5">
+      <h3 class="font-semibold mb-3">管理商品关联</h3>
+      <input class="w-full border border-line rounded-md px-2 py-1.5 text-sm mb-3" placeholder="搜索 SPU/SKU" />
+      <div class="space-y-2 max-h-48 overflow-y-auto mb-3">
+        <template x-for="s in linkSkuCandidates" :key="s.sku">
+          <label class="flex items-center gap-2 p-2 bg-fill rounded text-sm cursor-pointer">
+            <input type="checkbox" class="accent-[#C8102E]" :checked="s.linked" />
+            <span x-text="s.sku"></span>
+            <span class="text-xs text-ink-tertiary" x-text="s.name"></span>
+          </label>
+        </template>
+      </div>
+      <div class="flex justify-end gap-2">
+        <button @click="modal.linkSku=false" class="px-3 py-1.5 text-sm border rounded-md">取消</button>
+        <button @click="modal.linkSku=false; toast('关联已保存')" class="px-3 py-1.5 text-sm bg-primary text-white rounded-md">保存</button>
+      </div>
+    </div>
+  </div>
+  <div x-show="modal.addUser" class="fixed inset-0 z-[300] flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/45" @click="modal.addUser=false"></div>
+    <div class="relative bg-white rounded-lg w-full max-w-md p-5">
+      <h3 class="font-semibold mb-3">添加空间用户</h3>
+      <label class="text-xs block mb-3">账号
+        <select x-model="addUserAccount" class="mt-1 w-full border border-line rounded-md px-2 py-1.5 text-sm">
+          <option value="赵七">赵七</option>
+          <option value="钱八">钱八</option>
+          <option value="孙九">孙九</option>
+        </select>
+      </label>
+      <p class="text-xs text-ink-tertiary mb-3">仅分配进入本空间；查看/操作能力由组织权限控制</p>
+      <div class="flex justify-end gap-2">
+        <button @click="modal.addUser=false" class="px-3 py-1.5 text-sm border rounded-md">取消</button>
+        <button @click="confirmAddUser()" class="px-3 py-1.5 text-sm bg-primary text-white rounded-md">确认</button>
+      </div>
+    </div>
+  </div>
+  <div x-show="modal.spaceConfig" class="fixed inset-0 z-[300] flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/45" @click="modal.spaceConfig=false"></div>
+    <div class="relative bg-white rounded-lg w-full max-w-md p-5 max-h-[90vh] overflow-y-auto">
+      <h3 class="font-semibold mb-3">空间配置 · <span x-text="(configSpace||currentSpace).name"></span></h3>
+      <p class="text-xs text-ink-tertiary mb-3">本期不做上传侵权检测 · 本页仅保留存储/回收站等经营项</p>
+      <label class="text-xs block mb-3">回收站保留期（天）<input type="number" value="30" min="7" max="90" class="mt-1 w-full border border-line rounded-md px-2 py-1.5 text-sm" /></label>
+      <label class="text-xs block mb-3">存储上限<input class="mt-1 w-full border border-line rounded-md px-2 py-1.5 text-sm" value="100 GB" /></label>
+      <div class="flex flex-wrap justify-between gap-2">
+        <button @click="disableSpace(configSpace||currentSpace); modal.spaceConfig=false" class="px-3 py-1.5 text-sm border border-line rounded-md text-primary">停用空间</button>
+        <button @click="modal.spaceConfig=false; toast('配置已保存')" class="px-3 py-1.5 text-sm bg-primary text-white rounded-md">保存</button>
+      </div>
+    </div>
+  </div>
+  <!-- 系统落点说明 §7.20 -->
+  <div x-show="modal.landing" class="fixed inset-0 z-[300] flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/45" @click="modal.landing=false"></div>
+    <div class="relative bg-white rounded-lg w-full max-w-md p-5">
+      <h3 class="font-semibold mb-3">系统来源落点</h3>
+      <p class="text-sm text-ink-secondary mb-3">灵感创意库采纳 / PW 附图默认落入品牌总控；可在系统设置改为指定渠道或部门空间。</p>
+      <label class="text-xs block mb-3">当前落点空间
+        <select class="mt-1 w-full border border-line rounded-md px-2 py-1.5 text-sm">
+          <option>品牌总控空间（默认）</option>
+          <option>新品部门素材空间</option>
+          <option>天猫渠道素材空间</option>
+        </select>
+      </label>
+      <button @click="toast('演示：落点空间已停用，上传将被拒绝')" class="w-full mb-2 py-2 text-sm border border-warning text-warning rounded-md">演示落点空间停用</button>
+      <button @click="modal.landing=false; toast('落点配置已保存（D13 系统设置演示 · 幂等 Key=sourceType:sourceBizId）')" class="w-full py-2 text-sm bg-primary text-white rounded-md">保存</button>
+    </div>
+  </div>
+  <div x-show="modal.recyclePurge" class="fixed inset-0 z-[300] flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/45" @click="modal.recyclePurge=false"></div>
+    <div class="relative bg-white rounded-lg w-full max-w-md p-5">
+      <h3 class="font-semibold mb-2">彻底删除</h3>
+      <p class="text-sm text-ink-secondary mb-4">将永久删除已选 <b class="text-primary" x-text="purgeRecycleIds.length"></b> 项素材，不可恢复。确认继续？</p>
+      <div class="flex justify-end gap-2">
+        <button @click="modal.recyclePurge=false; purgeRecycleIds=[]" class="px-3 py-1.5 text-sm border rounded-md">取消</button>
+        <button @click="confirmPurgeRecycle()" class="px-3 py-1.5 text-sm bg-primary text-white rounded-md">确认删除</button>
+      </div>
+    </div>
+  </div>
+  <div x-show="modal.libraryDelete" class="fixed inset-0 z-[300] flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/45" @click="modal.libraryDelete=false"></div>
+    <div class="relative bg-white rounded-lg w-full max-w-md p-5">
+      <h3 class="font-semibold mb-2">移入回收站</h3>
+      <p class="text-sm text-ink-secondary mb-4">将 <b class="text-primary" x-text="libraryDeleteIds.length"></b> 项素材移入当前空间回收站，30 天内可恢复。确认继续？</p>
+      <div class="flex justify-end gap-2">
+        <button @click="modal.libraryDelete=false; libraryDeleteIds=[]" class="px-3 py-1.5 text-sm border rounded-md">取消</button>
+        <button @click="confirmMoveToRecycle()" class="px-3 py-1.5 text-sm bg-primary text-white rounded-md">确认</button>
+      </div>
+    </div>
+  </div>
+  <!-- Toast -->
+  <div x-show="toastMsg" x-transition class="fixed top-16 left-1/2 -translate-x-1/2 z-[500] px-4 py-2 bg-brand-black text-white text-sm rounded-md shadow-lg toast-enter" x-text="toastMsg"></div>
+  <script>
+    function damApp() {
+      const baseNames = ['经典火焰主图','磨砂黑冰侧面','情人节限定海报','天猫主图白底','活动 KV 横版','包装详情特写','品牌故事横幅','经销商培训封面','直播贴片素材','SKU 组合图','复古雕花特写','限量编号款','户外场景图','礼盒组合','OCR 海报文字','待复核样稿','渠道授权引用','推送副本','裁剪衍生图','AI 白底候选','AI 棚拍图','部门活动稿','PW 沉淀附图','灵感采纳图','黑冰系列主图','铜雕龙纹特写','联名款 KV','618 大促横幅','双11 预售图','详情页长图','短视频封面','小程序分享图','经销商海报','门店陈列图','说明书扫描件','质检留样图','包装展开图','防伪标签图','礼盒内衬图','配件组合图','打火机特写','ZIPPO 标志规范','火焰动效帧','3D 渲染图','场景合成图','模特手持图','户外露营场景','商务礼品图','收藏版编号','限量版证书'];
+      const tagPool = ['主图','活动','白底','渠道','详情','品牌','AI','春夏','秋冬','直播','PW'];
+      const spaceIds = ['sp1','sp1','sp1','sp2','sp2','sp3','sp4'];
+      const materials = [];
+      for (let i = 0; i < 160; i++) {
+        const name = baseNames[i % baseNames.length] + (i >= baseNames.length ? ' v' + Math.floor(i / baseNames.length) : '');
+        const skuCount = i % 6;
+        const base = baseNames[i % baseNames.length];
+        const isDoc = /说明书|质检|标志规范|证书|培训课件/.test(base);
+        materials.push({
+          id: 'm' + (i + 1),
+          name,
+          assetNo: 'AST202608' + String(i + 1).padStart(4, '0'),
+          format: isDoc ? 'PDF' : (i % 11 === 0 ? 'PNG' : 'JPG'),
+          size: ((i % 9) + 1.1).toFixed(1) + 'MB',
+          tags: [tagPool[i % tagPool.length], tagPool[(i + 3) % tagPool.length]].filter((v, idx, a) => a.indexOf(v) === idx),
+          skuCount,
+          isMainPic: i % 8 === 0,
+          thumbLabel: base.slice(0, 6),
+          updatedAt: '2026-08-' + String(1 + (i % 19)).padStart(2, '0') + ' ' + String(8 + (i % 14)).padStart(2, '0') + ':00',
+          spaceId: spaceIds[i % spaceIds.length],
+          uploader: i % 3 === 0 ? 'me' : 'other',
+        });
+      }
+      const orgRoles = ['品牌管理员', '渠道运营', '商品专员', '普通用户', '法务专员', '设计师', '经销商运营'];
+      const orgNames = ['ZIPPO 品牌', '天猫渠道部', '京东渠道部', '新品开发部', '市场部', '经销商 A'];
+      const surnames = ['张', '李', '王', '赵', '钱', '孙', '周', '吴', '郑', '陈', '刘', '杨', '黄', '林', '何'];
+      const givenNames = ['三', '四', '五', '六', '七', '八', '九', '十', '明', '华', '强', '丽', '芳', '伟', '杰', '娜', '敏', '静', '磊', '洋'];
+      const recycleNames = ['旧版包装展示图.jpg', '活动备用横幅.png', '测试上传误删.jpg', '过期主图.jpg', '草稿 KV.png', '误删白底图.jpg', '渠道旧素材.jpg', '培训课件封面.png', '直播背景.jpg', '详情页切片.png', '礼盒图旧版.jpg', '经销商海报.jpg'];
+      const productNamePool = ['Zippo经典款-红色', 'Zippo经典款-黑色', '限量铜雕龙纹', '磨砂黑冰系列', '情人节限定', '户外露营联名', '复古雕花款', '联名礼盒装', '商务礼品套装', '收藏编号款'];
+      const externalTitlePool = {
+        tmall: ['ZIPPO打火机正品经典铬砂轮防风煤油火机男士礼物', 'zippo煤油打火机黑冰男士创意刻字', 'Zippo美国原装正品磨砂系列', '芝宝zippo火机礼盒装'],
+        jd: ['ZIPPO芝宝打火机205磨砂经典', 'zippo正品防风煤油火机', 'Zippo黑冰系列礼盒', '芝宝经典款男士礼物'],
+      };
+      function thumbSvg(label) {
+        const t = encodeURIComponent(label || '素材');
+        return "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%232a2a2a'/%3E%3Cstop offset='55%25' stop-color='%23555'/%3E%3Cstop offset='100%25' stop-color='%23C8102E'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect fill='url(%23g)' width='200' height='200'/%3E%3Ctext x='100' y='105' text-anchor='middle' fill='white' font-size='13' font-family='sans-serif'%3E" + t + "%3C/text%3E%3C/svg%3E";
+      }
+      return {
+        page: 'library',
+        openTabs: [
+          { id: 'ext-workbench', label: '工作台', kind: 'external' },
+          { id: 'dam-library', label: '素材库', kind: 'dam', page: 'library' },
+        ],
+        activeTabId: 'dam-library',
+        mobileNav: false,
+        role: 'BRAND_ADMIN',
+        currentSpaceId: 'sp1',
+        currentFolderId: 'f1',
+        spaceDropdownOpen: false,
+        filterPanelOpen: false,
+        detailPanelOpen: false,
+        viewTab: 'all',
+        searchScope: 'internal',
+        externalPlatform: 'tmall',
+        externalResults: [],
+        externalFailed: false,
+        pickerChannel: 'tmall',
+        legalView: 'todo',
+        configSpace: null,
+        uploadSessionHint: '',
+        viewMode: 'grid',
+        shareType: 'external',
+        sharePerm: 'download',
+        shareLink: '',
+        pushMode: 'direct',
+        aiPreview: false,
+        productResults: [],
+        pickerSelected: [],
+        analyzeTarget: null,
+        newFolderName: '',
+        newDeptName: '',
+        addUserAccount: '赵七',
+        channelAuth: { tmall: true, jd: true, douyin: false },
+        versions: [
+          { ver: 'V3（当前）', at: '2026-08-18 14:22', by: '张三', label: 'V3' },
+          { ver: 'V2', at: '2026-08-10 09:15', by: '李四', label: 'V2' },
+          { ver: 'V1', at: '2026-07-28 16:40', by: '王五', label: 'V1' },
+        ],
+        deptDict: [
+          { name: '新品部门', enabled: true },
+          { name: '法务 IP', enabled: true },
+          { name: '市场部', enabled: true },
+          { name: '设计协作（停用示例）', enabled: false },
+        ],
+        linkSkuCandidates: [
+          { sku: 'SKU20260001', name: '经典款-红', linked: true },
+          { sku: 'SKU20260002', name: '经典款-黑', linked: true },
+          { sku: 'SKU20260015', name: '限量铜雕', linked: false },
+          { sku: 'SKU20260028', name: '磨砂黑冰', linked: false },
+        ],
+        pageNo: 1,
+        pageSize: 20,
+        spaceUserPageNo: 1,
+        spaceUserPageSize: 20,
+        recyclePageNo: 1,
+        recyclePageSize: 20,
+        searchPageNo: 1,
+        searchPageSize: 20,
+        externalPageNo: 1,
+        externalPageSize: 20,
+        productPageNo: 1,
+        productPageSize: 20,
+        pickerPageNo: 1,
+        pickerPageSize: 20,
+        detailTab: 'info',
+        loading: false,
+        replaceLogs: [
+          { at: '2026-08-18 14:22', operator: '张三', note: '更新天猫主图白底版本' },
+          { at: '2026-08-10 09:15', operator: '李四', note: '替换为 618 活动稿' },
+          { at: '2026-07-28 16:40', operator: '王五', note: '初版上传' },
+        ],
+        filters: { keyword: '', tag: '', linked: '' },
+        viewTabs: [
+          { id: 'all', label: '全部素材', count: 0 },
+          { id: 'mine', label: '我上传的', count: 0 },
+        ],
+        selectedIds: [],
+        selectedRecycleIds: [],
+        purgeRecycleIds: [],
+        libraryDeleteIds: [],
+        filteredMaterials: materials.filter(m => m.spaceId === 'sp1'),
+        searchResults: [],
+        uploadQueue: [],
+        currentMaterial: null,
+        toastMsg: '',
+        modal: {
+          detail: false, upload: false, share: false, replace: false, crop: false, ai: false,
+          txt2img: false, optimize: false, newSpace: false, deptDict: false, push: false,
+          analyze: false, suggest: false, newFolder: false, batchMove: false, batchTag: false,
+          linkSku: false, addUser: false, spaceConfig: false, landing: false, recyclePurge: false, libraryDelete: false,
+        },
+        spaces: [
+          { id: 'sp1', name: '天猫渠道素材空间', typeLabel: '品牌·渠道', shortType: '渠道', typeClass: 'bg-primary-bg text-primary border-primary/20', status: 'ENABLED', detect: true, storage: '68.2 / 100 GB', storagePct: 68, assetCount: 1236, userCount: 18 },
+          { id: 'sp2', name: '品牌总控空间', typeLabel: '品牌·总控', shortType: '总控', typeClass: 'bg-brand-black text-white border-brand-black', status: 'ENABLED', detect: true, storage: '124 / 200 GB', storagePct: 62, assetCount: 2840, userCount: 32 },
+          { id: 'sp3', name: '新品部门素材空间', typeLabel: '品牌·部门', shortType: '部门', typeClass: 'bg-success-bg text-success border-success/20', status: 'ENABLED', detect: false, storage: '12 / 50 GB', storagePct: 24, assetCount: 456, userCount: 8 },
+          { id: 'sp4', name: '京东渠道素材空间', typeLabel: '品牌·渠道', shortType: '渠道', typeClass: 'bg-primary-bg text-primary border-primary/20', status: 'ENABLED', detect: true, storage: '45 / 100 GB', storagePct: 45, assetCount: 892, userCount: 12 },
+          { id: 'sp5', name: '经销商 A 总控', typeLabel: '经销商·总控', shortType: '经销商', typeClass: 'bg-fill text-ink-secondary border-line', status: 'DISABLED', detect: true, storage: '8 / 30 GB', storagePct: 27, assetCount: 128, userCount: 4 },
+        ],
+        folderTree: [
+          { id: 'f1', name: '商品素材', count: 1236, level: 0, open: true, icon: '📂' },
+          { id: 'f1a', name: 'SPU 主图', count: 320, level: 1, icon: '📁' },
+          { id: 'f1b', name: '资源图', count: 680, level: 1, icon: '📁' },
+          { id: 'f1c', name: '商品详情图', count: 236, level: 1, icon: '📁' },
+          { id: 'f2', name: '渠道投放', count: 456, level: 0, open: false, icon: '📁' },
+          { id: 'f3', name: '内容素材', count: 189, level: 0, icon: '📁' },
+          { id: 'f4', name: 'AI 生成候选', count: 86, level: 0, icon: '📁' },
+        ],
+        spaceUsers: Array.from({ length: 140 }, (_, i) => ({
+          id: i + 1,
+          name: surnames[i % surnames.length] + givenNames[i % givenNames.length] + (i >= 100 ? String(i - 99) : ''),
+          org: orgNames[i % orgNames.length],
+          orgRole: orgRoles[i % orgRoles.length],
+          enabled: i % 11 !== 0,
+        })),
+        recycleItems: Array.from({ length: 120 }, (_, i) => ({
+          id: i + 1,
+          name: recycleNames[i % recycleNames.length] + (i >= recycleNames.length ? ' v' + Math.floor(i / recycleNames.length) : ''),
+          deletedAt: '2026-08-' + String(Math.max(1, 20 - (i % 20))).padStart(2, '0') + ' ' + String(9 + (i % 8)).padStart(2, '0') + ':00',
+          daysLeft: Math.max(1, 30 - (i % 30)),
+        })),
+        pickerMaterials: (() => {
+          const list = materials.slice(0, 120).map((m, i) => ({
+            ...m,
+            selectable: true,
+            reason: '',
+            source: i % 4 === 0 ? '总控·已授权' : '本渠道空间',
+          }));
+          list.push({
+            id: 'deleted-src', assetNo: 'AST-DEL-001', thumbLabel: '已删', name: '源已删除样例',
+            selectable: false, reason: '源素材已删除', source: 'SOURCE_DELETED',
+          });
+          return list;
+        })(),
+        get currentSpace() { return this.spaces.find(s => s.id === this.currentSpaceId) || this.spaces[0]; },
+        get pageTitle() {
+          const map = { library: '素材库', search: '以图搜图', searchProduct: '以图搜款', spaces: '空间管理', spaceUsers: '用户分配', recycle: '回收站', picker: '渠道选图器', legal: '法务复核（已取消）', external: '其它页面' };
+          return map[this.page] || '';
+        },
+        get activeTabLabel() {
+          const t = this.openTabs.find(x => x.id === this.activeTabId);
+          return t ? t.label : this.pageTitle;
+        },
+        get roleLabel() {
+          return {
+            BRAND_ADMIN: '品牌管理员', CHANNEL_ADMIN: '渠道空间管理员',
+            DEALER_ADMIN: '经销商/零售商管理员', VIEWER: '普通用户',
+          }[this.role] || this.role;
+        },
+        get currentFolderName() {
+          const f = this.folderTree.find(x => x.id === this.currentFolderId);
+          return f ? f.name : '全部';
+        },
+        get activeFilterChips() {
+          const chips = [];
+          if (this.filters.tag) chips.push({ key: 'tag', label: this.filters.tag });
+          if (this.filters.linked === 'yes') chips.push({ key: 'linked', label: '已关联' });
+          if (this.filters.linked === 'no') chips.push({ key: 'linked', label: '未关联' });
+          return chips;
+        },
+        get canManageSpace() { return this.role === 'BRAND_ADMIN' || this.role === 'DEALER_ADMIN'; },
+        get canUpload() { return this.role !== 'VIEWER'; },
+        get canDelete() { return this.role !== 'VIEWER'; },
+        get canEdit() { return this.role !== 'VIEWER'; },
+        get canDownload() { return this.role !== 'VIEWER'; },
+        get canShare() { return this.role !== 'VIEWER'; },
+        get canPush() { return this.role === 'BRAND_ADMIN'; },
+        get canAi() { return this.role !== 'VIEWER'; },
+        get uploadOk() { return this.uploadQueue.filter(u => u.status !== '失败' && u.status !== '上传中' && u.progress === 100).length; },
+        get uploadFail() { return this.uploadQueue.filter(u => u.status === '失败').length; },
+        get uploadBusy() { return this.uploadQueue.filter(u => u.status === '上传中' || (u.progress < 100 && u.status !== '失败')).length; },
+        get indexedCount() { return this.filteredMaterials.filter(m => m.format === 'JPG').length; },
+        get totalPages() { return Math.max(1, Math.ceil(this.filteredMaterials.length / this.pageSize)); },
+        get pagedMaterials() {
+          const start = (this.pageNo - 1) * this.pageSize;
+          return this.filteredMaterials.slice(start, start + this.pageSize);
+        },
+        get pageAllSelected() {
+          const rows = this.pagedMaterials;
+          return rows.length > 0 && rows.every(m => this.selectedIds.includes(m.id));
+        },
+        get spaceUserTotalPages() { return Math.max(1, Math.ceil(this.spaceUsers.length / this.spaceUserPageSize)); },
+        get pagedSpaceUsers() {
+          const start = (this.spaceUserPageNo - 1) * this.spaceUserPageSize;
+          return this.spaceUsers.slice(start, start + this.spaceUserPageSize);
+        },
+        get recycleTotalPages() { return Math.max(1, Math.ceil(this.recycleItems.length / this.recyclePageSize)); },
+        get pagedRecycleItems() {
+          const start = (this.recyclePageNo - 1) * this.recyclePageSize;
+          return this.recycleItems.slice(start, start + this.recyclePageSize);
+        },
+        get recyclePageAllSelected() {
+          const rows = this.pagedRecycleItems;
+          return rows.length > 0 && rows.every(r => this.selectedRecycleIds.includes(r.id));
+        },
+        get searchTotalPages() { return Math.max(1, Math.ceil(this.searchResults.length / this.searchPageSize)); },
+        get pagedSearchResults() {
+          const start = (this.searchPageNo - 1) * this.searchPageSize;
+          return this.searchResults.slice(start, start + this.searchPageSize);
+        },
+        get externalTotalPages() { return Math.max(1, Math.ceil(this.externalResults.length / this.externalPageSize)); },
+        get pagedExternalResults() {
+          const start = (this.externalPageNo - 1) * this.externalPageSize;
+          return this.externalResults.slice(start, start + this.externalPageSize);
+        },
+        get productTotalPages() { return Math.max(1, Math.ceil(this.productResults.length / this.productPageSize)); },
+        get pagedProductResults() {
+          const start = (this.productPageNo - 1) * this.productPageSize;
+          return this.productResults.slice(start, start + this.productPageSize);
+        },
+        get pickerTotalPages() { return Math.max(1, Math.ceil(this.pickerMaterials.length / this.pickerPageSize)); },
+        get pagedPickerMaterials() {
+          const start = (this.pickerPageNo - 1) * this.pickerPageSize;
+          return this.pickerMaterials.slice(start, start + this.pickerPageSize);
+        },
+        canManageSpaceOps(s) {
+          if (this.role === 'BRAND_ADMIN') return !String(s.typeLabel || '').includes('经销商');
+          if (this.role === 'DEALER_ADMIN') return String(s.typeLabel || '').includes('经销商');
+          return false;
+        },
+        openSpaceUsers(s) {
+          if (this.role === 'BRAND_ADMIN' && String(s.typeLabel || '').includes('经销商')) {
+            this.toast('品牌不可改经销商空间用户分配');
+            return;
+          }
+          this.currentSpaceId = s.id;
+          this.spaceUserPageNo = 1;
+          this.go('spaceUsers');
+        },
+        pageLabel(p) {
+          const map = { library: '素材库', search: '以图搜图', searchProduct: '以图搜款', spaces: '空间管理', spaceUsers: '用户分配', recycle: '回收站', picker: '渠道选图器', legal: '法务复核（已取消）', external: '其它页面' };
+          return map[p] || p;
+        },
+        openOrFocusDamTab(pageKey) {
+          const id = 'dam-' + pageKey;
+          const label = this.pageLabel(pageKey);
+          const hit = this.openTabs.find(t => t.id === id);
+          if (!hit) this.openTabs.push({ id, label, kind: 'dam', page: pageKey });
+          this.activeTabId = id;
+        },
+        activateTab(id) {
+          const t = this.openTabs.find(x => x.id === id);
+          if (!t) return;
+          this.activeTabId = id;
+          if (t.kind === 'dam') {
+            this.page = t.page;
+            if (t.page !== 'library') this.closeDetail();
+          } else {
+            this.page = 'external';
+            this.closeDetail();
+          }
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        },
+        closeTab(id) {
+          const idx = this.openTabs.findIndex(t => t.id === id);
+          if (idx < 0) return;
+          if (this.openTabs.length <= 1) {
+            this.toast('至少保留一个已打开页面');
+            return;
+          }
+          const wasActive = this.activeTabId === id;
+          this.openTabs.splice(idx, 1);
+          if (wasActive) {
+            const next = this.openTabs[Math.max(0, idx - 1)];
+            this.activateTab(next.id);
+          }
+        },
+        go(p) {
+          this.openOrFocusDamTab(p);
+          this.page = p;
+          if (p !== 'library') this.closeDetail();
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        },
+        init() {
+          this.updateViewTabCounts();
+          this.openOrFocusDamTab(this.page || 'library');
+        },
+        onEsc() {
+          Object.keys(this.modal).forEach(k => this.modal[k] = false);
+          this.spaceDropdownOpen = false;
+          this.closeDetail();
+        },
+        selectSpace(id) {
+          this.currentSpaceId = id;
+          this.spaceDropdownOpen = false;
+          this.onSpaceChange();
+        },
+        closeDetail() {
+          this.detailPanelOpen = false;
+          this.modal.detail = false;
+          this.currentMaterial = null;
+        },
+        applyViewTab() {
+          this.filterMaterials();
+        },
+        clearChip(key) {
+          if (key === 'linked') this.filters.linked = '';
+          else this.filters[key] = '';
+          this.filterMaterials();
+        },
+        updateViewTabCounts() {
+          const base = materials.filter(m => m.spaceId === this.currentSpaceId);
+          this.viewTabs[0].count = base.length;
+          this.viewTabs[1].count = base.filter(m => m.uploader === 'me').length;
+        },
+        thumbSvg(label) { return thumbSvg(label); },
+        onRoleChange() {
+          if (this.role === 'VIEWER') this.toast('演示：隐藏上传/推送等按钮');
+          else if (this.role === 'DEALER_ADMIN') this.toast('经销商管理员：可管本组织空间，不可直推品牌空间');
+          else if (this.role === 'CHANNEL_ADMIN') this.toast('渠道管理员：可上传/编辑，不可直推（仅可申请）');
+          else this.toast('角色已切换：' + this.roleLabel);
+        },
+        onSpaceChange() {
+          this.filteredMaterials = materials.filter(m => m.spaceId === this.currentSpaceId);
+          this.pageNo = 1;
+          this.selectedIds = [];
+          this.viewTab = 'all';
+          this.filters = { keyword: '', tag: '', linked: '' };
+          this.updateViewTabCounts();
+          this.toast('已切换空间 · 列表已刷新（搜图仍按有权限空间）');
+        },
+        filterMaterials() {
+          this.loading = true;
+          let list = materials.filter(m => m.spaceId === this.currentSpaceId);
+          if (this.viewTab === 'mine') list = list.filter(m => m.uploader === 'me');
+          const kw = this.filters.keyword.trim().toLowerCase();
+          if (kw) list = list.filter(m => m.name.toLowerCase().includes(kw) || m.assetNo.toLowerCase().includes(kw));
+          if (this.filters.tag) list = list.filter(m => m.tags.includes(this.filters.tag));
+          if (this.filters.linked === 'yes') list = list.filter(m => m.skuCount > 0);
+          if (this.filters.linked === 'no') list = list.filter(m => m.skuCount === 0);
+          setTimeout(() => { this.filteredMaterials = list; this.pageNo = 1; this.loading = false; }, 280);
+        },
+        prevPage() { if (this.pageNo > 1) this.pageNo--; },
+        nextPage() { if (this.pageNo < this.totalPages) this.pageNo++; },
+        prevSpaceUserPage() { if (this.spaceUserPageNo > 1) this.spaceUserPageNo--; },
+        nextSpaceUserPage() { if (this.spaceUserPageNo < this.spaceUserTotalPages) this.spaceUserPageNo++; },
+        prevRecyclePage() { if (this.recyclePageNo > 1) this.recyclePageNo--; },
+        nextRecyclePage() { if (this.recyclePageNo < this.recycleTotalPages) this.recyclePageNo++; },
+        prevSearchPage() { if (this.searchPageNo > 1) this.searchPageNo--; },
+        nextSearchPage() { if (this.searchPageNo < this.searchTotalPages) this.searchPageNo++; },
+        prevExternalPage() { if (this.externalPageNo > 1) this.externalPageNo--; },
+        nextExternalPage() { if (this.externalPageNo < this.externalTotalPages) this.externalPageNo++; },
+        prevProductPage() { if (this.productPageNo > 1) this.productPageNo--; },
+        nextProductPage() { if (this.productPageNo < this.productTotalPages) this.productPageNo++; },
+        prevPickerPage() { if (this.pickerPageNo > 1) this.pickerPageNo--; },
+        nextPickerPage() { if (this.pickerPageNo < this.pickerTotalPages) this.pickerPageNo++; },
+        confirmAddUser() {
+          if (this.spaceUsers.some(u => u.name === this.addUserAccount)) {
+            this.toast('该账号已在当前空间');
+            return;
+          }
+          this.spaceUsers.unshift({
+            id: Date.now(),
+            name: this.addUserAccount,
+            org: orgNames[0],
+            orgRole: '普通用户',
+            enabled: true,
+          });
+          this.spaceUserPageNo = 1;
+          this.modal.addUser = false;
+          this.toast('已加入本空间 · 须重新登录后切换器可见');
+        },
+        removeSpaceUser(u) {
+          if (!confirm('确认移除「' + u.name + '」的本空间分配？')) return;
+          const i = this.spaceUsers.findIndex(x => x.id === u.id);
+          if (i >= 0) this.spaceUsers.splice(i, 1);
+          if (this.spaceUserPageNo > this.spaceUserTotalPages) this.spaceUserPageNo = this.spaceUserTotalPages;
+          this.toast('已移除分配');
+        },
+        toggleSelect(id) {
+          const i = this.selectedIds.indexOf(id);
+          if (i >= 0) this.selectedIds.splice(i, 1);
+          else this.selectedIds.push(id);
+        },
+        selectAll(checked) {
+          const ids = this.pagedMaterials.map(m => m.id);
+          if (checked) {
+            ids.forEach(id => { if (!this.selectedIds.includes(id)) this.selectedIds.push(id); });
+          } else {
+            this.selectedIds = this.selectedIds.filter(id => !ids.includes(id));
+          }
+        },
+        openDetail(m) {
+          this.currentMaterial = m;
+          this.detailTab = 'info';
+          this.detailPanelOpen = true;
+          this.channelAuth = { tmall: true, jd: m.spaceId !== 'sp1', douyin: false };
+          if (window.innerWidth < 1024) this.modal.detail = true;
+        },
+        canLinkSku(m) { return !!m; },
+        openLinkSku() {
+          this.modal.linkSku = true;
+        },
+        askMoveOneToRecycle() {
+          if (!this.currentMaterial) return;
+          this.libraryDeleteIds = [this.currentMaterial.id];
+          this.modal.libraryDelete = true;
+        },
+        askMoveToRecycle() {
+          if (!this.selectedIds.length) { this.toast('请先勾选要删除的素材'); return; }
+          this.libraryDeleteIds = [...this.selectedIds];
+          this.modal.libraryDelete = true;
+        },
+        confirmMoveToRecycle() {
+          const set = new Set(this.libraryDeleteIds);
+          const n = set.size;
+          for (let i = materials.length - 1; i >= 0; i--) {
+            if (set.has(materials[i].id)) {
+              const m = materials[i];
+              this.recycleItems.unshift({
+                id: 'r' + Date.now() + '-' + i,
+                name: m.name,
+                deletedAt: '2026-08-24 刚刚',
+                daysLeft: 30,
+              });
+              materials.splice(i, 1);
+            }
+          }
+          if (this.currentMaterial && set.has(this.currentMaterial.id)) this.closeDetail();
+          this.selectedIds = this.selectedIds.filter(id => !set.has(id));
+          this.libraryDeleteIds = [];
+          this.modal.libraryDelete = false;
+          this.filterMaterials();
+          if (this.pageNo > this.totalPages) this.pageNo = this.totalPages;
+          this.toast('已移入当前空间回收站 · ' + n + ' 项');
+        },
+        openAnalyze(r) { this.analyzeTarget = r; this.modal.analyze = true; },
+        togglePicker(m) {
+          if (!m.selectable) { this.toast(m.reason || '不可选'); return; }
+          const i = this.pickerSelected.indexOf(m.id);
+          if (i >= 0) this.pickerSelected.splice(i, 1);
+          else this.pickerSelected.push(m.id);
+        },
+        createFolder() {
+          if (!this.newFolderName.trim()) { this.toast('请输入文件夹名称'); return; }
+          this.folderTree.push({ id: 'f' + Date.now(), name: this.newFolderName.trim(), count: 0, level: 1, icon: '📁' });
+          this.newFolderName = '';
+          this.modal.newFolder = false;
+          this.toast('文件夹已创建');
+        },
+        renameFolder(f) {
+          const name = prompt('重命名文件夹', f.name);
+          if (name && name.trim()) { f.name = name.trim(); this.toast('文件夹已重命名'); }
+        },
+        deleteFolder(f) {
+          if (!confirm('删除文件夹「' + f.name + '」？')) return;
+          const i = this.folderTree.findIndex(x => x.id === f.id);
+          if (i >= 0) this.folderTree.splice(i, 1);
+          this.toast('文件夹已删除');
+        },
+        disableSpace(s) {
+          if (!s) return;
+          s.status = 'DISABLED';
+          this.toast('空间已停用 · 422-DAM-SPACE_DISABLED 将拦截写入');
+        },
+        enableSpace(s) {
+          if (!s) return;
+          s.status = 'ENABLED';
+          this.toast('空间已手工启用（D12 组织再启用不会自动启空间）');
+        },
+        archiveSpace(s) {
+          if (!s) return;
+          s.status = 'ARCHIVED';
+          this.toast('空间已归档 · 422-DAM-SPACE_ARCHIVED');
+        },
+        addDept() {
+          if (!this.newDeptName.trim()) { this.toast('请输入部门名称'); return; }
+          this.deptDict.push({ name: this.newDeptName.trim(), enabled: true });
+          this.newDeptName = '';
+          this.toast('部门字典已新增');
+        },
+        simulateUpload() {
+          this.uploadSessionHint = '';
+          this.uploadQueue = [
+            { name: 'zippo_hero_01.jpg', progress: 100, status: '完成' },
+            { name: 'zippo_detail_02.png', progress: 100, status: '完成' },
+            { name: 'campaign_kv.jpg', progress: 65, status: '上传中' },
+            { name: 'bad.exe', progress: 0, status: '失败' },
+            { name: 'large_video.mp4', progress: 40, status: '上传中' },
+          ];
+          let t = 65;
+          const iv = setInterval(() => {
+            t += 5;
+            if (this.uploadQueue[2]) this.uploadQueue[2].progress = Math.min(100, t);
+            if (t >= 100) {
+              clearInterval(iv);
+              if (this.uploadQueue[2]) { this.uploadQueue[2].status = '完成'; this.uploadQueue[2].progress = 100; }
+              this.toast('上传完成 · 本期不做侵权检测');
+            }
+          }, 200);
+        },
+        simulateResumeUpload() {
+          this.uploadSessionHint = '分片会话 sessionId=ups_demo_001 · 已传 3/8 片 · 断点续传中（TTL 24h）';
+          this.uploadQueue = [
+            { name: '大图_4K_主视觉.jpg', progress: 38, status: '上传中' },
+          ];
+          let t = 38;
+          const iv = setInterval(() => {
+            t += 8;
+            if (this.uploadQueue[0]) this.uploadQueue[0].progress = Math.min(100, t);
+            if (t >= 100) {
+              clearInterval(iv);
+              if (this.uploadQueue[0]) this.uploadQueue[0].status = '完成';
+              this.uploadSessionHint = '分片会话已完成 · COMPLETED';
+              this.toast('断点续传完成');
+            }
+          }, 250);
+        },
+        runSearch() {
+          this.externalFailed = false;
+          this.searchPageNo = 1;
+          const accessible = this.spaces.filter(s => s.status !== 'ARCHIVED').map(s => s.id);
+          const pool = materials.filter(m => accessible.includes(m.spaceId));
+          const hits = [];
+          for (let i = 0; i < 120; i++) {
+            const m = pool[i % pool.length];
+            hits.push({
+              name: m.name,
+              assetNo: m.assetNo,
+              score: Math.max(72, 98 - (i % 27)),
+              spaceName: (this.spaces.find(s => s.id === m.spaceId) || {}).name || m.spaceId,
+            });
+          }
+          this.searchResults = hits;
+          this.toast('内部搜图完成 · ' + this.searchResults.length + ' 条');
+        },
+        runExternalSearch() {
+          this.externalFailed = false;
+          this.externalPageNo = 1;
+          const platform = this.externalPlatform;
+          const titles = externalTitlePool[platform] || externalTitlePool.tmall;
+          const count = platform === 'tmall' ? 96 : 88;
+          const shops = platform === 'tmall'
+            ? ['ZIPPO官方旗舰店', '某专营店', '某专卖店', '礼品批发']
+            : ['京东自营', '京东专营', '京东旗舰', '礼品专营'];
+          this.externalResults = Array.from({ length: count }, (_, i) => ({
+            platform,
+            platformLabel: platform === 'jd' ? '京东' : (i % 3 === 1 ? '淘宝' : '天猫'),
+            title: titles[i % titles.length] + (i >= titles.length ? ' #' + (i + 1) : ''),
+            price: (120 + (i % 80) + (i % 10) * 0.1).toFixed(2),
+            shop: shops[i % shops.length],
+            matchRate: Math.max(75, 94 - (i % 20)),
+            detailUrl: (platform === 'jd' ? 'item.jd.com' : 'item.taobao.com') + '/…',
+          }));
+          this.toast((platform === 'tmall' ? '淘宝/天猫拍立淘' : '京东拍立淘') + ' · ' + this.externalResults.length + ' 条 · 未入库');
+        },
+        simulateExternalFail() {
+          this.externalResults = [];
+          this.externalFailed = true;
+          this.toast('502-DAM-EXTERNAL_SEARCH · 内部搜图仍可用');
+        },
+        runSearchProduct() {
+          this.productPageNo = 1;
+          this.productResults = Array.from({ length: 100 }, (_, i) => ({
+            sku: 'SKU2026' + String(i + 1).padStart(4, '0'),
+            name: productNamePool[i % productNamePool.length] + (i >= productNamePool.length ? ' v' + Math.floor(i / productNamePool.length) : ''),
+            score: Math.max(60, 98 - (i % 40)),
+          }));
+          this.toast('搜款完成 · ' + this.productResults.length + ' 条');
+        },
+        toggleRecycleSelect(id) {
+          const i = this.selectedRecycleIds.indexOf(id);
+          if (i >= 0) this.selectedRecycleIds.splice(i, 1);
+          else this.selectedRecycleIds.push(id);
+        },
+        selectAllRecyclePage(checked) {
+          const ids = this.pagedRecycleItems.map(r => r.id);
+          if (checked) {
+            ids.forEach(id => { if (!this.selectedRecycleIds.includes(id)) this.selectedRecycleIds.push(id); });
+          } else {
+            this.selectedRecycleIds = this.selectedRecycleIds.filter(id => !ids.includes(id));
+          }
+        },
+        restoreRecycleOne(r) {
+          this.recycleItems = this.recycleItems.filter(x => x.id !== r.id);
+          this.selectedRecycleIds = this.selectedRecycleIds.filter(id => id !== r.id);
+          if (this.recyclePageNo > this.recycleTotalPages) this.recyclePageNo = this.recycleTotalPages;
+          this.toast('已恢复到原路径');
+        },
+        batchRestoreRecycle() {
+          if (!this.selectedRecycleIds.length) { this.toast('请先勾选要恢复的素材'); return; }
+          const set = new Set(this.selectedRecycleIds);
+          const n = set.size;
+          this.recycleItems = this.recycleItems.filter(x => !set.has(x.id));
+          this.selectedRecycleIds = [];
+          if (this.recyclePageNo > this.recycleTotalPages) this.recyclePageNo = this.recycleTotalPages;
+          this.toast('批量恢复成功 · ' + n + ' 项');
+        },
+        askPurgeRecycle() {
+          if (!this.selectedRecycleIds.length) { this.toast('请先勾选要彻底删除的素材'); return; }
+          this.purgeRecycleIds = [...this.selectedRecycleIds];
+          this.modal.recyclePurge = true;
+        },
+        askPurgeRecycleOne(r) {
+          this.purgeRecycleIds = [r.id];
+          this.modal.recyclePurge = true;
+        },
+        confirmPurgeRecycle() {
+          const set = new Set(this.purgeRecycleIds);
+          const n = set.size;
+          this.recycleItems = this.recycleItems.filter(x => !set.has(x.id));
+          this.selectedRecycleIds = this.selectedRecycleIds.filter(id => !set.has(id));
+          this.purgeRecycleIds = [];
+          this.modal.recyclePurge = false;
+          if (this.recyclePageNo > this.recycleTotalPages) this.recyclePageNo = this.recycleTotalPages;
+          this.toast('已彻底删除 · ' + n + ' 项，不可找回');
+        },
+        toast(msg, type) {
+          this.toastMsg = msg;
+          clearTimeout(this._toastTimer);
+          this._toastTimer = setTimeout(() => { this.toastMsg = ''; }, 2600);
+        },
+      };
+    }
+  </script>
+<script src="view-guard.js"></script>
+</body>
+
+<script>
+/* ZIPPO_GLOBAL_SHELL_V2 */
+(function(){
+  if(window.__zippoShellV2) return;
+  window.__zippoShellV2 = 1;
+  document.querySelectorAll('.card').forEach(function(card){
+    if(card.querySelector('.table-wrap table')) card.classList.add('has-table');
+  });
+  document.querySelectorAll('.pager, .pagination').forEach(function(p){
+    p.classList.add('zippo-pager-sticky');
+  });
+  function wrapAvatar(el){
+    if(!el || el.closest('.zippo-user-menu')) return;
+    var wrap = document.createElement('div');
+    wrap.className = 'zippo-user-menu';
+    var panel = document.createElement('div');
+    panel.className = 'zippo-user-menu-panel';
+    panel.innerHTML = '<button type="button" data-act="profile">个人中心</button><button type="button" data-act="logout">退出登录</button>';
+    el.parentNode.insertBefore(wrap, el);
+    wrap.appendChild(el);
+    wrap.appendChild(panel);
+    el.style.cursor = 'pointer';
+    el.addEventListener('click', function(e){ e.stopPropagation(); wrap.classList.toggle('open'); });
+    panel.querySelector('[data-act=profile]').onclick = function(){
+      wrap.classList.remove('open');
+      var t=document.getElementById('toast'); if(t){t.textContent='个人中心';t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1600);} else alert('个人中心');
+    };
+    panel.querySelector('[data-act=logout]').onclick = function(){
+      wrap.classList.remove('open');
+      var t=document.getElementById('toast'); if(t){t.textContent='已退出登录';t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1600);} else alert('已退出登录');
+    };
+    document.addEventListener('click', function(){ wrap.classList.remove('open'); });
+  }
+  document.querySelectorAll('[aria-label="账号"], [title="管理员"], .d05-avatar, .d03-avatar, .zippo-avatar-trigger').forEach(wrapAvatar);
+  document.querySelectorAll('.top-right span[title], .global-topbar .top-right > span[style*="border-radius:50%"]').forEach(function(el){
+    if(el.textContent && el.textContent.length<=2) wrapAvatar(el);
+  });
+  document.querySelectorAll('.w-8.h-8.rounded-full, .rounded-full.bg-primary').forEach(function(el){
+    if(el.closest('header') && !el.closest('.zippo-user-menu')) wrapAvatar(el);
+  });
+})();
+</script>
+
+</html>

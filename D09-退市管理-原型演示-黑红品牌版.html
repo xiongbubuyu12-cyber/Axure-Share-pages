@@ -1,0 +1,1984 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<!-- poc-embed-guest -->
+<script src="poc-embed-guest.js"></script>
+
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>D09 退市管理 · 黑红品牌版原型 V1.2</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <script>
+    /* Colors via CSS Alias Token (--color-*)；Zippo 品牌红待 VI 确认后仅改 :root */
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: { DEFAULT: 'var(--color-primary)', hover: 'var(--color-primary-hover)', active: 'var(--color-primary-active)', bg: 'var(--color-primary-bg)' },
+            success: { DEFAULT: 'var(--color-success)', bg: 'var(--color-success-bg)' },
+            warning: { DEFAULT: 'var(--color-warning)', bg: 'var(--color-warning-bg)', border: 'var(--color-warning-border)' },
+            purple: { DEFAULT: 'var(--color-purple)', bg: 'var(--color-purple-bg)' },
+            ink: { DEFAULT: 'var(--color-ink)', secondary: 'var(--color-ink-secondary)', tertiary: 'var(--color-ink-tertiary)', disabled: 'var(--color-ink-disabled)' },
+            line: { DEFAULT: 'var(--color-line)', soft: 'var(--color-line-soft)' },
+            page: 'var(--color-bg-page)',
+            fill: 'var(--color-bg-fill)',
+            brand: { black: 'var(--color-brand-black)', red: 'var(--color-primary)', gray: 'var(--color-brand-gray)', white: 'var(--color-brand-white)' },
+          },
+          fontFamily: { sans: ['-apple-system', '"PingFang SC"', '"Microsoft YaHei"', 'system-ui', 'sans-serif'] },
+          boxShadow: { card: 'var(--shadow-1)' },
+        },
+      },
+    };
+  </script>
+  <style>
+    :root {
+      --color-primary: #C8102E;
+      --color-primary-hover: #A00D25;
+      --color-primary-active: #7A0A1C;
+      --color-primary-bg: #FDE8EC;
+      --color-success: #2F6B3A;
+      --color-success-bg: #EAF5EC;
+      --color-warning: #8A6A1A;
+      --color-warning-bg: #F7F1DE;
+      --color-warning-border: #E6D7A8;
+      --color-purple: #5B4B8A;
+      --color-purple-bg: #F0ECF7;
+      --color-ink: #0A0A0A;
+      --color-ink-secondary: #4A4A4A;
+      --color-ink-tertiary: #8A8A8A;
+      --color-ink-disabled: #B8B8B8;
+      --color-line: #D4D4D4;
+      --color-line-soft: #EBEBEB;
+      --color-bg-page: #EDEDED;
+      --color-bg-fill: #F7F7F7;
+      --color-brand-black: #0A0A0A;
+      --color-brand-gray: #6B6B6B;
+      --color-brand-white: #FFFFFF;
+      --color-skeleton-a: #ececec;
+      --color-skeleton-b: #e0e0e0;
+      --color-scrollbar: #555555;
+      --shadow-1: 0 1px 2px rgba(0,0,0,.06), 0 1px 4px rgba(0,0,0,.04);
+      --z-sticky: 50;
+      --z-overlay: 200;
+      --z-modal: 300;
+      --z-message: 500;
+    }
+    [x-cloak] { display: none !important; }
+    .sidebar-scroll::-webkit-scrollbar { width: 4px; }
+    .sidebar-scroll::-webkit-scrollbar-thumb { background: var(--color-scrollbar); border-radius: 4px; }
+    .table-wrap { overflow-x: auto; }
+    .skeleton { background: linear-gradient(90deg, var(--color-skeleton-a) 25%, var(--color-skeleton-b) 50%, var(--color-skeleton-a) 75%); background-size: 200% 100%; animation: shimmer 1.2s infinite; }
+    @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+    .toast-enter { animation: toastIn .25s ease; }
+    @keyframes toastIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
+    .brand-stripe { background: linear-gradient(90deg, var(--color-brand-black) 0%, var(--color-brand-black) 72%, var(--color-primary) 72%, var(--color-primary) 100%); }
+    .drawer-enter { animation: drawerIn .22s ease; }
+    @keyframes drawerIn { from { transform: translateX(24px); opacity: .4; } to { transform: none; opacity: 1; } }
+    .modal-enter { animation: modalIn .2s ease; }
+    @keyframes modalIn { from { opacity: 0; transform: translateY(8px) scale(.98); } to { opacity: 1; transform: none; } }
+    .step-line { height: 2px; background: var(--color-line); flex: 1; }
+    .step-line.done { background: var(--color-primary); }
+    .log-rail { position: relative; }
+    .log-rail::before { content: ''; position: absolute; left: 11px; top: 8px; bottom: 8px; width: 2px; background: var(--color-line-soft); }
+    .log-dot { width: 10px; height: 10px; border-radius: 999px; background: var(--color-primary); border: 2px solid var(--color-brand-white); box-shadow: 0 0 0 2px var(--color-primary); flex-shrink: 0; margin-top: 4px; position: relative; z-index: 1; }
+    .log-dot.muted { background: var(--color-ink-tertiary); box-shadow: 0 0 0 2px var(--color-ink-disabled); }
+    .log-dot.warn { background: var(--color-warning); box-shadow: 0 0 0 2px var(--color-warning-border); }
+    .log-dot.ok { background: var(--color-success); box-shadow: 0 0 0 2px var(--color-success-bg); }
+    .z-token-sticky { z-index: var(--z-sticky); }
+    .z-token-overlay { z-index: var(--z-overlay); }
+    .z-token-modal { z-index: var(--z-modal); }
+    .z-token-message { z-index: var(--z-message); }
+    button:focus-visible,
+    a:focus-visible,
+    input:focus-visible,
+    select:focus-visible,
+    textarea:focus-visible,
+    [tabindex]:focus-visible {
+      outline: 2px solid var(--color-primary);
+      outline-offset: 2px;
+    }
+  
+    /* §2.2 已打开页面 Tab */
+    .open-tab {
+      display: inline-flex; align-items: center; gap: 6px; max-width: 160px;
+      padding: 6px 10px; font-size: 13px; border-radius: 4px;
+      color: rgba(255,255,255,.72); white-space: nowrap; transition: all .15s;
+      border-bottom: 2px solid transparent; background: transparent; border-left: 0; border-right: 0; border-top: 0;
+    }
+    .open-tab:hover { color: #fff; background: rgba(255,255,255,.08); }
+    .open-tab.active { color: #fff; font-weight: 600; border-bottom-color: #C8102E; background: rgba(200,16,46,.18); }
+    .open-tab .tab-close { opacity: .55; font-size: 12px; line-height: 1; padding: 2px 4px; border-radius: 3px; }
+    .open-tab .tab-close:hover { opacity: 1; background: rgba(255,255,255,.15); }
+
+
+    /* App shell: header+sidebar fixed; only main scrolls */
+    html, body { height: 100%; overflow: hidden; }
+    .zippo-shell { display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+    .zippo-shell > header.sticky,
+    .zippo-shell > header.global-topbar,
+    body > header.sticky,
+    body > header.global-topbar { flex: 0 0 auto; position: sticky; top: 0; z-index: 50; }
+    .zippo-body {
+      flex: 1 1 auto; min-height: 0; display: flex; overflow: hidden;
+    }
+    .zippo-body > aside,
+    .zippo-body > .sidebar {
+      flex: 0 0 auto; height: 100%; overflow-y: auto; position: relative !important;
+      top: auto !important; inset: auto !important;
+    }
+    .zippo-main {
+      flex: 1 1 auto; min-width: 0; min-height: 0; overflow-y: auto;
+      background: #EDEDED;
+    }
+
+
+    /* body 纵向壳：顶栏固定，下方 zippo-body 占满剩余高度 */
+    body.overflow-hidden, body.zippo-fixed, body.d06-shell {
+      display: flex !important; flex-direction: column !important; height: 100vh !important; margin: 0;
+    }
+    body > header, body > .brand-stripe, body > .h-1.brand-stripe, body > div.h-1 {
+      flex: 0 0 auto !important;
+    }
+    .zippo-body { flex: 1 1 auto !important; min-height: 0 !important; height: auto !important; }
+    main.zippo-main, .zippo-main {
+      flex: 1 1 auto !important; min-width: 0 !important; min-height: 0 !important;
+      overflow-y: auto !important;
+    }
+
+
+/* Spec §2.2 white sidebar override */
+.proto-sidebar, aside.sidebar, aside.primary-nav, .module-sidebar, .d-sidebar {
+  background: #0A0A0A !important; color: #cfcfcf !important;
+  border-right: 0 !important;
+  display: flex !important; flex-direction: column !important;
+}
+.proto-sidebar-title {
+  flex: 0 0 auto; padding: 14px 16px 10px;
+  border-bottom: 1px solid #363636; background: #0A0A0A;
+}
+.proto-sidebar-title .label {
+  font-size: 12px; font-weight: 600; color: #8f8f8f; letter-spacing: .06em;
+}
+.proto-sidebar-nav { flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 10px 12px 24px; }
+/* 选中：深灰底 + 白字 + 左红条 */
+.proto-nav-item.active, .nav button.active, .nav-item.active, .side-nav a.active, .menu-item.active,
+aside .nav-active, aside button.nav-active {
+  background: #2d2d2d !important; color: #fff !important; font-weight: 600;
+  border-left: 3px solid #C8102E !important; border-radius: 4px;
+  box-shadow: inset 3px 0 0 #C8102E;
+}
+.page-chrome-fixed {
+  flex: 0 0 auto; background: #EDEDED; border-bottom: 1px solid #E8E8E8;
+  padding: 12px 24px 10px; z-index: 5;
+}
+.page-chrome-scroll { flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 16px 24px 24px; }
+main.zippo-main.chrome-split {
+  display: flex !important; flex-direction: column !important;
+  overflow: hidden !important; padding: 0 !important;
+}
+
+
+
+/* ZIPPO_NAV_HIERARCHY_V3 */
+details.nav-group { margin: 0 0 6px; border: 0; }
+details.nav-group > summary.nav-l1 {
+  list-style: none; cursor: pointer; user-select: none;
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  min-height: 40px; padding: 0 12px; margin: 0; border-radius: 4px;
+  font-size: 13px !important; font-weight: 600 !important; line-height: 1.2;
+  color: #FFFFFF !important; letter-spacing: 0 !important; text-transform: none !important;
+  background: transparent;
+}
+details.nav-group > summary.nav-l1::-webkit-details-marker { display: none; }
+details.nav-group > summary.nav-l1 .nav-chev {
+  font-size: 10px; color: rgba(255,255,255,.7); transition: transform .15s;
+}
+details.nav-group:not([open]) > summary.nav-l1 .nav-chev { transform: rotate(-90deg); }
+details.nav-group > summary.nav-l1:hover { background: #2d2d2d; }
+.nav-l2-wrap { display: flex; flex-direction: column; gap: 2px; padding: 2px 0 6px; }
+.nav-l2-wrap .proto-nav-item,
+.nav-l2-wrap > button,
+.nav-l2-wrap .nav-item,
+aside .nav-l2-wrap button {
+  font-size: 13px !important;
+  color: #E8E8E8 !important;
+  min-height: 40px;
+}
+/* dark sidebar contrast: kill low-contrast tertiary / selected white block */
+aside.proto-sidebar, aside.sidebar, aside.module-sidebar, .proto-sidebar {
+  color: #E8E8E8 !important;
+}
+aside.proto-sidebar .text-ink-secondary,
+aside.proto-sidebar .text-ink-tertiary,
+aside.proto-sidebar .text-ink,
+aside .nav-label {
+  color: #E8E8E8 !important;
+}
+aside.proto-sidebar button.text-ink-secondary,
+aside.proto-sidebar a.text-ink-secondary {
+  color: #E8E8E8 !important;
+}
+aside.proto-sidebar .bg-\[\#F5F5F5\],
+aside.proto-sidebar button.bg-\[\#F5F5F5\] {
+  background: #2d2d2d !important;
+  color: #FFFFFF !important;
+}
+aside.proto-sidebar .hover\:bg-fill:hover,
+aside.proto-sidebar button:hover {
+  background: #2d2d2d !important;
+  color: #FFFFFF !important;
+}
+/* L1 labels that are not yet details */
+.nav-label, .proto-nav-group, .proto-sidebar-title {
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  color: #FFFFFF !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+}
+.proto-nav-item, .nav button, aside .nav button {
+  color: #E8E8E8 !important;
+  font-size: 13px !important;
+}
+.proto-nav-item.active, .nav button.active {
+  color: #FFFFFF !important;
+}
+/* hide sidebar bottom notes / brand footnotes */
+.sidebar-note, .sidebar-foot, .sidebar-footer,
+aside .zippo-sidebar-note,
+aside nav > .mt-6.px-3.py-3.rounded-lg {
+  display: none !important;
+}
+
+/* ZIPPO_NAV_SPACING_V2 */
+.nav, .proto-sidebar-nav, aside .nav, .sidebar .nav {
+  gap: 4px !important;
+}
+.proto-nav-item, .nav button, .nav-item, .side-nav a, .menu-item {
+  min-height: 40px !important;
+  height: auto !important;
+  max-height: none !important;
+  padding-top: 8px !important;
+  padding-bottom: 8px !important;
+  box-sizing: border-box !important;
+  flex-shrink: 0 !important;
+}
+.nav-label, .proto-sidebar-title .label {
+  padding-top: 10px !important;
+  padding-bottom: 4px !important;
+}
+
+/* ZIPPO_GLOBAL_SHELL_V2 */
+.card.has-table { display:flex; flex-direction:column; min-height:0; }
+.card.has-table > .table-wrap { flex:1 1 auto; min-height:0; overflow:auto; }
+.card > .pager, .card > .pager.pagination, .pager.zippo-pager-sticky {
+  position:sticky; bottom:0; z-index:5; flex-shrink:0;
+  background:#fff; border-top:1px solid #EBEBEB; margin-top:0;
+  box-shadow:0 -4px 12px rgba(0,0,0,.04);
+}
+.sidebar-foot, .sidebar-footer { display:none !important; }
+.zippo-user-menu { position:relative; display:inline-flex; }
+.zippo-user-menu-panel {
+  display:none; position:absolute; right:0; top:calc(100% + 6px); min-width:128px;
+  background:#fff; color:#0A0A0A; border:1px solid #EBEBEB; border-radius:6px;
+  box-shadow:0 8px 24px rgba(0,0,0,.12); padding:4px; z-index:80;
+}
+.zippo-user-menu.open .zippo-user-menu-panel { display:block; }
+.zippo-user-menu-panel button {
+  display:block; width:100%; text-align:left; border:0; background:transparent;
+  padding:8px 10px; font-size:13px; border-radius:4px; cursor:pointer; color:#0A0A0A;
+}
+.zippo-user-menu-panel button:hover { background:#F5F5F5; }
+
+</style>
+</head>
+<body class="bg-page text-ink font-sans antialiased overflow-hidden" x-data="delistingApp()" x-cloak @keydown.escape.window="onGlobalEsc()">
+  <header class="sticky top-0 z-token-sticky h-14 bg-brand-black text-white border-b border-black flex items-center justify-between px-4 lg:px-6">
+    <div class="flex items-center gap-3">
+      <button @click="mobileNav = !mobileNav" class="lg:hidden p-2 rounded hover:bg-white/10" aria-label="菜单">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+      </button>
+      <div class="text-sm font-semibold tracking-wide">ZIPPO</div>
+    </div>
+    
+      <nav class="flex items-center gap-0.5 overflow-x-auto flex-1 min-w-0 py-1 mx-2" aria-label="已打开页面">
+        <template x-for="t in openTabs" :key="t.id">
+          <button type="button" @click="activateTab(t.id)" class="open-tab" :class="activeTabId===t.id ? 'active' : ''" :title="t.label">
+            <span class="truncate" x-text="t.label"></span>
+            <span class="tab-close" @click.stop="closeTab(t.id)" title="关闭">✕</span>
+          </button>
+        </template>
+      </nav>
+<div class="flex items-center gap-3">
+      <div class="hidden md:flex items-center gap-2 text-xs text-white/70">
+        <span>演示角色</span>
+        <select x-model="role" @change="onRoleChange()" class="border border-white/20 rounded-md px-2 py-1.5 text-sm bg-black text-white">
+          <option value="BRAND_ADMIN">品牌管理员</option>
+          <option value="BRAND_OPERATOR">品牌业务</option>
+          <option value="DISTRIBUTOR">经销商（默认无入口）</option>
+        </select>
+      </div>
+      <button type="button" @click="toast('通知')" class="relative w-8 h-8 flex items-center justify-center rounded hover:bg-white/10 text-white/70" aria-label="通知"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg><span class="absolute top-1 right-1 w-2 h-2 bg-primary rounded-full"></span></button>
+      <div class="flex items-center gap-2 pl-2 border-l border-white/15">
+        <div class="w-8 h-8 rounded-full bg-primary text-white text-xs font-semibold flex items-center justify-center" x-text="currentUser.avatar"></div>
+      </div>
+    </div>
+  </header>
+  <div class="h-1 brand-stripe"></div>
+
+  <div class="zippo-body">
+    <aside class="proto-sidebar w-56 shrink-0 bg-brand-black text-white/80 border-r border-black/20 transform transition-transform lg:translate-x-0" :class="mobileNav ? 'translate-x-0' : '-translate-x-full'">
+      <nav class="proto-sidebar-nav space-y-0.5 sidebar-scroll">
+        <details class="nav-group" open x-show="canDelist">
+          <summary class="nav-l1">退市管理<span class="nav-chev">▾</span></summary>
+          <div class="nav-l2-wrap">
+            <button x-show="canDelist" @click="go('applyList'); mobileNav=false" class="w-full flex items-center gap-2 px-3 py-2.5 text-sm transition border-l-[3px] border-transparent" :class="['applyList','applyDetail','applyEdit'].includes(page) ? 'nav-active bg-[#2d2d2d] text-white font-medium border-l-primary' : 'text-[#E8E8E8] hover:bg-[#2d2d2d] hover:text-white'">
+              <span>退市申请</span>
+            </button>
+            <button x-show="canDelist" @click="go('executeList'); mobileNav=false" class="w-full flex items-center gap-2 px-3 py-2.5 text-sm transition border-l-[3px] border-transparent" :class="['executeList','skuDetail'].includes(page) ? 'nav-active bg-[#2d2d2d] text-white font-medium border-l-primary' : 'text-[#E8E8E8] hover:bg-[#2d2d2d] hover:text-white'">
+              <span>退市执行</span>
+            </button>
+          </div>
+        </details>
+        <details class="nav-group" open>
+          <summary class="nav-l1">审批中心<span class="nav-chev">▾</span></summary>
+          <div class="nav-l2-wrap">
+            <button @click="go('flowPage'); mobileNav=false" class="w-full flex items-center gap-2 px-3 py-2.5 text-sm transition border-l-[3px] border-transparent" :class="page==='flowPage' ? 'nav-active bg-[#2d2d2d] text-white font-medium border-l-primary' : 'text-[#E8E8E8] hover:bg-[#2d2d2d] hover:text-white'">
+              <span>审核流程</span>
+            </button>
+          </div>
+        </details>
+        <details class="nav-group" open x-show="canDelist">
+          <summary class="nav-l1">系统设置<span class="nav-chev">▾</span></summary>
+          <div class="nav-l2-wrap">
+            <button x-show="canDelist" @click="go('settings'); mobileNav=false" class="w-full flex items-center gap-2 px-3 py-2.5 text-sm transition border-l-[3px] border-transparent" :class="page==='settings' ? 'nav-active bg-[#2d2d2d] text-white font-medium border-l-primary' : 'text-[#E8E8E8] hover:bg-[#2d2d2d] hover:text-white'">
+              <span>退市配置</span>
+            </button>
+          </div>
+        </details>
+      </nav>
+    </aside>
+    <div x-show="mobileNav" @click="mobileNav=false" class="fixed inset-0 z-token-overlay bg-black/40 lg:hidden" aria-hidden="true"></div>
+
+    <main class="zippo-main chrome-split flex-1 min-w-0">
+      <div class="page-chrome-fixed flex items-center justify-between gap-3 flex-wrap">
+        <div class="text-sm text-ink-tertiary">首页 / <span x-text="crumbModule"></span> / <span class="text-ink" x-text="pageTitle"></span></div>
+        <div class="flex items-center gap-3" x-show="['applyList','executeList'].includes(page)">
+          <button type="button" @click="searchWithLoading(false)" class="text-xs text-ink-secondary hover:underline">列表状态刷新</button>
+          <button type="button" @click="searchWithLoading(true)" class="text-xs text-ink-tertiary hover:underline">模拟加载失败</button>
+        </div>
+      </div>
+      <div class="page-chrome-scroll">
+
+      <section x-show="!canDelist && ['applyList','executeList','settings','applyDetail','skuDetail','applyEdit'].includes(page)" class="bg-white rounded-lg shadow-card border border-line-soft p-12 text-center">
+        <div class="text-base font-semibold mb-2">暂无菜单权限</div>
+        <p class="text-sm text-ink-secondary">经销商默认不参与退市。认领副本不随品牌主商品同步退市。</p>
+      </section>
+
+      <!-- ===== 退市申请（申请单列表 = 发起页） ===== -->
+      <section x-show="page==='applyList' && canDelist" class="space-y-4">
+        <div class="bg-white rounded-lg shadow-card border border-line-soft">
+          <div class="px-5 py-4 border-b border-line-soft flex items-start justify-between gap-4">
+            <div>
+              <h1 class="text-base font-semibold">退市申请</h1>
+              <p class="mt-1 text-xs text-ink-tertiary">本页为<strong>申请页面</strong>：新建退市<strong>申请单</strong>（可关联多 SPU/SKU）。按 SKU 关联时，所属 SPU 下全部 SKU 纳入本单。</p>
+            </div>
+            <button @click="openNewForm()" class="shrink-0 px-3 py-1.5 text-sm rounded-md bg-primary text-white hover:bg-primary-hover">新建申请</button>
+          </div>
+          <div class="p-4 flex flex-wrap gap-3 items-end border-b border-line-soft bg-fill/50">
+            <label class="text-xs text-ink-secondary space-y-1"><span>申请状态</span>
+              <select x-model="filters.apply.status" class="block w-36 border border-line rounded-md px-2 py-1.5 text-sm bg-white">
+                <option value="">全部</option>
+                <option value="PENDING">退市中</option>
+                <option value="APPROVED">已通过</option>
+                <option value="REJECTED">已驳回</option>
+                <option value="CANCELLED">已撤销</option>
+              </select>
+            </label>
+            <label class="text-xs text-ink-secondary space-y-1"><span>退市原因</span>
+              <select x-model="filters.apply.reason" class="block w-40 border border-line rounded-md px-2 py-1.5 text-sm bg-white">
+                <option value="">全部</option>
+                <template x-for="r in reasonOptions" :key="r"><option :value="r" x-text="r"></option></template>
+              </select>
+            </label>
+            <label class="text-xs text-ink-secondary space-y-1"><span>提交时间起</span>
+              <input type="date" x-model="filters.apply.timeStart" class="block w-40 border border-line rounded-md px-2 py-1.5 text-sm bg-white" />
+            </label>
+            <label class="text-xs text-ink-secondary space-y-1"><span>提交时间止</span>
+              <input type="date" x-model="filters.apply.timeEnd" class="block w-40 border border-line rounded-md px-2 py-1.5 text-sm bg-white" />
+            </label>
+            <label class="text-xs text-ink-secondary space-y-1"><span>关键词</span>
+              <input x-model="filters.apply.keyword" type="text" placeholder="申请单号 / SPU / SKU / 申请人" class="block w-56 border border-line rounded-md px-2 py-1.5 text-sm" />
+            </label>
+            <button @click="searchWithLoading()" class="px-3 py-1.5 text-sm rounded-md bg-primary text-white hover:bg-primary-hover">搜索</button>
+            <button @click="filters.apply={status:'',reason:'',keyword:'',timeStart:'',timeEnd:''}; applyPage=1" class="px-3 py-1.5 text-sm rounded-md border border-line hover:bg-fill">重置</button>
+          </div>
+          <div class="table-wrap">
+            <template x-if="loading"><div class="p-6 space-y-3"><div class="h-10 skeleton rounded"></div><div class="h-10 skeleton rounded"></div><div class="h-10 skeleton rounded"></div></div></template>
+            <template x-if="!loading && listError">
+              <div class="py-16 text-center space-y-3">
+                <div class="text-sm font-medium text-ink">列表加载失败</div>
+                <p class="text-xs text-ink-tertiary">无法获取退市申请数据，请检查网络后重试。</p>
+                <button type="button" @click="searchWithLoading(false)" class="px-3 py-1.5 text-sm rounded-md bg-primary text-white hover:bg-primary-hover">重试</button>
+              </div>
+            </template>
+            <template x-if="!loading && !listError">
+              <div>
+                <div x-show="filteredForms.length===0" class="py-16 text-center space-y-3">
+                  <div class="text-sm text-ink-tertiary">暂无退市申请单</div>
+                  <p class="text-xs text-ink-tertiary">可新建申请，或调整筛选条件后重试。</p>
+                  <button type="button" @click="openNewForm()" class="px-3 py-1.5 text-sm rounded-md bg-primary text-white hover:bg-primary-hover">新建申请</button>
+                </div>
+                <table x-show="filteredForms.length" class="w-full text-sm">
+                <thead class="bg-fill text-ink-secondary text-xs">
+                  <tr>
+                    <th class="text-left font-medium px-4 py-3">申请单号</th>
+                    <th class="text-left font-medium px-4 py-3">关联明细</th>
+                    <th class="text-left font-medium px-4 py-3">退市原因</th>
+                    <th class="text-left font-medium px-4 py-3">预计退市</th>
+                    <th class="text-left font-medium px-4 py-3">申请人</th>
+                    <th class="text-left font-medium px-4 py-3">提交时间</th>
+                    <th class="text-left font-medium px-4 py-3">状态</th>
+                    <th class="text-left font-medium px-4 py-3">当前节点</th>
+                    <th class="text-left font-medium px-4 py-3">操作</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <template x-for="row in pagedForms" :key="row.id">
+                    <tr class="border-t border-line-soft hover:bg-primary-bg/40">
+                      <td class="px-4 py-3 font-medium whitespace-nowrap" x-text="row.formNo"></td>
+                      <td class="px-4 py-3 text-ink-secondary" x-text="row.skuCount + ' SKU · ' + row.spuCount + ' SPU'"></td>
+                      <td class="px-4 py-3" x-text="row.reason"></td>
+                      <td class="px-4 py-3 text-ink-secondary whitespace-nowrap" x-text="row.planDate"></td>
+                      <td class="px-4 py-3" x-text="row.applicant"></td>
+                      <td class="px-4 py-3 text-ink-secondary whitespace-nowrap" x-text="row.submittedAt"></td>
+                      <td class="px-4 py-3"><span class="text-xs px-2 py-0.5 rounded border" :class="formStatusClass(row.status)" x-text="formStatusLabel(row.status)"></span></td>
+                      <td class="px-4 py-3 text-ink-secondary" x-text="row.node || '—'"></td>
+                      <td class="px-4 py-3 space-x-2 whitespace-nowrap">
+                        <button @click="openFormDetail(row)" class="text-primary hover:underline">查看</button>
+                        <button @click="openFlowForm(row)" class="text-ink-secondary hover:text-primary">流程</button>
+                        <button x-show="row.status==='REJECTED'" @click="openEditForm(row)" class="text-primary hover:underline">去修改</button>
+                      </td>
+                    </tr>
+                  </template>
+                </tbody>
+              </table>
+              </div>
+            </template>
+          </div>
+          <div class="px-4 py-3 border-t border-line-soft flex items-center justify-between text-xs text-ink-tertiary">
+            <span>共 <span x-text="filteredForms.length"></span> 条 · 每页
+              <select x-model.number="pageSize" class="border border-line rounded px-2 py-1 text-xs bg-white mx-1">
+                <option :value="20">20条/页</option><option :value="50">50条/页</option><option :value="100">100条/页</option>
+              </select>
+              条</span>
+            <div class="flex gap-2">
+              <button @click="applyPage=Math.max(1,applyPage-1)" class="px-2 py-1 border border-line rounded hover:bg-fill">上一页</button>
+              <span class="px-2 py-1" x-text="applyPage + ' / ' + Math.max(1, Math.ceil(filteredForms.length/pageSize))"></span>
+              <button @click="applyPage=Math.min(Math.max(1,Math.ceil(filteredForms.length/pageSize)), applyPage+1)" class="px-2 py-1 border border-line rounded hover:bg-fill">下一页</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 申请单详情 -->
+      <section x-show="page==='applyDetail' && currentForm" class="space-y-4">
+        <div class="bg-white rounded-lg shadow-card border border-line-soft">
+          <div class="px-5 py-4 border-b border-line-soft flex items-center justify-between gap-3 flex-wrap">
+            <div class="flex items-center gap-3">
+              <button @click="go('applyList')" class="text-sm text-ink-secondary hover:text-primary">← 返回</button>
+              <h1 class="text-base font-semibold" x-text="currentForm.formNo"></h1>
+              <span class="text-xs px-2 py-0.5 rounded border" :class="formStatusClass(currentForm.status)" x-text="formStatusLabel(currentForm.status)"></span>
+            </div>
+            <button @click="openFlowForm(currentForm)" class="px-3 py-1.5 text-sm rounded-md border border-line hover:bg-fill">审核流程</button>
+          </div>
+          <div class="p-5 grid lg:grid-cols-3 gap-4 text-sm">
+            <div><span class="text-ink-tertiary">原因</span> · <span x-text="currentForm.reason"></span></div>
+            <div><span class="text-ink-tertiary">预计退市</span> · <span x-text="currentForm.planDate"></span></div>
+            <div><span class="text-ink-tertiary">申请人</span> · <span x-text="currentForm.applicant"></span></div>
+            <div class="lg:col-span-3"><span class="text-ink-tertiary">补充说明</span> · <span x-text="currentForm.note || '—'"></span></div>
+          </div>
+          <div class="px-5 pb-5">
+            <h2 class="text-sm font-semibold mb-2">关联 SKU 明细（申请单维度展开）</h2>
+            <div class="table-wrap border border-line-soft rounded-md">
+              <table class="w-full text-sm">
+                <thead class="bg-fill text-xs text-ink-secondary">
+                  <tr>
+                    <th class="text-left px-3 py-2 font-medium">SPU</th>
+                    <th class="text-left px-3 py-2 font-medium">SKU</th>
+                    <th class="text-left px-3 py-2 font-medium">名称</th>
+                    <th class="text-left px-3 py-2 font-medium">当前状态</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <template x-for="line in currentFormLines" :key="line.id">
+                    <tr class="border-t border-line-soft">
+                      <td class="px-3 py-2" x-text="line.spuCode"></td>
+                      <td class="px-3 py-2 font-medium" x-text="line.skuCode"></td>
+                      <td class="px-3 py-2" x-text="line.name"></td>
+                      <td class="px-3 py-2"><span class="text-xs px-2 py-0.5 rounded border" :class="skuStatusClass(line.status)" x-text="skuStatusLabel(line.status)"></span></td>
+                    </tr>
+                  </template>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== 新建/修改申请单 · 独立编辑页 ===== -->
+      <section x-show="page==='applyEdit' && canDelist" class="space-y-4">
+        <div class="bg-white rounded-lg shadow-card border border-line-soft">
+          <div class="px-5 py-4 border-b border-line-soft flex items-center justify-between gap-3 flex-wrap">
+            <div class="flex items-center gap-3">
+              <button @click="cancelEdit()" class="text-sm text-ink-secondary hover:text-primary">← 返回</button>
+              <h1 class="text-base font-semibold" x-text="editingFormId ? '修改退市申请单' : '新建退市申请单'"></h1>
+            </div>
+            <div class="flex gap-2">
+              <button @click="cancelEdit()" class="px-3 py-1.5 text-sm rounded-md border border-line hover:bg-fill">取消</button>
+              <button @click="submitForm()" :disabled="submitting" class="px-3 py-1.5 text-sm rounded-md bg-primary text-white hover:bg-primary-hover disabled:opacity-60" x-text="submitting ? '提交中…' : '提交申请'"></button>
+            </div>
+          </div>
+
+          <div class="p-5 space-y-5">
+            <div class="flex flex-wrap items-center gap-4">
+              <div class="text-sm font-medium">关联方式</div>
+              <label class="flex items-center gap-2 text-sm"><input type="radio" value="SPU" x-model="applyForm.mode" class="text-primary" /><span>按 SPU</span></label>
+              <label class="flex items-center gap-2 text-sm"><input type="radio" value="SKU" x-model="applyForm.mode" class="text-primary" /><span>按 SKU</span></label>
+              <div class="ml-auto flex gap-2">
+                <button @click="openImport()" class="px-3 py-1.5 text-sm rounded-md border border-line hover:bg-fill">批量导入</button>
+                <button @click="openPicker()" class="px-3 py-1.5 text-sm rounded-md bg-white text-ink border-r border-line-soft hover:bg-black" x-text="applyForm.lines.length ? '更换' : '选择商品'"></button>
+              </div>
+            </div>
+            <p class="text-xs text-ink-tertiary -mt-3">面向万级商品：弹窗筛选选择，或批量导入编码；按 SKU 时展开所属 SPU 下全部 SKU，系统自动过滤非已发布。退市原因在「系统设置 → 枚举管理」维护。</p>
+
+            <div>
+              <div class="flex items-center justify-between mb-2">
+                <h2 class="text-sm font-semibold">明细预览 <span class="text-ink-tertiary font-normal" x-text="'（' + applyForm.lines.length + ' 个 SKU）'"></span></h2>
+                <span class="text-xs text-primary" x-show="errors.lines" x-text="errors.lines"></span>
+              </div>
+              <div class="border border-line-soft rounded-md table-wrap">
+                <div x-show="applyForm.lines.length===0" class="py-10 text-center text-sm text-ink-tertiary">尚未选择商品，请点击「选择商品」</div>
+                <table x-show="applyForm.lines.length" class="w-full text-sm">
+                  <thead class="bg-fill text-xs text-ink-secondary">
+                    <tr>
+                      <th class="text-left px-3 py-2 font-medium">SPU</th>
+                      <th class="text-left px-3 py-2 font-medium">SKU</th>
+                      <th class="text-left px-3 py-2 font-medium">名称</th>
+                      <th class="text-left px-3 py-2 font-medium">品牌</th>
+                      <th class="text-left px-3 py-2 font-medium">分类</th>
+                      <th class="text-left px-3 py-2 font-medium">操作</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <template x-for="(l, idx) in applyForm.lines" :key="l.skuCode">
+                      <tr class="border-t border-line-soft hover:bg-primary-bg/30">
+                        <td class="px-3 py-2" x-text="l.spuCode"></td>
+                        <td class="px-3 py-2 font-medium" x-text="l.skuCode"></td>
+                        <td class="px-3 py-2" x-text="l.name"></td>
+                        <td class="px-3 py-2 text-ink-secondary" x-text="l.brand"></td>
+                        <td class="px-3 py-2 text-ink-secondary" x-text="l.category"></td>
+                        <td class="px-3 py-2 space-x-2 whitespace-nowrap">
+                          <button type="button" @click="askRemovePreviewLine(idx)" class="text-ink-secondary hover:text-primary">删除</button>
+                        </td>
+                      </tr>
+                    </template>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="grid lg:grid-cols-2 gap-4">
+              <label class="block text-sm space-y-1">
+                <span>退市原因 <span class="text-primary">*</span></span>
+                <select x-model="applyForm.reason" class="w-full border rounded-md px-3 py-2 text-sm" :class="errors.reason ? 'border-primary' : 'border-line'">
+                  <option value="">请选择</option>
+                  <template x-for="r in reasonOptions" :key="r"><option :value="r" x-text="r"></option></template>
+                </select>
+                <span class="text-xs text-primary" x-show="errors.reason" x-text="errors.reason"></span>
+              </label>
+              <label class="block text-sm space-y-1">
+                <span>预计退市时间 <span class="text-primary">*</span></span>
+                <input type="date" x-model="applyForm.planDate" class="w-full border rounded-md px-3 py-2 text-sm" :class="errors.planDate ? 'border-primary' : 'border-line'" />
+                <span class="text-xs text-primary" x-show="errors.planDate" x-text="errors.planDate"></span>
+              </label>
+              <label class="block text-sm space-y-1 lg:col-span-2">
+                <span>补充说明 <span x-show="reasonRequiresNote" class="text-primary">*</span></span>
+                <textarea x-model="applyForm.note" maxlength="500" rows="3" class="w-full border rounded-md px-3 py-2 text-sm" :class="errors.note ? 'border-primary' : 'border-line'"></textarea>
+                <div class="flex justify-between text-xs text-ink-tertiary">
+                  <span class="text-primary" x-show="errors.note" x-text="errors.note"></span>
+                  <span class="ml-auto" x-text="(applyForm.note||'').length + '/500'"></span>
+                </div>
+              </label>
+            </div>
+
+            <div class="rounded-md border border-line-soft bg-fill p-3 text-xs text-ink-secondary leading-relaxed space-y-1">
+              <div>· 提交后按配置进入退市审批或免审落定</div>
+              <div>· 退市不等于渠道下架；审批通过后是否自动下架以系统设置开关为准（当前 <span class="text-ink" x-text="settings.autoUnlist ? '开启' : '关闭'"></span>）</div>
+              <div>· 预计退市时间仅作计划记录</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== 退市执行 SKU ===== -->
+      <section x-show="page==='executeList' && canDelist" class="space-y-4">
+        <div class="bg-white rounded-lg shadow-card border border-line-soft">
+          <div class="px-5 py-4 border-b border-line-soft">
+            <h1 class="text-base font-semibold">退市执行</h1>
+            <p class="mt-1 text-xs text-ink-tertiary">申请单内被申请商品的 <strong>SKU 维度</strong>台账。审批通过后直接已退市；正常展示 <span class="text-primary">已退市 / 复活中</span>。复活成功后该行自动消失。</p>
+          </div>
+          <div class="p-4 flex flex-wrap gap-3 items-end border-b border-line-soft bg-fill/50">
+            <label class="text-xs text-ink-secondary space-y-1"><span>商品状态</span>
+              <select x-model="filters.exec.status" class="block w-36 border border-line rounded-md px-2 py-1.5 text-sm bg-white">
+                <option value="">全部</option>
+                <option value="RETIRED">已退市</option>
+                <option value="REVIVAL_PENDING">复活中</option>
+              </select>
+            </label>
+            <label class="text-xs text-ink-secondary space-y-1"><span>退市原因</span>
+              <select x-model="filters.exec.reason" class="block w-40 border border-line rounded-md px-2 py-1.5 text-sm bg-white">
+                <option value="">全部</option>
+                <template x-for="r in reasonOptions" :key="r"><option :value="r" x-text="r"></option></template>
+              </select>
+            </label>
+            <label class="text-xs text-ink-secondary space-y-1"><span>关键词</span>
+              <input x-model="filters.exec.keyword" placeholder="申请单号 / SPU / SKU / 名称" class="block w-56 border border-line rounded-md px-2 py-1.5 text-sm" />
+            </label>
+            <button @click="searchWithLoading()" class="px-3 py-1.5 text-sm rounded-md bg-primary text-white hover:bg-primary-hover">搜索</button>
+            <button @click="filters.exec={status:'',reason:'',keyword:''}; execPage=1" class="px-3 py-1.5 text-sm rounded-md border border-line hover:bg-fill">重置</button>
+          </div>
+          <div class="table-wrap">
+            <template x-if="loading"><div class="p-6 space-y-3"><div class="h-10 skeleton rounded"></div><div class="h-10 skeleton rounded"></div><div class="h-10 skeleton rounded"></div></div></template>
+            <template x-if="!loading && listError">
+              <div class="py-16 text-center space-y-3">
+                <div class="text-sm font-medium text-ink">列表加载失败</div>
+                <p class="text-xs text-ink-tertiary">无法获取退市执行数据，请检查网络后重试。</p>
+                <button type="button" @click="searchWithLoading(false)" class="px-3 py-1.5 text-sm rounded-md bg-primary text-white hover:bg-primary-hover">重试</button>
+              </div>
+            </template>
+            <template x-if="!loading && !listError">
+              <div>
+                <div x-show="filteredExec.length===0" class="py-16 text-center text-ink-tertiary text-sm">暂无符合条件的执行记录</div>
+                <table x-show="filteredExec.length" class="w-full text-sm">
+                  <thead class="bg-fill text-ink-secondary text-xs">
+                    <tr>
+                      <th class="text-left font-medium px-4 py-3">申请单号</th>
+                      <th class="text-left font-medium px-4 py-3">SPU</th>
+                      <th class="text-left font-medium px-4 py-3">SKU</th>
+                      <th class="text-left font-medium px-4 py-3">名称</th>
+                      <th class="text-left font-medium px-4 py-3">原因</th>
+                      <th class="text-left font-medium px-4 py-3">预计退市</th>
+                      <th class="text-left font-medium px-4 py-3">状态</th>
+                      <th class="text-left font-medium px-4 py-3">落定时间</th>
+                      <th class="text-left font-medium px-4 py-3">操作</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <template x-for="row in pagedExec" :key="row.id">
+                      <tr class="border-t border-line-soft hover:bg-primary-bg/40">
+                        <td class="px-4 py-3 whitespace-nowrap text-ink-secondary" x-text="row.formNo"></td>
+                        <td class="px-4 py-3" x-text="row.spuCode"></td>
+                        <td class="px-4 py-3 font-medium" x-text="row.skuCode"></td>
+                        <td class="px-4 py-3" x-text="row.name"></td>
+                        <td class="px-4 py-3 text-ink-secondary" x-text="row.reason"></td>
+                        <td class="px-4 py-3 text-ink-secondary" x-text="row.planDate"></td>
+                        <td class="px-4 py-3"><span class="text-xs px-2 py-0.5 rounded border" :class="skuStatusClass(row.status)" x-text="skuStatusLabel(row.status)"></span></td>
+                        <td class="px-4 py-3 text-ink-secondary" x-text="row.settledAt || '—'"></td>
+                        <td class="px-4 py-3 space-x-2 whitespace-nowrap">
+                          <button @click="openSkuDetail(row)" class="text-primary hover:underline">查看</button>
+                          <button x-show="row.status==='RETIRED' && canRevive" @click="openRevive(row)" class="text-primary hover:underline">复活</button>
+                          <button x-show="row.status==='REVIVAL_PENDING'" @click="openFlowSku(row)" class="text-ink-secondary hover:text-primary">流程</button>
+                        </td>
+                      </tr>
+                    </template>
+                  </tbody>
+                </table>
+              </div>
+            </template>
+          </div>
+          <div class="px-4 py-3 border-t border-line-soft flex items-center justify-between text-xs text-ink-tertiary">
+            <span>共 <span x-text="filteredExec.length"></span> 条 · 每页
+              <select x-model.number="pageSize" class="border border-line rounded px-2 py-1 text-xs bg-white mx-1">
+                <option :value="20">20条/页</option><option :value="50">50条/页</option><option :value="100">100条/页</option>
+              </select>
+              条</span>
+            <div class="flex gap-2">
+              <button @click="execPage=Math.max(1,execPage-1)" class="px-2 py-1 border border-line rounded hover:bg-fill">上一页</button>
+              <span class="px-2 py-1" x-text="execPage + ' / ' + Math.max(1, Math.ceil(filteredExec.length/pageSize))"></span>
+              <button @click="execPage=Math.min(Math.max(1,Math.ceil(filteredExec.length/pageSize)), execPage+1)" class="px-2 py-1 border border-line rounded hover:bg-fill">下一页</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SKU 只读详情 -->
+      <section x-show="page==='skuDetail' && currentSku" class="space-y-4">
+        <div class="bg-white rounded-lg shadow-card border border-line-soft">
+          <div class="px-5 py-4 border-b border-line-soft flex items-center justify-between gap-3 flex-wrap">
+            <div class="flex items-center gap-3 flex-wrap">
+              <button @click="go('executeList')" class="text-sm text-ink-secondary hover:text-primary">← 返回</button>
+              <h1 class="text-base font-semibold" x-text="currentSku.skuCode + ' · ' + currentSku.name"></h1>
+              <span class="text-xs px-2 py-0.5 rounded border" :class="skuStatusClass(currentSku.status)" x-text="skuStatusLabel(currentSku.status)"></span>
+            </div>
+            <div class="flex gap-2">
+              <button @click="openFlowSku(currentSku)" class="px-3 py-1.5 text-sm rounded-md border border-line hover:bg-fill">查看审批进度</button>
+              <button x-show="currentSku.status==='RETIRED' && canRevive" @click="openRevive(currentSku)" class="px-3 py-1.5 text-sm rounded-md bg-primary text-white hover:bg-primary-hover">复活</button>
+            </div>
+          </div>
+          <div class="mx-5 mt-4 rounded-md px-4 py-3 text-sm border bg-fill border-line text-ink-secondary">
+            申请单 <span class="font-medium text-ink" x-text="currentSku.formNo"></span>
+            · 原因 <span x-text="currentSku.reason"></span>
+            · 预计退市 <span x-text="currentSku.planDate"></span>
+            · 落定 <span x-text="currentSku.settledAt || '—'"></span>
+          </div>
+          <div class="p-5 grid sm:grid-cols-2 gap-3 text-sm opacity-80">
+            <div class="flex justify-between border-b border-line-soft py-1.5"><span class="text-ink-tertiary">SPU</span><span x-text="currentSku.spuCode"></span></div>
+            <div class="flex justify-between border-b border-line-soft py-1.5"><span class="text-ink-tertiary">SKU</span><span x-text="currentSku.skuCode"></span></div>
+            <div class="flex justify-between border-b border-line-soft py-1.5"><span class="text-ink-tertiary">名称</span><span x-text="currentSku.name"></span></div>
+            <div class="flex justify-between border-b border-line-soft py-1.5"><span class="text-ink-tertiary">系列</span><span x-text="currentSku.series"></span></div>
+          </div>
+          <p class="px-5 pb-4 text-xs text-ink-tertiary">已退市后商品主档只读；渠道商品不受本页约束。</p>
+        </div>
+
+        <div class="grid lg:grid-cols-5 gap-4">
+          <!-- A 申请快照 -->
+          <div class="lg:col-span-2 bg-white rounded-lg shadow-card border border-line-soft p-5 space-y-4">
+            <div>
+              <h2 class="text-sm font-semibold">申请快照</h2>
+              <p class="mt-0.5 text-xs text-ink-tertiary">该 SKU 纳入退市申请单时的关键信息</p>
+            </div>
+            <dl class="text-sm space-y-2.5">
+              <div class="flex justify-between gap-3"><dt class="text-ink-tertiary shrink-0">申请单号</dt><dd class="font-medium text-right" x-text="currentSku.formNo"></dd></div>
+              <div class="flex justify-between gap-3"><dt class="text-ink-tertiary shrink-0">退市原因</dt><dd class="text-right" x-text="currentSku.reason"></dd></div>
+              <div class="flex justify-between gap-3"><dt class="text-ink-tertiary shrink-0">补充说明</dt><dd class="text-right text-ink-secondary" x-text="currentSku.note || '—'"></dd></div>
+              <div class="flex justify-between gap-3"><dt class="text-ink-tertiary shrink-0">预计退市</dt><dd class="text-right" x-text="currentSku.planDate"></dd></div>
+              <div class="flex justify-between gap-3"><dt class="text-ink-tertiary shrink-0">同单关联 SKU</dt><dd class="text-right font-medium" x-text="sameFormSkuCount + ' 个'"></dd></div>
+              <div class="flex justify-between gap-3"><dt class="text-ink-tertiary shrink-0">申请人</dt><dd class="text-right" x-text="currentSku.applicant"></dd></div>
+              <div class="flex justify-between gap-3"><dt class="text-ink-tertiary shrink-0">提交时间</dt><dd class="text-right" x-text="currentSku.submittedAt"></dd></div>
+            </dl>
+
+            <!-- C 复活提示 -->
+            <div x-show="currentSku.status==='RETIRED'" class="rounded-md border border-primary/20 bg-primary-bg px-3 py-3 text-xs text-primary leading-relaxed space-y-1.5">
+              <div class="font-semibold text-sm">复活提示</div>
+              <div>· 点击「复活」将二次确认，并提交<strong>复活审批</strong>（审批流可在系统设置配置）</div>
+              <div>· 审批<strong>通过</strong>后恢复「已发布」，本 SKU 将从退市执行<strong>自动消失</strong></div>
+              <div>· 审批<strong>失败/驳回</strong>后仍为「已退市」，继续可在本页查看</div>
+              <div>· 不会自动渠道上架；再售请在渠道管理操作</div>
+              <div>· 已退市后<strong>商品主档</strong>不可编辑；<strong>渠道商品不受影响</strong></div>
+            </div>
+            <div x-show="currentSku.status==='REVIVAL_PENDING'" class="rounded-md border border-primary/20 bg-primary-bg px-3 py-3 text-xs text-primary leading-relaxed space-y-1.5">
+              <div class="font-semibold text-sm">复活审批进行中</div>
+              <div>当前状态为「复活中」。可通过页头或日志中的「看审批」进入 D11 统一进度页。</div>
+              <div>通过后本 SKU 将从退市执行消失；驳回/失败后仍为已退市。</div>
+            </div>
+            <div x-show="currentSku.status==='DELISTING'" class="rounded-md border border-line-soft bg-fill px-3 py-3 text-xs text-ink-secondary leading-relaxed">
+              <div class="font-semibold text-sm text-ink mb-1">落定中</div>
+              商品管理正在将本 SKU 落定为「已退市」。落定完成后可在本页发起复活。
+            </div>
+          </div>
+
+          <!-- 操作日志时间轴 -->
+          <div class="lg:col-span-3 bg-white rounded-lg shadow-card border border-line-soft p-5">
+            <div class="flex items-start justify-between gap-3 mb-4">
+              <div>
+                <h2 class="text-sm font-semibold">操作日志</h2>
+                <p class="mt-0.5 text-xs text-ink-tertiary">该 SKU：退市申请 → 审批 → 落定 → 复活全链路（时间轴）</p>
+              </div>
+              <span class="text-xs text-ink-tertiary shrink-0" x-text="skuTimeline.length + ' 条记录'"></span>
+            </div>
+            <div class="log-rail space-y-0 pl-1">
+              <template x-for="(ev, idx) in skuTimeline" :key="ev.id">
+                <div class="flex gap-3 pb-5 last:pb-0">
+                  <div class="log-dot" :class="ev.dot"></div>
+                  <div class="flex-1 min-w-0">
+                    <div class="flex items-start justify-between gap-2 flex-wrap">
+                      <div class="text-sm font-medium" x-text="ev.action"></div>
+                      <div class="text-xs text-ink-tertiary whitespace-nowrap" x-text="ev.at"></div>
+                    </div>
+                    <div class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-ink-secondary">
+                      <span>操作人 · <span class="text-ink" x-text="ev.actor"></span></span>
+                      <span class="text-xs px-1.5 py-0.5 rounded border" :class="ev.resultClass" x-text="ev.result"></span>
+                      <button x-show="ev.canJumpFlow" @click="openFlowSku(currentSku)" class="text-primary hover:underline font-medium">看审批</button>
+                    </div>
+                    <div class="mt-1.5 text-xs text-ink-tertiary leading-relaxed" x-text="ev.detail"></div>
+                  </div>
+                </div>
+              </template>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 系统设置：渠道下架；退市原因统一到 D13 枚举管理 -->
+      <section x-show="page==='settings' && canDelist" class="space-y-4">
+        <div class="bg-white rounded-lg shadow-card border border-line-soft p-5">
+          <h1 class="text-base font-semibold">退市通过后自动渠道下架</h1>
+          <p class="mt-1 text-xs text-ink-tertiary mb-5">商品退市状态与渠道上下架是两套字段，退市不等于下架。仅当开关开启且审批通过后，才对指定渠道自动下架；审批过程中不提前下架。渠道下架失败时商品仍为已退市，系统记失败日志。</p>
+          <label class="flex items-center gap-3 mb-4">
+            <input type="checkbox" x-model="settings.autoUnlist" class="rounded border-line text-primary focus:ring-primary" />
+            <span class="text-sm font-medium">开启：退市审批通过后自动触发渠道下架</span>
+          </label>
+          <div x-show="settings.autoUnlist" class="mb-4">
+            <div class="text-xs text-ink-tertiary mb-2">指定渠道（可多选；渠道清单引用主数据，维护见渠道管理/枚举管理说明）</div>
+            <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-2">
+              <template x-for="ch in channelOptions" :key="ch">
+                <label class="flex items-center gap-2 text-sm px-3 py-2 rounded-md border border-line-soft hover:bg-fill">
+                  <input type="checkbox" :value="ch" x-model="settings.channels" class="rounded border-line text-primary" />
+                  <span x-text="ch"></span>
+                </label>
+              </template>
+            </div>
+          </div>
+          <button @click="saveSettings()" class="px-4 py-2 text-sm rounded-md bg-primary text-white hover:bg-primary-hover">保存下架配置</button>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-card border border-line-soft p-5">
+          <h1 class="text-base font-semibold">退市原因</h1>
+          <p class="mt-1 text-xs text-ink-tertiary mb-4">原因枚举已统一到 <strong>系统设置 → 枚举管理 → 退市原因</strong> 维护（新增/编辑/启停、「需补充说明」）。本域申请与筛选仅消费已启用项；历史单保留快照。本页不提供重复配置入口。</p>
+          <div class="flex flex-wrap gap-2 mb-3">
+            <template x-for="r in reasonCatalog" :key="r.id">
+              <span class="text-xs px-2 py-1 rounded border"
+                :class="r.enabled ? 'bg-success-bg text-success border-success/20' : 'bg-fill text-ink-tertiary border-line'"
+                x-text="r.name + (r.requireNote ? '（需说明）' : '') + (r.enabled ? '' : ' · 停用')"></span>
+            </template>
+          </div>
+          <p class="text-xs text-ink-tertiary">上表为同源只读预览（演示数据）。请到 D01+D13 原型「枚举管理」做增删启停。</p>
+        </div>
+      </section>
+
+      <!-- D11 审核流程 -->
+      <section x-show="page==='flowPage'" class="space-y-4">
+        <div class="bg-white rounded-lg shadow-card border border-line-soft p-5">
+          <div class="flex items-start justify-between gap-3 flex-wrap mb-6">
+            <div>
+              <div class="text-xs text-ink-tertiary mb-1">审批中心 · 审核流程（D11 统一模式）</div>
+              <h1 class="text-base font-semibold" x-text="(flowDoc && flowDoc.title) || '请从申请单或执行行进入进度'"></h1>
+              <p class="mt-1 text-xs text-ink-tertiary">退市/复活审批流均可在系统设置审批流引擎配置。本域不自建第二套时间轴。</p>
+            </div>
+            <button x-show="flowFrom" @click="go(flowFrom)" class="text-sm text-primary hover:underline">返回来源页</button>
+          </div>
+          <template x-if="flowDoc">
+            <div>
+              <div class="flex items-center gap-2 mb-8 overflow-x-auto pb-2">
+                <template x-for="(st, i) in flowDoc.steps" :key="st.name">
+                  <div class="flex items-center gap-2">
+                    <div class="flex flex-col items-center min-w-[7rem]">
+                      <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold"
+                        :class="st.state==='done' ? 'bg-primary text-white' : st.state==='current' ? 'bg-white text-primary border-2 border-primary' : 'bg-fill text-ink-disabled border border-line'"
+                        x-text="i+1"></div>
+                      <div class="mt-2 text-xs font-medium" x-text="st.name"></div>
+                    </div>
+                    <div x-show="i < flowDoc.steps.length-1" class="step-line w-12" :class="st.state==='done' ? 'done' : ''"></div>
+                  </div>
+                </template>
+              </div>
+              <div class="grid lg:grid-cols-3 gap-6">
+                <div class="lg:col-span-2 space-y-3">
+                  <h2 class="text-sm font-semibold">审批意见</h2>
+                  <template x-for="op in flowDoc.opinions" :key="op.at + op.user">
+                    <div class="border border-line-soft rounded-md p-3 text-sm">
+                      <div class="flex justify-between text-xs text-ink-tertiary"><span x-text="op.node + ' · ' + op.user"></span><span x-text="op.at"></span></div>
+                      <div class="mt-1" x-text="op.text"></div>
+                    </div>
+                  </template>
+                </div>
+                <div class="space-y-2" x-show="flowDoc.canDemoAct">
+                  <div class="text-xs text-ink-tertiary">演示操作</div>
+                  <button @click="demoApprove()" class="w-full px-3 py-2 text-sm rounded-md bg-primary text-white hover:bg-primary-hover">审批通过</button>
+                  <button @click="demoReject()" class="w-full px-3 py-2 text-sm rounded-md border border-line hover:bg-fill">审批驳回/失败</button>
+                </div>
+              </div>
+            </div>
+          </template>
+        </div>
+      </section>
+      </div>
+    </main>
+  </div>
+
+  <!-- 选品弹窗 -->
+  <div x-show="pickerOpen" x-cloak class="fixed inset-0 z-token-modal flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="picker-title" @keydown.tab="trapFocus($event, 'picker')">
+    <div class="absolute inset-0 bg-black/40 z-token-overlay" @click="closePicker()" aria-hidden="true"></div>
+    <div class="relative w-full max-w-4xl max-h-[90vh] bg-white rounded-lg shadow-card border border-line-soft modal-enter flex flex-col" data-modal="picker">
+      <div class="px-5 py-4 border-b border-line-soft flex items-center justify-between bg-white text-ink border-r border-line-soft rounded-t-lg">
+        <div>
+          <div id="picker-title" class="font-semibold" x-text="applyForm.mode==='SPU' ? '选择 SPU' : '选择 SKU'"></div>
+          <div class="text-xs text-white/55">演示商品库约 <span x-text="catalogTotalHint"></span> 条 · 请用品牌/分类/关键词筛选</div>
+        </div>
+        <button type="button" @click="closePicker()" class="text-white/70 hover:text-white text-xl leading-none" aria-label="关闭">×</button>
+      </div>
+      <div class="p-4 flex flex-wrap gap-3 items-end border-b border-line-soft bg-fill/50">
+        <label class="text-xs text-ink-secondary space-y-1"><span>品牌</span>
+          <select x-model="picker.brand" class="block w-36 border border-line rounded-md px-2 py-1.5 text-sm bg-white">
+            <option value="">全部</option>
+            <template x-for="b in brandOptions" :key="b"><option :value="b" x-text="b"></option></template>
+          </select>
+        </label>
+        <label class="text-xs text-ink-secondary space-y-1"><span>分类</span>
+          <select x-model="picker.category" class="block w-36 border border-line rounded-md px-2 py-1.5 text-sm bg-white">
+            <option value="">全部</option>
+            <template x-for="c in categoryOptions" :key="c"><option :value="c" x-text="c"></option></template>
+          </select>
+        </label>
+        <label class="text-xs text-ink-secondary space-y-1"><span>关键词</span>
+          <input x-model="picker.keyword" type="text" placeholder="编码 / 名称" class="block w-44 border border-line rounded-md px-2 py-1.5 text-sm" />
+        </label>
+        <button @click="pickerPage=1" class="px-3 py-1.5 text-sm rounded-md bg-primary text-white hover:bg-primary-hover">搜索</button>
+        <button @click="picker.brand=''; picker.category=''; picker.keyword=''; pickerPage=1" class="px-3 py-1.5 text-sm rounded-md border border-line hover:bg-fill">重置</button>
+        <span class="text-xs text-ink-tertiary ml-auto">已勾选 <span class="text-primary font-medium" x-text="pickerCheckedCount"></span></span>
+      </div>
+      <div class="flex-1 overflow-y-auto table-wrap min-h-[280px]">
+        <table x-show="applyForm.mode==='SPU'" class="w-full text-sm">
+          <thead class="bg-fill text-xs text-ink-secondary sticky top-0">
+            <tr>
+              <th class="text-left px-3 py-2 font-medium w-10"></th>
+              <th class="text-left px-3 py-2 font-medium">编码</th>
+              <th class="text-left px-3 py-2 font-medium">名称</th>
+              <th class="text-left px-3 py-2 font-medium">品牌</th>
+              <th class="text-left px-3 py-2 font-medium">分类</th>
+              <th class="text-left px-3 py-2 font-medium">SKU 数</th>
+            </tr>
+          </thead>
+          <tbody>
+            <template x-for="row in pagedPickerSpus" :key="row.code">
+              <tr class="border-t border-line-soft hover:bg-primary-bg/30">
+                <td class="px-3 py-2"><input type="checkbox" :value="row.code" x-model="picker.selectedSpus" class="rounded text-primary" /></td>
+                <td class="px-3 py-2 font-medium" x-text="row.code"></td>
+                <td class="px-3 py-2" x-text="row.name"></td>
+                <td class="px-3 py-2 text-ink-secondary" x-text="row.brand"></td>
+                <td class="px-3 py-2 text-ink-secondary" x-text="row.category"></td>
+                <td class="px-3 py-2 text-ink-secondary" x-text="row.skus.length"></td>
+              </tr>
+            </template>
+          </tbody>
+        </table>
+        <table x-show="applyForm.mode==='SKU'" class="w-full text-sm">
+          <thead class="bg-fill text-xs text-ink-secondary sticky top-0">
+            <tr>
+              <th class="text-left px-3 py-2 font-medium w-10"></th>
+              <th class="text-left px-3 py-2 font-medium">编码</th>
+              <th class="text-left px-3 py-2 font-medium">名称</th>
+              <th class="text-left px-3 py-2 font-medium">品牌</th>
+              <th class="text-left px-3 py-2 font-medium">分类</th>
+            </tr>
+          </thead>
+          <tbody>
+            <template x-for="row in pagedPickerSkus" :key="row.skuCode">
+              <tr class="border-t border-line-soft hover:bg-primary-bg/30">
+                <td class="px-3 py-2"><input type="checkbox" :value="row.skuCode" x-model="picker.selectedSkus" class="rounded text-primary" /></td>
+                <td class="px-3 py-2 font-medium" x-text="row.skuCode"></td>
+                <td class="px-3 py-2" x-text="row.name"></td>
+                <td class="px-3 py-2 text-ink-secondary" x-text="row.brand"></td>
+                <td class="px-3 py-2 text-ink-secondary" x-text="row.category"></td>
+              </tr>
+            </template>
+          </tbody>
+        </table>
+        <div x-show="(applyForm.mode==='SPU' ? filteredPickerSpus.length : filteredPickerSkus.length)===0" class="py-12 text-center text-sm text-ink-tertiary">无匹配商品，请调整筛选条件</div>
+      </div>
+      <div class="px-4 py-3 border-t border-line-soft flex items-center justify-between text-xs text-ink-tertiary">
+        <span>筛选结果 <span x-text="applyForm.mode==='SPU' ? filteredPickerSpus.length : filteredPickerSkus.length"></span> 条 · 每页 <span x-text="pickerPageSize"></span></span>
+        <div class="flex gap-2 items-center">
+          <button @click="pickerPage=Math.max(1,pickerPage-1)" class="px-2 py-1 border border-line rounded hover:bg-fill">上一页</button>
+          <span x-text="pickerPage + ' / ' + pickerMaxPage"></span>
+          <button @click="pickerPage=Math.min(pickerMaxPage, pickerPage+1)" class="px-2 py-1 border border-line rounded hover:bg-fill">下一页</button>
+        </div>
+        <div class="flex gap-2">
+          <button type="button" @click="closePicker()" class="px-3 py-1.5 text-sm rounded-md border border-line hover:bg-fill text-ink">取消</button>
+          <button @click="confirmPicker()" class="px-3 py-1.5 text-sm rounded-md bg-primary text-white hover:bg-primary-hover">确认选择</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 批量导入弹窗 -->
+  <div x-show="importOpen" x-cloak class="fixed inset-0 z-token-modal flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="import-title" @keydown.tab="trapFocus($event, 'import')">
+    <div class="absolute inset-0 bg-black/40 z-token-overlay" @click="closeImport()" aria-hidden="true"></div>
+    <div class="relative w-full max-w-2xl max-h-[90vh] bg-white rounded-lg shadow-card border border-line-soft modal-enter flex flex-col" data-modal="import">
+      <div class="px-5 py-4 border-b border-line-soft flex items-center justify-between bg-white text-ink border-r border-line-soft rounded-t-lg">
+        <div>
+          <div id="import-title" class="font-semibold">批量导入商品</div>
+          <div class="text-xs text-white/55">当前按 <span x-text="applyForm.mode"></span> 解析；每行一个编码，也可用逗号/空格分隔</div>
+        </div>
+        <button type="button" @click="closeImport()" class="text-white/70 hover:text-white text-xl leading-none" aria-label="关闭">×</button>
+      </div>
+      <div class="p-5 space-y-3 flex-1 overflow-y-auto">
+        <div class="flex items-center justify-between text-xs text-ink-tertiary">
+          <span>模板示例：<code class="bg-fill px-1 rounded" x-text="applyForm.mode==='SPU' ? 'SPU2001' : 'SKU2007-A'"></code></span>
+          <button @click="fillImportSample()" class="text-primary hover:underline">填入示例</button>
+        </div>
+        <textarea x-model="importText" rows="8" class="w-full border border-line rounded-md px-3 py-2 text-sm font-mono" placeholder="每行一个编码…"></textarea>
+        <label class="flex items-center gap-2 text-sm text-ink-secondary">
+          <input type="file" accept=".txt,.csv" class="text-xs" @change="onImportFile($event)" />
+          <span class="text-xs text-ink-tertiary">可选：上传 txt/csv（演示读取文本）</span>
+        </label>
+        <div x-show="importResult" class="rounded-md border border-line-soft bg-fill p-3 text-sm space-y-2">
+          <div>解析结果：成功 <span class="text-success font-medium" x-text="importResult && importResult.ok"></span> · 失败 <span class="text-primary font-medium" x-text="importResult && importResult.fail"></span> · 将写入 SKU <span class="font-medium" x-text="importResult && importResult.lines.length"></span></div>
+          <div x-show="importResult && importResult.errors.length" class="text-xs text-primary max-h-24 overflow-y-auto space-y-0.5">
+            <template x-for="e in (importResult ? importResult.errors.slice(0,8) : [])" :key="e">
+              <div x-text="e"></div>
+            </template>
+          </div>
+        </div>
+      </div>
+      <div class="px-5 py-4 border-t border-line-soft flex justify-end gap-2">
+        <button type="button" @click="closeImport()" class="px-3 py-1.5 text-sm rounded-md border border-line hover:bg-fill">取消</button>
+        <button @click="parseImport()" class="px-3 py-1.5 text-sm rounded-md border border-line hover:bg-fill">解析预览</button>
+        <button @click="confirmImport()" class="px-3 py-1.5 text-sm rounded-md bg-primary text-white hover:bg-primary-hover">确认导入到明细</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 复活确认 -->
+  <div x-show="reviveOpen" x-cloak class="fixed inset-0 z-token-modal flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="revive-title" @keydown.tab="trapFocus($event, 'revive')">
+    <div class="absolute inset-0 bg-black/40 z-token-overlay" @click="closeRevive()" aria-hidden="true"></div>
+    <div class="relative w-full max-w-md bg-white rounded-lg shadow-card border border-line-soft modal-enter" data-modal="revive">
+      <div id="revive-title" class="px-5 py-4 border-b border-line-soft font-semibold">确认复活</div>
+      <div class="p-5 text-sm space-y-3" x-show="reviveTarget">
+        <div>SKU：<span class="font-medium" x-text="reviveTarget && (reviveTarget.skuCode + ' · ' + reviveTarget.name)"></span></div>
+        <p>确认发起复活申请？</p>
+        <ul class="text-xs text-ink-secondary space-y-1 list-disc pl-4">
+          <li>将提交复活审批（审批流可在系统设置配置）</li>
+          <li>通过后恢复「已发布」，保留原编码；本行将从退市执行自动消失</li>
+          <li>审批失败/驳回后仍为「已退市」，继续在本页展示</li>
+          <li>不会自动渠道上架；再售请在渠道管理操作</li>
+        </ul>
+      </div>
+      <div class="px-5 py-4 border-t border-line-soft flex justify-end gap-2">
+        <button type="button" @click="closeRevive()" class="px-4 py-2 text-sm rounded-md border border-line hover:bg-fill">取消</button>
+        <button type="button" @click="confirmRevive()" class="px-4 py-2 text-sm rounded-md bg-primary text-white hover:bg-primary-hover">确认复活</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 明细删除确认 -->
+  <div x-show="deleteLineOpen" x-cloak class="fixed inset-0 z-token-modal flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="delete-line-title" @keydown.tab="trapFocus($event, 'deleteLine')">
+    <div class="absolute inset-0 bg-black/40 z-token-overlay" @click="closeDeleteLine()" aria-hidden="true"></div>
+    <div class="relative w-full max-w-md bg-white rounded-lg shadow-card border border-line-soft modal-enter" data-modal="deleteLine">
+      <div id="delete-line-title" class="px-5 py-4 border-b border-line-soft font-semibold">确认删除明细</div>
+      <div class="p-5 text-sm space-y-2">
+        <p>将从本申请单明细中移除该 SKU，不会影响商品主档状态。</p>
+        <p class="text-ink-secondary" x-show="deleteLineTarget">SKU：<span class="font-medium text-ink" x-text="deleteLineTarget && (deleteLineTarget.skuCode + ' · ' + deleteLineTarget.name)"></span></p>
+      </div>
+      <div class="px-5 py-4 border-t border-line-soft flex justify-end gap-2">
+        <button type="button" @click="closeDeleteLine()" class="px-4 py-2 text-sm rounded-md border border-line hover:bg-fill">取消</button>
+        <button type="button" @click="confirmRemovePreviewLine()" class="px-4 py-2 text-sm rounded-md bg-primary text-white hover:bg-primary-hover">确认删除</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="fixed top-16 right-4 z-token-message space-y-2" aria-live="polite">
+    <template x-for="t in toasts" :key="t.id">
+      <div class="toast-enter min-w-[240px] max-w-sm bg-white text-ink border-r border-line-soft text-sm px-4 py-3 rounded-md shadow-lg border-l-4 border-primary" x-text="t.msg"></div>
+    </template>
+  </div>
+
+  <script>
+    function delistingApp() {
+      const reasons = ['产品迭代替代','销量不达标','质量问题','供应链中断','合规原因','其他','季节性调整'];
+      const applicants = ['陈启明','李薇','王海宁','赵晓','周然','吴倩'];
+      const channelOptions = ['天猫旗舰','京东自营','官网商城','抖音旗舰'];
+      const brands = ['ZIPPO', 'ZIPPO Armor', 'ZIPPO Vintage', 'ZIPPO Accessory'];
+      const categories = ['打火机','Armor 系列','联名款','插入件','配件耗材','礼盒套装'];
+      const seriesList = ['Classic','Armor','Vintage','Insert','Accessory','Limited','Emblem'];
+      const spuNames = [
+        'Armor Brushed Chrome','High Polish Brass','Street Chrome','Venetian Classic','Black Ice',
+        'Regular Street Chrome','Armor Antique Silver','High Polish Chrome','Brushed Brass','Black Matte',
+        'Red Matte','Spectrum Finish','Distressed Brass','Sterling Silver Armor','Classic Chrome',
+        'Satin Chrome','High Polish Black','Armor Black Ice','Tumbled Brass','Gray Dusk',
+        'Iron Stone','Woodchuck','Fender Stratocaster','Jack Daniel Brass','Harley Chrome',
+        'Playboy Satin','Lucky Strike Replica','1941 Replica','Vintage 1937','Pipe Lighter',
+        'Butane Insert','Yellow Flame','Double Torch','Table Lighter','Hand Warmer',
+        'Fuel 125ml','Wicks Pack','Flints Pack','Gift Set Armor','Collector Case',
+        'Dragon Armor','Phoenix Polish','Tiger Eye','Celtic Knot','American Flag',
+        'Logo Black','Logo Red','Skull Chrome','Eagle Emblem','Compass Antique',
+        'Slim High Polish','1941 Black Crackle','Armor Deep Carve','Zippo 1932 Replica','Pipe Lighter Satin',
+        'Butane Dual Torch','Single Torch Insert','Yellow Flame Soft','Table Lighter Brass','Hand Warmer Black',
+        'Fuel 355ml','Cotton & Wick Kit','Flint Dispenser','Holiday Gift Tin','Display Case 48',
+        'Anne Stokes Dragon','Mazzi Skull','James Bond','AC DC Logo','Led Zeppelin',
+        'Mustang Classic','Chevrolet Emblem','Ford Heritage','NBA Team Chrome','NFL Team Brass'
+      ];
+
+      function pad(n) { return String(n).padStart(2, '0'); }
+      function dt(offDay, h, m) {
+        const d = new Date(2026, 7, 14);
+        d.setDate(d.getDate() - offDay);
+        return `2026-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(h)}:${pad(m)}`;
+      }
+      function day(off) {
+        const d = new Date(2026, 7, 14);
+        d.setDate(d.getDate() + off);
+        return `2026-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+      }
+
+      // Catalog: denser mock for picker (prototype sample of 万级库)
+      const catalogSpus = spuNames.map((name, i) => {
+        const code = 'SPU' + String(2001 + i);
+        const nSku = 2 + (i % 2);
+        const brand = brands[i % brands.length];
+        const category = categories[i % categories.length];
+        const skus = [];
+        for (let j = 0; j < nSku; j++) {
+          const suffix = ['A','B','C'][j];
+          skus.push({
+            skuCode: code.replace('SPU','SKU') + '-' + suffix,
+            name: name + (j === 0 ? ' · 银' : j === 1 ? ' · 金' : ' · 黑'),
+            series: seriesList[i % seriesList.length],
+            brand, category,
+            status: j === 2 ? 'DRAFT' : 'PUBLISHED',
+          });
+        }
+        return { code, name, brand, category, skus };
+      });
+      const catalogSkuFlat = catalogSpus.flatMap(s => s.skus.map(k => ({ ...k, spuCode: s.code, spuName: s.name })));
+
+      // Seed forms + sku lines
+      const forms = [];
+      const skuLines = [];
+      const statusCycle = ['PENDING','APPROVED','APPROVED','APPROVED','REJECTED','CANCELLED','PENDING','APPROVED'];
+      for (let i = 0; i < 120; i++) {
+        const formNo = 'DL202608' + pad(1 + (i % 14)) + pad(100 + i);
+        const status = statusCycle[i % statusCycle.length];
+        const reason = reasons[i % reasons.length];
+        const applicant = applicants[i % applicants.length];
+        const planDate = day((i % 12) - 3);
+        const submittedAt = dt(20 - (i % 18), 9 + (i % 8), (i * 7) % 60);
+        // pick 1~2 SPUs worth of SKUs
+        const spuA = catalogSpus[i % catalogSpus.length];
+        const spuB = catalogSpus[(i + 7) % catalogSpus.length];
+        const pickSpus = i % 3 === 0 ? [spuA, spuB] : [spuA];
+        const lines = [];
+        pickSpus.forEach(spu => {
+          spu.skus.filter(sku => sku.status === 'PUBLISHED').forEach((sku, idx) => {
+            let lineStatus = 'DELISTING_PENDING';
+            let settledAt = '';
+            if (status === 'APPROVED') {
+              const sub = ['RETIRED','RETIRED','REVIVAL_PENDING'];
+              lineStatus = sub[(i + idx) % sub.length];
+              settledAt = dt(8 - (i % 6), 11, 2 + (i % 40));
+            } else if (status === 'REJECTED' || status === 'CANCELLED') {
+              lineStatus = 'PUBLISHED';
+            }
+            const line = {
+              id: formNo + '-' + sku.skuCode,
+              formNo, formId: 'f' + i,
+              spuCode: spu.code, skuCode: sku.skuCode, name: sku.name, series: sku.series,
+              reason, planDate, applicant, submittedAt, settledAt,
+              status: lineStatus,
+              note: reason === '其他' ? '区域政策调整' : (i % 3 === 0 ? '连续两季动销低于阈值' : ''),
+              _revivalFailed: lineStatus === 'RETIRED' && ((i + idx) % 5 === 0),
+            };
+            lines.push(line);
+            skuLines.push(line);
+          });
+        });
+        const spuSet = new Set(lines.map(l => l.spuCode));
+        forms.push({
+          id: 'f' + i,
+          formNo, status, reason, planDate, applicant, submittedAt,
+          note: lines[0].note,
+          node: status === 'PENDING' ? (i % 2 ? '品牌终审' : '品牌初审') : '—',
+          skuCount: lines.length,
+          spuCount: spuSet.size,
+          lineIds: lines.map(l => l.id),
+        });
+      }
+
+      return {
+        page: 'applyList',
+        role: 'BRAND_ADMIN',
+        mobileNav: false,
+        openTabs: [{ id: 'home', label: '退市申请', page: null }],
+        activeTabId: 'home',
+        activateTab(id) {
+          const t = this.openTabs.find(x => x.id === id);
+          if (!t) return;
+          this.activeTabId = id;
+          if (t.page && typeof this.go === 'function') this.go(t.page, true);
+        },
+        closeTab(id) {
+          if (this.openTabs.length <= 1) return;
+          const i = this.openTabs.findIndex(x => x.id === id);
+          if (i < 0) return;
+          this.openTabs.splice(i, 1);
+          if (this.activeTabId === id) {
+            const next = this.openTabs[Math.max(0, i - 1)];
+            this.activateTab(next.id);
+          }
+        },
+        ensureOpenTab(page, label) {
+          const id = 'p-' + page;
+          let t = this.openTabs.find(x => x.id === id);
+          if (!t) {
+            this.openTabs.push({ id, label, page });
+          } else {
+            t.label = label;
+          }
+          this.activeTabId = id;
+        },
+
+        loading: false,
+        listError: false,
+        submitting: false,
+        pickerOpen: false,
+        reviveOpen: false,
+        deleteLineOpen: false,
+        deleteLineIdx: -1,
+        deleteLineTarget: null,
+        editSnapshot: '',
+        modalFocusEl: null,
+        toasts: [],
+        toastSeq: 1,
+        pageSize: 20,
+        applyPage: 1,
+        execPage: 1,
+        pickerPage: 1,
+        pickerPageSize: 10,
+        catalogSpus,
+        catalogSkuFlat,
+        catalogTotalHint: '12,840+',
+        brandOptions: brands,
+        categoryOptions: categories,
+        forms,
+        skuLines,
+        currentForm: null,
+        currentSku: null,
+        reviveTarget: null,
+        editingFormId: null,
+        flowDoc: null,
+        flowFrom: 'applyList',
+        flowTarget: null,
+        reasonCatalog: [
+          { id: 'r1', name: '产品迭代替代', requireNote: false, enabled: true },
+          { id: 'r2', name: '销量不达标', requireNote: false, enabled: true },
+          { id: 'r3', name: '质量问题', requireNote: false, enabled: true },
+          { id: 'r4', name: '供应链中断', requireNote: false, enabled: true },
+          { id: 'r5', name: '合规原因', requireNote: false, enabled: true },
+          { id: 'r6', name: '其他', requireNote: true, enabled: true },
+          { id: 'r7', name: '季节性调整', requireNote: false, enabled: true },
+        ],
+        channelOptions,
+        settings: { autoUnlist: false, channels: ['天猫旗舰','京东自营'] },
+        applyForm: { mode: 'SPU', lines: [], reason: '', note: '', planDate: '2026-08-14' },
+        picker: { brand: '', category: '', keyword: '', selectedSpus: [], selectedSkus: [] },
+        importOpen: false,
+        importText: '',
+        importResult: null,
+        errors: {},
+        filters: {
+          apply: { status: '', reason: '', keyword: '', timeStart: '', timeEnd: '' },
+          exec: { status: '', reason: '', keyword: '' },
+        },
+        get reasonOptions() {
+          return this.reasonCatalog.filter(r => r.enabled).map(r => r.name);
+        },
+        get reasonRequiresNote() {
+          const hit = this.reasonCatalog.find(r => r.name === this.applyForm.reason);
+          return !!(hit && hit.requireNote);
+        },
+        get canDelist() { return this.role === 'BRAND_ADMIN' || this.role === 'BRAND_OPERATOR'; },
+        get canRevive() { return this.canDelist; },
+        get currentUser() {
+          if (this.role === 'BRAND_OPERATOR') return { name: '李薇', avatar: '李' };
+          if (this.role === 'DISTRIBUTOR') return { name: '张经销', avatar: '张' };
+          return { name: '陈启明', avatar: '陈' };
+        },
+        get roleLabel() {
+          return { BRAND_ADMIN: '品牌管理员', BRAND_OPERATOR: '品牌业务', DISTRIBUTOR: '经销商' }[this.role];
+        },
+        get pageTitle() {
+          return { applyList:'退市申请', applyDetail:'申请单详情', applyEdit:'申请单编辑', executeList:'退市执行', skuDetail:'SKU 详情', flowPage:'审核流程', settings:'退市配置' }[this.page];
+        },
+        get crumbModule() {
+          if (this.page === 'flowPage') return '审批中心';
+          if (this.page === 'settings') return '系统设置';
+          return '退市管理';
+        },
+        get allSkuLines() { return this.skuLines; },
+        get execLines() {
+          return this.skuLines.filter(l => ['RETIRED','REVIVAL_PENDING','DELISTING'].includes(l.status));
+        },
+        get filteredForms() {
+          const f = this.filters.apply;
+          return this.forms.filter(r => {
+            if (f.status && r.status !== f.status) return false;
+            if (f.reason && r.reason !== f.reason) return false;
+            const submittedDay = (r.submittedAt || '').slice(0, 10);
+            if (f.timeStart && submittedDay && submittedDay < f.timeStart) return false;
+            if (f.timeEnd && submittedDay && submittedDay > f.timeEnd) return false;
+            if (f.keyword) {
+              const k = f.keyword.trim();
+              const lines = this.skuLines.filter(l => l.formNo === r.formNo);
+              const hit = r.formNo.includes(k) || r.applicant.includes(k) ||
+                lines.some(l => l.skuCode.includes(k) || l.spuCode.includes(k) || l.name.includes(k));
+              if (!hit) return false;
+            }
+            return true;
+          });
+        },
+        get pagedForms() {
+          const s = (this.applyPage - 1) * this.pageSize;
+          return this.filteredForms.slice(s, s + this.pageSize);
+        },
+        get filteredExec() {
+          const f = this.filters.exec;
+          return this.execLines.filter(r => {
+            if (f.status && r.status !== f.status) return false;
+            if (f.reason && r.reason !== f.reason) return false;
+            if (f.keyword) {
+              const k = f.keyword.trim();
+              if (![r.formNo, r.spuCode, r.skuCode, r.name].some(x => x.includes(k))) return false;
+            }
+            return true;
+          });
+        },
+        get pagedExec() {
+          const s = (this.execPage - 1) * this.pageSize;
+          return this.filteredExec.slice(s, s + this.pageSize);
+        },
+        get currentFormLines() {
+          if (!this.currentForm) return [];
+          return this.skuLines.filter(l => l.formNo === this.currentForm.formNo);
+        },
+        get sameFormSkuCount() {
+          if (!this.currentSku) return 0;
+          return this.skuLines.filter(l => l.formNo === this.currentSku.formNo).length;
+        },
+        get skuTimeline() {
+          if (!this.currentSku) return [];
+          return this.buildSkuTimeline(this.currentSku);
+        },
+        get filteredPickerSpus() {
+          const p = this.picker;
+          return this.catalogSpus.filter(s => {
+            if (p.brand && s.brand !== p.brand) return false;
+            if (p.category && s.category !== p.category) return false;
+            if (p.keyword) {
+              const k = p.keyword.trim();
+              if (![s.code, s.name].some(x => x.includes(k))) return false;
+            }
+            return true;
+          });
+        },
+        get filteredPickerSkus() {
+          const p = this.picker;
+          return this.catalogSkuFlat.filter(s => {
+            if (p.brand && s.brand !== p.brand) return false;
+            if (p.category && s.category !== p.category) return false;
+            if (p.keyword) {
+              const k = p.keyword.trim();
+              if (![s.skuCode, s.name, s.spuCode].some(x => x.includes(k))) return false;
+            }
+            return true;
+          });
+        },
+        get pagedPickerSpus() {
+          const s = (this.pickerPage - 1) * this.pickerPageSize;
+          return this.filteredPickerSpus.slice(s, s + this.pickerPageSize);
+        },
+        get pagedPickerSkus() {
+          const s = (this.pickerPage - 1) * this.pickerPageSize;
+          return this.filteredPickerSkus.slice(s, s + this.pickerPageSize);
+        },
+        get pickerMaxPage() {
+          const n = this.applyForm.mode === 'SPU' ? this.filteredPickerSpus.length : this.filteredPickerSkus.length;
+          return Math.max(1, Math.ceil(n / this.pickerPageSize));
+        },
+        get pickerCheckedCount() {
+          return this.applyForm.mode === 'SPU' ? this.picker.selectedSpus.length : this.picker.selectedSkus.length;
+        },
+        countForm(s) { return this.forms.filter(f => f.status === s).length; },
+        formStatusLabel(s) { return { PENDING:'退市中', APPROVED:'已通过', REJECTED:'已驳回', CANCELLED:'已撤销' }[s] || s; },
+        formStatusClass(s) {
+          return { PENDING:'bg-warning-bg text-warning border-warning-border', APPROVED:'bg-success-bg text-success border-success/20', REJECTED:'bg-primary-bg text-primary border-primary/20', CANCELLED:'bg-fill text-ink-secondary border-line' }[s];
+        },
+        skuStatusLabel(s) {
+          return { PUBLISHED:'已发布', DELISTING_PENDING:'退市中', DELISTING:'退市中', RETIRED:'已退市', REVIVAL_PENDING:'复活中' }[s] || s;
+        },
+        skuStatusClass(s) {
+          return {
+            PUBLISHED: 'bg-success-bg text-success border-success/20',
+            DELISTING_PENDING: 'bg-warning-bg text-warning border-warning-border',
+            DELISTING: 'bg-purple-bg text-purple border-purple/20',
+            RETIRED: 'bg-fill text-ink-secondary border-line',
+            REVIVAL_PENDING: 'bg-primary-bg text-primary border-primary/20',
+          }[s] || 'bg-fill border-line';
+        },
+        get editDirty() {
+          return this.page === 'applyEdit' && this.editSnapshot !== JSON.stringify(this.applyForm);
+        },
+        markEditClean() {
+          this.editSnapshot = JSON.stringify(this.applyForm);
+        },
+        confirmLeaveEdit() {
+          if (!this.editDirty) return true;
+          return window.confirm('有未保存的修改，确定离开？离开后修改将丢失。');
+        },
+        go(id) {
+          if (this.page === 'applyEdit' && id !== 'applyEdit' && !this.confirmLeaveEdit()) return;
+          this.page = id;
+          this.mobileNav = false;
+        },
+        onRoleChange() {
+          if (!this.canDelist) this.page = 'flowPage';
+          this.toast('已切换为 ' + this.roleLabel);
+        },
+        searchWithLoading(fail) {
+          this.loading = true;
+          this.listError = false;
+          setTimeout(() => {
+            this.loading = false;
+            this.listError = !!fail;
+            if (fail) this.toast('列表加载失败，请重试');
+          }, 350);
+        },
+        toast(msg) {
+          const id = this.toastSeq++;
+          this.toasts.push({ id, msg });
+          setTimeout(() => { this.toasts = this.toasts.filter(t => t.id !== id); }, 2800);
+        },
+        focusModal(key) {
+          this.$nextTick(() => {
+            const root = document.querySelector('[data-modal="' + key + '"]');
+            if (!root) return;
+            const el = root.querySelector('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+            if (el) el.focus();
+          });
+        },
+        restoreModalFocus() {
+          const el = this.modalFocusEl;
+          this.modalFocusEl = null;
+          this.$nextTick(() => { if (el && typeof el.focus === 'function') el.focus(); });
+        },
+        trapFocus(e, key) {
+          const root = document.querySelector('[data-modal="' + key + '"]');
+          if (!root) return;
+          const nodes = Array.from(root.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'))
+            .filter((n) => !n.disabled && n.getAttribute('aria-hidden') !== 'true');
+          if (!nodes.length) return;
+          const first = nodes[0];
+          const last = nodes[nodes.length - 1];
+          if (e.shiftKey && document.activeElement === first) {
+            e.preventDefault();
+            last.focus();
+          } else if (!e.shiftKey && document.activeElement === last) {
+            e.preventDefault();
+            first.focus();
+          }
+        },
+        onGlobalEsc() {
+          if (this.deleteLineOpen) { this.closeDeleteLine(); return; }
+          if (this.reviveOpen) { this.closeRevive(); return; }
+          if (this.importOpen) { this.closeImport(); return; }
+          if (this.pickerOpen) { this.closePicker(); return; }
+        },
+        closePicker() {
+          this.pickerOpen = false;
+          this.restoreModalFocus();
+        },
+        closeImport() {
+          this.importOpen = false;
+          this.restoreModalFocus();
+        },
+        closeRevive() {
+          this.reviveOpen = false;
+          this.restoreModalFocus();
+        },
+        closeDeleteLine() {
+          this.deleteLineOpen = false;
+          this.deleteLineIdx = -1;
+          this.deleteLineTarget = null;
+          this.restoreModalFocus();
+        },
+        openNewForm() {
+          this.editingFormId = null;
+          this.applyForm = { mode: 'SPU', lines: [], reason: '', note: '', planDate: '2026-08-14' };
+          this.errors = {};
+          this.markEditClean();
+          this.page = 'applyEdit';
+        },
+        openEditForm(row) {
+          this.editingFormId = row.id;
+          const lines = this.skuLines.filter(l => l.formNo === row.formNo).map(l => {
+            const cat = this.catalogSkuFlat.find(c => c.skuCode === l.skuCode);
+            return {
+              spuCode: l.spuCode, skuCode: l.skuCode, name: l.name, series: l.series,
+              brand: (cat && cat.brand) || 'ZIPPO', category: (cat && cat.category) || '打火机',
+            };
+          });
+          this.applyForm = { mode: 'SPU', lines, reason: row.reason, note: row.note || '', planDate: row.planDate };
+          this.errors = {};
+          this.markEditClean();
+          this.page = 'applyEdit';
+        },
+        cancelEdit() {
+          if (!this.confirmLeaveEdit()) return;
+          this.page = 'applyList';
+          this.errors = {};
+        },
+        openPicker() {
+          const lines = this.applyForm.lines || [];
+          this.picker.selectedSpus = [...new Set(lines.map(l => l.spuCode).filter(Boolean))];
+          this.picker.selectedSkus = [...new Set(lines.map(l => l.skuCode).filter(Boolean))];
+          this.pickerPage = 1;
+          this.modalFocusEl = document.activeElement;
+          this.pickerOpen = true;
+          this.focusModal('picker');
+        },
+        openImport() {
+          this.importText = '';
+          this.importResult = null;
+          this.modalFocusEl = document.activeElement;
+          this.importOpen = true;
+          this.focusModal('import');
+        },
+        fillImportSample() {
+          this.importText = this.applyForm.mode === 'SPU'
+            ? 'SPU2001\nSPU2007\nSPU9999'
+            : 'SKU2007-A\nSKU2001-B\nSKU0000-X';
+          this.importResult = null;
+        },
+        onImportFile(e) {
+          const file = e.target.files && e.target.files[0];
+          if (!file) return;
+          const reader = new FileReader();
+          reader.onload = () => {
+            this.importText = String(reader.result || '');
+            this.importResult = null;
+          };
+          reader.readAsText(file);
+        },
+        parseImportCodes() {
+          const raw = (this.importText || '').split(/[\n,;\s]+/).map(s => s.trim()).filter(Boolean);
+          const uniq = [...new Set(raw)];
+          const errors = [];
+          const map = new Map();
+          uniq.forEach(code => {
+            if (this.applyForm.mode === 'SPU') {
+              const spu = this.catalogSpus.find(s => s.code === code);
+              if (!spu) { errors.push(code + '：SPU 不存在'); return; }
+              this.collectDelistableFromSpu(spu, map);
+            } else {
+              const hit = this.catalogSkuFlat.find(s => s.skuCode === code);
+              if (!hit) { errors.push(code + '：SKU 不存在'); return; }
+              const spu = this.catalogSpus.find(s => s.code === hit.spuCode);
+              if (!spu) { errors.push(code + '：所属 SPU 异常'); return; }
+              this.collectDelistableFromSpu(spu, map);
+            }
+          });
+          const ok = uniq.length - errors.length;
+          return { ok: Math.max(0, ok), fail: errors.length, errors, lines: Array.from(map.values()) };
+        },
+        parseImport() {
+          if (!(this.importText || '').trim()) {
+            this.toast('请先粘贴或上传编码');
+            return;
+          }
+          this.importResult = this.parseImportCodes();
+          this.toast('已解析：成功 ' + this.importResult.ok + ' / 失败 ' + this.importResult.fail);
+        },
+        confirmImport() {
+          if (!(this.importText || '').trim()) {
+            this.toast('请先粘贴或上传编码');
+            return;
+          }
+          const result = this.parseImportCodes();
+          this.importResult = result;
+          if (!result.lines.length) {
+            this.toast('没有可导入的有效编码');
+            return;
+          }
+          const map = new Map(this.applyForm.lines.map(l => [l.skuCode, l]));
+          result.lines.forEach(l => map.set(l.skuCode, l));
+          this.applyForm.lines = Array.from(map.values());
+          this.closeImport();
+          this.errors.lines = '';
+          this.toast('已导入 ' + result.lines.length + ' 个 SKU 到明细' + (result.fail ? '（' + result.fail + ' 条失败已跳过）' : ''));
+        },
+        isDelistableSku(sku) {
+          return !sku.status || sku.status === 'PUBLISHED';
+        },
+        collectDelistableFromSpu(spu, map) {
+          let filtered = 0;
+          (spu.skus || []).forEach(sku => {
+            if (!this.isDelistableSku(sku)) { filtered += 1; return; }
+            map.set(sku.skuCode, {
+              spuCode: spu.code, skuCode: sku.skuCode, name: sku.name, series: sku.series,
+              brand: spu.brand, category: spu.category,
+            });
+          });
+          return filtered;
+        },
+        confirmPicker() {
+          const map = new Map();
+          let filtered = 0;
+          if (this.applyForm.mode === 'SPU') {
+            this.picker.selectedSpus.forEach(code => {
+              const spu = this.catalogSpus.find(s => s.code === code);
+              if (!spu) return;
+              filtered += this.collectDelistableFromSpu(spu, map);
+            });
+          } else {
+            const spuCodes = new Set();
+            this.picker.selectedSkus.forEach(skuCode => {
+              const hit = this.catalogSkuFlat.find(s => s.skuCode === skuCode);
+              if (hit) spuCodes.add(hit.spuCode);
+            });
+            spuCodes.forEach(code => {
+              const spu = this.catalogSpus.find(s => s.code === code);
+              if (!spu) return;
+              filtered += this.collectDelistableFromSpu(spu, map);
+            });
+          }
+          this.applyForm.lines = Array.from(map.values());
+          this.closePicker();
+          this.errors.lines = '';
+          this.toast('已更新明细 ' + this.applyForm.lines.length + ' 个 SKU' + (filtered ? '（已过滤 ' + filtered + ' 个非已发布）' : ''));
+        },
+        askRemovePreviewLine(idx) {
+          const line = this.applyForm.lines[idx];
+          if (!line) return;
+          this.deleteLineIdx = idx;
+          this.deleteLineTarget = line;
+          this.modalFocusEl = document.activeElement;
+          this.deleteLineOpen = true;
+          this.focusModal('deleteLine');
+        },
+        confirmRemovePreviewLine() {
+          const idx = this.deleteLineIdx;
+          if (idx < 0) { this.closeDeleteLine(); return; }
+          this.applyForm.lines.splice(idx, 1);
+          this.closeDeleteLine();
+          this.toast('已从明细删除');
+        },
+        removePreviewLine(idx) {
+          this.askRemovePreviewLine(idx);
+        },
+        openFormDetail(row) {
+          this.currentForm = row;
+          this.page = 'applyDetail';
+        },
+        openSkuDetail(row) {
+          this.currentSku = row;
+          this.page = 'skuDetail';
+        },
+        buildSkuTimeline(sku) {
+          const form = this.forms.find(f => f.formNo === sku.formNo);
+          const applicant = sku.applicant || '陈启明';
+          const submitAt = sku.submittedAt || '2026-08-02 10:00';
+          // derive related times from submit
+          const base = submitAt.slice(0, 10);
+          const t1 = submitAt;
+          const t2 = base + ' 10:01';
+          const t3 = base + ' 15:20';
+          const t4 = base + ' 16:00';
+          const t5 = base + ' 16:05';
+          const settle = sku.settledAt || (base.slice(0, 8) + '07 11:03');
+          const events = [];
+          let id = 1;
+          const push = (ev) => { events.push({ id: 'ev' + (id++), ...ev }); };
+
+          push({
+            at: t1, actor: applicant, action: '纳入退市申请单',
+            result: '成功', resultClass: 'bg-success-bg text-success border-success/20',
+            detail: '本 SKU 随申请单 ' + sku.formNo + ' 纳入明细（同单共 ' + this.skuLines.filter(l => l.formNo === sku.formNo).length + ' 个 SKU）。原因：' + sku.reason + '。',
+            canJumpFlow: false, dot: 'ok',
+          });
+          push({
+            at: t2, actor: applicant, action: '提交退市审批',
+            result: form && form.status === 'REJECTED' ? '已驳回' : (form && form.status === 'PENDING' ? '待审' : '已提交'),
+            resultClass: form && form.status === 'REJECTED' ? 'bg-primary-bg text-primary border-primary/20' : (form && form.status === 'PENDING' ? 'bg-warning-bg text-warning border-warning-border' : 'bg-success-bg text-success border-success/20'),
+            detail: '申请单进入审批中心待办。进度展示走 D11 统一「审核流程」。',
+            canJumpFlow: true, dot: form && form.status === 'PENDING' ? 'warn' : 'ok',
+          });
+
+          if (form && form.status === 'REJECTED') {
+            push({
+              at: t3, actor: '李薇', action: '退市审批驳回',
+              result: '驳回', resultClass: 'bg-primary-bg text-primary border-primary/20',
+              detail: '申请单被驳回，SKU 未进入退市执行。可在退市申请页「去修改」后重提。',
+              canJumpFlow: true, dot: 'muted',
+            });
+            return events;
+          }
+
+          if (form && form.status === 'PENDING') {
+            push({
+              at: t3, actor: '李薇', action: '品牌初审（进行中）',
+              result: '待处理', resultClass: 'bg-warning-bg text-warning border-warning-border',
+              detail: '等待审批人处理。可点「看审批」进入 D11。',
+              canJumpFlow: true, dot: 'warn',
+            });
+            return events;
+          }
+
+          // APPROVED path
+          push({
+            at: t3, actor: '李薇', action: '品牌初审通过',
+            result: '通过', resultClass: 'bg-success-bg text-success border-success/20',
+            detail: '同意进入终审。',
+            canJumpFlow: false, dot: 'ok',
+          });
+          push({
+            at: t4, actor: '陈启明', action: '品牌终审通过',
+            result: '通过', resultClass: 'bg-success-bg text-success border-success/20',
+            detail: '退市审批通过。是否自动渠道下架以系统设置开关为准。',
+            canJumpFlow: true, dot: 'ok',
+          });
+          push({
+            at: t5, actor: '系统', action: '状态写入「已退市」',
+            result: '完成', resultClass: 'bg-fill text-ink-secondary border-line',
+            detail: '商品管理写入生命周期状态 RETIRED；本 SKU 出现在退市执行列表。本期不在「退市中」停留。',
+            canJumpFlow: false, dot: '',
+          });
+
+          if (sku.status === 'DELISTING') {
+            push({
+              at: t5, actor: '系统', action: '异常：仍为退市中',
+              result: '异常', resultClass: 'bg-warning-bg text-warning border-warning-border',
+              detail: '正常路径应直接已退市。本行仅作异常展示。',
+              canJumpFlow: false, dot: 'warn',
+            });
+            return events;
+          }
+
+          push({
+            at: settle, actor: '系统', action: '已退市只读',
+            result: '完成', resultClass: 'bg-fill text-ink-secondary border-line',
+            detail: '商品管理写入 RETIRED。商品主档只读，仅可查看与发起复活；渠道商品不受本约束。',
+            canJumpFlow: false, dot: 'muted',
+          });
+
+          if (sku.status === 'REVIVAL_PENDING') {
+            push({
+              at: '2026-08-14 09:10', actor: this.currentUser.name, action: '发起复活申请',
+              result: '待审', resultClass: 'bg-warning-bg text-warning border-warning-border',
+              detail: '二次确认后提交复活审批（审批流可在系统设置配置）。状态→复活中。',
+              canJumpFlow: true, dot: 'warn',
+            });
+            push({
+              at: '2026-08-14 09:11', actor: '系统', action: '复活审批待办已生成',
+              result: '待处理', resultClass: 'bg-primary-bg text-primary border-primary/20',
+              detail: '请在审批中心处理。通过后本 SKU 将从退市执行消失；失败仍为已退市。',
+              canJumpFlow: true, dot: '',
+            });
+          }
+
+          if (sku.status === 'RETIRED' && sku._revivalFailed) {
+            push({
+              at: '2026-08-13 18:00', actor: this.currentUser.name, action: '发起复活申请',
+              result: '已提交', resultClass: 'bg-fill text-ink-secondary border-line',
+              detail: '曾发起复活。',
+              canJumpFlow: true, dot: 'muted',
+            });
+            push({
+              at: '2026-08-13 18:30', actor: '陈启明', action: '复活审批失败/驳回',
+              result: '仍为已退市', resultClass: 'bg-primary-bg text-primary border-primary/20',
+              detail: '复活未通过，状态保持已退市，继续在退市执行展示。',
+              canJumpFlow: true, dot: 'muted',
+            });
+          }
+
+          return events;
+        },
+        submitForm() {
+          this.errors = {};
+          if (!this.applyForm.lines.length) this.errors.lines = '请至少关联一个 SPU 或 SKU';
+          if (!this.applyForm.reason) this.errors.reason = '请选择退市原因';
+          if (this.reasonRequiresNote && !(this.applyForm.note || '').trim()) this.errors.note = '该原因须填写补充说明';
+          if (!this.applyForm.planDate) this.errors.planDate = '请填写预计退市时间';
+          if (Object.keys(this.errors).length) return;
+          this.submitting = true;
+          setTimeout(() => {
+            const formNo = 'DL20260814' + String(200 + this.forms.length);
+            const lines = this.applyForm.lines.map(l => ({
+              id: formNo + '-' + l.skuCode,
+              formNo, formId: 'f-new-' + Date.now(),
+              spuCode: l.spuCode, skuCode: l.skuCode, name: l.name, series: l.series,
+              reason: this.applyForm.reason, planDate: this.applyForm.planDate,
+              applicant: this.currentUser.name, submittedAt: '2026-08-14 10:40', settledAt: '',
+              status: 'DELISTING_PENDING', note: this.applyForm.note,
+            }));
+            if (this.editingFormId) {
+              const old = this.forms.find(f => f.id === this.editingFormId);
+              if (old) {
+                this.skuLines = this.skuLines.filter(l => l.formNo !== old.formNo);
+                this.forms = this.forms.filter(f => f.id !== this.editingFormId);
+              }
+            }
+            const spuSet = new Set(lines.map(l => l.spuCode));
+            this.forms.unshift({
+              id: 'f-new-' + Date.now(),
+              formNo, status: 'PENDING', reason: this.applyForm.reason, planDate: this.applyForm.planDate,
+              applicant: this.currentUser.name, submittedAt: '2026-08-14 10:40',
+              note: this.applyForm.note, node: '品牌初审',
+              skuCount: lines.length, spuCount: spuSet.size, lineIds: lines.map(l => l.id),
+            });
+            this.skuLines = lines.concat(this.skuLines);
+            this.submitting = false;
+            this.markEditClean();
+            this.toast('已提交申请单 ' + formNo + '（' + lines.length + ' 个 SKU）→ 退市中');
+            this.page = 'applyList';
+          }, 450);
+        },
+        openRevive(row) {
+          this.reviveTarget = row;
+          this.modalFocusEl = document.activeElement;
+          this.reviveOpen = true;
+          this.focusModal('revive');
+        },
+        confirmRevive() {
+          const line = this.skuLines.find(l => l.id === this.reviveTarget.id);
+          line.status = 'REVIVAL_PENDING';
+          this.closeRevive();
+          if (this.currentSku && this.currentSku.id === line.id) this.currentSku = line;
+          this.toast('已提交复活审批，状态为「复活中」');
+          this.page = 'executeList';
+        },
+        openFlowForm(row) {
+          this.flowTarget = { type: 'form', formNo: row.formNo, status: row.status };
+          this.buildFlow();
+          this.flowFrom = 'applyList';
+          this.page = 'flowPage';
+        },
+        openFlowSku(row) {
+          this.flowTarget = { type: 'sku', lineId: row.id, status: row.status, formNo: row.formNo, skuCode: row.skuCode };
+          this.buildFlow();
+          this.flowFrom = this.page === 'skuDetail' ? 'skuDetail' : 'executeList';
+          this.page = 'flowPage';
+        },
+        buildFlow() {
+          const t = this.flowTarget;
+          const isRevival = t.type === 'sku' && t.status === 'REVIVAL_PENDING';
+          const pending = (t.type === 'form' && t.status === 'PENDING') || isRevival;
+          this.flowDoc = {
+            title: isRevival
+              ? ('复活审批 · ' + t.skuCode)
+              : ('退市审批 · ' + t.formNo),
+            canDemoAct: pending,
+            steps: isRevival
+              ? [
+                  { name: '提交复活', state: 'done' },
+                  { name: '复活终审', state: 'current' },
+                  { name: '恢复已发布', state: 'wait' },
+                ]
+              : [
+                  { name: '提交申请单', state: 'done' },
+                  { name: '品牌初审', state: pending ? 'current' : 'done' },
+                  { name: '品牌终审', state: pending ? 'wait' : 'done' },
+                  { name: '退市落定', state: pending ? 'wait' : 'done' },
+                ],
+            opinions: [
+              { node: '提交', user: this.currentUser.name, at: '2026-08-14 10:40', text: isRevival ? '申请复活该 SKU。' : '提交退市申请单，关联多 SKU。' },
+              { node: pending ? '待审' : '终审', user: '品牌管理员', at: '2026-08-14 15:00', text: pending ? '待处理' : '同意。' },
+            ],
+          };
+        },
+        demoApprove() {
+          const t = this.flowTarget;
+          if (t.type === 'form' && t.status === 'PENDING') {
+            const form = this.forms.find(f => f.formNo === t.formNo);
+            form.status = 'APPROVED';
+            form.node = '—';
+            const lines = this.skuLines.filter(l => l.formNo === t.formNo);
+            lines.forEach((l) => {
+              l.status = 'RETIRED';
+              l.settledAt = '2026-08-14 11:02';
+            });
+            let msg = '退市审批通过：SKU 已退市，进入退市执行';
+            if (this.settings.autoUnlist && this.settings.channels.length) {
+              msg += '；已按开关对「' + this.settings.channels.join('、') + '」发起下架';
+            } else {
+              msg += '；自动下架开关关闭，渠道未自动下架';
+            }
+            this.toast(msg);
+            t.status = 'APPROVED';
+          } else if (t.type === 'sku' && t.status === 'REVIVAL_PENDING') {
+            const line = this.skuLines.find(l => l.id === t.lineId);
+            line.status = 'PUBLISHED'; // 从执行列表消失
+            this.toast('复活通过：已恢复「已发布」，该 SKU 已从退市执行消失');
+            t.status = 'PUBLISHED';
+            if (this.currentSku && this.currentSku.id === line.id) this.currentSku = line;
+          }
+          this.flowDoc.canDemoAct = false;
+          this.buildFlow();
+        },
+        demoReject() {
+          const t = this.flowTarget;
+          if (t.type === 'form' && t.status === 'PENDING') {
+            const form = this.forms.find(f => f.formNo === t.formNo);
+            form.status = 'REJECTED';
+            form.node = '—';
+            this.skuLines.filter(l => l.formNo === t.formNo).forEach(l => { l.status = 'PUBLISHED'; });
+            this.toast('申请单已驳回，可在申请页「去修改」');
+            t.status = 'REJECTED';
+          } else if (t.type === 'sku' && t.status === 'REVIVAL_PENDING') {
+            const line = this.skuLines.find(l => l.id === t.lineId);
+            line.status = 'RETIRED'; // 失败 → 已退市
+            line._revivalFailed = true;
+            this.toast('复活审批失败：状态仍为「已退市」，继续在退市执行展示');
+            t.status = 'RETIRED';
+            if (this.currentSku && this.currentSku.id === line.id) this.currentSku = line;
+          }
+          this.flowDoc.canDemoAct = false;
+          this.buildFlow();
+        },
+        saveSettings() {
+          if (this.settings.autoUnlist && !this.settings.channels.length) {
+            this.toast('开启自动下架时请至少指定一个渠道');
+            return;
+          }
+          this.toast('已保存：' + (this.settings.autoUnlist ? ('自动下架 · ' + this.settings.channels.join('、')) : '不自动下架'));
+        },
+      };
+    }
+  </script>
+<script src="view-guard.js"></script>
+</body>
+
+<script>
+/* ZIPPO_GLOBAL_SHELL_V2 */
+(function(){
+  if(window.__zippoShellV2) return;
+  window.__zippoShellV2 = 1;
+  document.querySelectorAll('.card').forEach(function(card){
+    if(card.querySelector('.table-wrap table')) card.classList.add('has-table');
+  });
+  document.querySelectorAll('.pager, .pagination').forEach(function(p){
+    p.classList.add('zippo-pager-sticky');
+  });
+  function wrapAvatar(el){
+    if(!el || el.closest('.zippo-user-menu')) return;
+    var wrap = document.createElement('div');
+    wrap.className = 'zippo-user-menu';
+    var panel = document.createElement('div');
+    panel.className = 'zippo-user-menu-panel';
+    panel.innerHTML = '<button type="button" data-act="profile">个人中心</button><button type="button" data-act="logout">退出登录</button>';
+    el.parentNode.insertBefore(wrap, el);
+    wrap.appendChild(el);
+    wrap.appendChild(panel);
+    el.style.cursor = 'pointer';
+    el.addEventListener('click', function(e){ e.stopPropagation(); wrap.classList.toggle('open'); });
+    panel.querySelector('[data-act=profile]').onclick = function(){
+      wrap.classList.remove('open');
+      var t=document.getElementById('toast'); if(t){t.textContent='个人中心';t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1600);} else alert('个人中心');
+    };
+    panel.querySelector('[data-act=logout]').onclick = function(){
+      wrap.classList.remove('open');
+      var t=document.getElementById('toast'); if(t){t.textContent='已退出登录';t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1600);} else alert('已退出登录');
+    };
+    document.addEventListener('click', function(){ wrap.classList.remove('open'); });
+  }
+  document.querySelectorAll('[aria-label="账号"], [title="管理员"], .d05-avatar, .d03-avatar, .zippo-avatar-trigger').forEach(wrapAvatar);
+  document.querySelectorAll('.top-right span[title], .global-topbar .top-right > span[style*="border-radius:50%"]').forEach(function(el){
+    if(el.textContent && el.textContent.length<=2) wrapAvatar(el);
+  });
+  document.querySelectorAll('.w-8.h-8.rounded-full, .rounded-full.bg-primary').forEach(function(el){
+    if(el.closest('header') && !el.closest('.zippo-user-menu')) wrapAvatar(el);
+  });
+})();
+</script>
+
+</html>

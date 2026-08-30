@@ -1,0 +1,1311 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<!-- poc-embed-guest -->
+<script src="poc-embed-guest.js"></script>
+
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>D10 消息通知 · 黑红品牌版原型</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: { DEFAULT: '#C8102E', hover: '#A00D25', active: '#7A0A1C', bg: '#FDE8EC' },
+            success: { DEFAULT: '#2F6B3A', bg: '#EAF5EC' },
+            warning: { DEFAULT: '#8A6A1A', bg: '#F7F1DE' },
+            danger: { DEFAULT: '#C8102E', bg: '#FDE8EC' },
+            ink: { DEFAULT: '#0A0A0A', secondary: '#4A4A4A', tertiary: '#8A8A8A', disabled: '#B8B8B8' },
+            line: { DEFAULT: '#D4D4D4', soft: '#EBEBEB' },
+            page: '#EDEDED',
+            fill: '#F7F7F7',
+            brand: { black: '#0A0A0A', red: '#C8102E', gray: '#6B6B6B', white: '#FFFFFF' },
+          },
+          fontFamily: { sans: ['"PingFang SC"', '"Microsoft YaHei"', 'system-ui', 'sans-serif'] },
+          boxShadow: { card: '0 1px 2px rgba(0,0,0,.06), 0 8px 24px rgba(0,0,0,.06)' },
+        },
+      },
+    };
+  </script>
+  <style>
+    [x-cloak] { display: none !important; }
+    .sidebar-scroll::-webkit-scrollbar { width: 4px; }
+    .sidebar-scroll::-webkit-scrollbar-thumb { background: #555; border-radius: 4px; }
+    .brand-stripe { background: linear-gradient(90deg, #0A0A0A 0%, #0A0A0A 72%, #C8102E 72%, #C8102E 100%); }
+    .toast-enter { animation: toastIn .25s ease; }
+    @keyframes toastIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
+    .drawer-panel { animation: slideIn .2s ease; }
+    @keyframes slideIn { from { transform: translateX(16px); opacity: .5; } to { transform: none; opacity: 1; } }
+    .table-scroll { max-height: calc(100vh - 15rem); overflow: auto; }
+    .panel-scroll { max-height: calc(100vh - 12rem); overflow: auto; }
+    .bell-panel { max-height: 28rem; overflow: auto; }
+    .row-unread { background: #FFF8F9; }
+    .tag-approval { background:#E8F0FE; color:#1A56A8; }
+    .tag-system { background:#FDE8EC; color:#C8102E; }
+    .tag-announce { background:#F7F1DE; color:#8A6A1A; }
+    .tag-other { background:#F0F0F0; color:#4A4A4A; }
+  
+    /* §2.2 已打开页面 Tab */
+    .open-tab {
+      display: inline-flex; align-items: center; gap: 6px; max-width: 160px;
+      padding: 6px 10px; font-size: 13px; border-radius: 4px;
+      color: rgba(255,255,255,.72); white-space: nowrap; transition: all .15s;
+      border-bottom: 2px solid transparent; background: transparent; border-left: 0; border-right: 0; border-top: 0;
+    }
+    .open-tab:hover { color: #fff; background: rgba(255,255,255,.08); }
+    .open-tab.active { color: #fff; font-weight: 600; border-bottom-color: #C8102E; background: rgba(200,16,46,.18); }
+    .open-tab .tab-close { opacity: .55; font-size: 12px; line-height: 1; padding: 2px 4px; border-radius: 3px; }
+    .open-tab .tab-close:hover { opacity: 1; background: rgba(255,255,255,.15); }
+
+
+    /* App shell: header+sidebar fixed; only main scrolls */
+    html, body { height: 100%; overflow: hidden; }
+    .zippo-shell { display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+    .zippo-shell > header.sticky,
+    .zippo-shell > header.global-topbar,
+    body > header.sticky,
+    body > header.global-topbar { flex: 0 0 auto; position: sticky; top: 0; z-index: 50; }
+    .zippo-body {
+      flex: 1 1 auto; min-height: 0; display: flex; overflow: hidden;
+    }
+    .zippo-body > aside,
+    .zippo-body > .sidebar {
+      flex: 0 0 auto; height: 100%; overflow-y: auto; position: relative !important;
+      top: auto !important; inset: auto !important;
+    }
+    .zippo-main {
+      flex: 1 1 auto; min-width: 0; min-height: 0; overflow-y: auto;
+      background: #EDEDED;
+    }
+
+
+    /* body 纵向壳：顶栏固定，下方 zippo-body 占满剩余高度 */
+    body.overflow-hidden, body.zippo-fixed, body.d06-shell {
+      display: flex !important; flex-direction: column !important; height: 100vh !important; margin: 0;
+    }
+    body > header, body > .brand-stripe, body > .h-1.brand-stripe, body > div.h-1 {
+      flex: 0 0 auto !important;
+    }
+    .zippo-body { flex: 1 1 auto !important; min-height: 0 !important; height: auto !important; }
+    main.zippo-main, .zippo-main {
+      flex: 1 1 auto !important; min-width: 0 !important; min-height: 0 !important;
+      overflow-y: auto !important;
+    }
+
+
+/* Spec §2.2 white sidebar override */
+.proto-sidebar, aside.sidebar, aside.primary-nav, .module-sidebar, .d-sidebar {
+  background: #0A0A0A !important; color: #cfcfcf !important;
+  border-right: 0 !important;
+}
+.proto-nav-item.active, .nav button.active, .nav-item.active, .side-nav a.active, .menu-item.active {
+  background: #2d2d2d !important; color: #fff !important; font-weight: 600;
+  border-left: 3px solid #C8102E !important;
+}
+
+
+
+/* ZIPPO_NAV_HIERARCHY_V3 */
+details.nav-group { margin: 0 0 6px; border: 0; }
+details.nav-group > summary.nav-l1 {
+  list-style: none; cursor: pointer; user-select: none;
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  min-height: 40px; padding: 0 12px; margin: 0; border-radius: 4px;
+  font-size: 13px !important; font-weight: 600 !important; line-height: 1.2;
+  color: #FFFFFF !important; letter-spacing: 0 !important; text-transform: none !important;
+  background: transparent;
+}
+details.nav-group > summary.nav-l1::-webkit-details-marker { display: none; }
+details.nav-group > summary.nav-l1 .nav-chev {
+  font-size: 10px; color: rgba(255,255,255,.7); transition: transform .15s;
+}
+details.nav-group:not([open]) > summary.nav-l1 .nav-chev { transform: rotate(-90deg); }
+details.nav-group > summary.nav-l1:hover { background: #2d2d2d; }
+.nav-l2-wrap { display: flex; flex-direction: column; gap: 2px; padding: 2px 0 6px; }
+.nav-l2-wrap .proto-nav-item,
+.nav-l2-wrap > button,
+.nav-l2-wrap .nav-item,
+aside .nav-l2-wrap button {
+  font-size: 13px !important;
+  color: #E8E8E8 !important;
+  min-height: 40px;
+}
+/* dark sidebar contrast: kill low-contrast tertiary / selected white block */
+aside.proto-sidebar, aside.sidebar, aside.module-sidebar, .proto-sidebar {
+  color: #E8E8E8 !important;
+}
+aside.proto-sidebar .text-ink-secondary,
+aside.proto-sidebar .text-ink-tertiary,
+aside.proto-sidebar .text-ink,
+aside .nav-label {
+  color: #E8E8E8 !important;
+}
+aside.proto-sidebar button.text-ink-secondary,
+aside.proto-sidebar a.text-ink-secondary {
+  color: #E8E8E8 !important;
+}
+aside.proto-sidebar .bg-\[\#F5F5F5\],
+aside.proto-sidebar button.bg-\[\#F5F5F5\] {
+  background: #2d2d2d !important;
+  color: #FFFFFF !important;
+}
+aside.proto-sidebar .hover\:bg-fill:hover,
+aside.proto-sidebar button:hover {
+  background: #2d2d2d !important;
+  color: #FFFFFF !important;
+}
+/* L1 labels that are not yet details */
+.nav-label, .proto-nav-group, .proto-sidebar-title {
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  color: #FFFFFF !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+}
+.proto-nav-item, .nav button, aside .nav button {
+  color: #E8E8E8 !important;
+  font-size: 13px !important;
+}
+.proto-nav-item.active, .nav button.active {
+  color: #FFFFFF !important;
+}
+/* hide sidebar bottom notes / brand footnotes */
+.sidebar-note, .sidebar-foot, .sidebar-footer,
+aside .zippo-sidebar-note,
+aside nav > .mt-6.px-3.py-3.rounded-lg {
+  display: none !important;
+}
+
+/* ZIPPO_NAV_SPACING_V2 */
+.nav, .proto-sidebar-nav, aside .nav, .sidebar .nav {
+  gap: 4px !important;
+}
+.proto-nav-item, .nav button, .nav-item, .side-nav a, .menu-item {
+  min-height: 40px !important;
+  height: auto !important;
+  max-height: none !important;
+  padding-top: 8px !important;
+  padding-bottom: 8px !important;
+  box-sizing: border-box !important;
+  flex-shrink: 0 !important;
+}
+.nav-label, .proto-sidebar-title .label {
+  padding-top: 10px !important;
+  padding-bottom: 4px !important;
+}
+
+/* ZIPPO_GLOBAL_SHELL_V2 */
+.card.has-table { display:flex; flex-direction:column; min-height:0; }
+.card.has-table > .table-wrap { flex:1 1 auto; min-height:0; overflow:auto; }
+.card > .pager, .card > .pager.pagination, .pager.zippo-pager-sticky {
+  position:sticky; bottom:0; z-index:5; flex-shrink:0;
+  background:#fff; border-top:1px solid #EBEBEB; margin-top:0;
+  box-shadow:0 -4px 12px rgba(0,0,0,.04);
+}
+.sidebar-foot, .sidebar-footer { display:none !important; }
+.zippo-user-menu { position:relative; display:inline-flex; }
+.zippo-user-menu-panel {
+  display:none; position:absolute; right:0; top:calc(100% + 6px); min-width:128px;
+  background:#fff; color:#0A0A0A; border:1px solid #EBEBEB; border-radius:6px;
+  box-shadow:0 8px 24px rgba(0,0,0,.12); padding:4px; z-index:80;
+}
+.zippo-user-menu.open .zippo-user-menu-panel { display:block; }
+.zippo-user-menu-panel button {
+  display:block; width:100%; text-align:left; border:0; background:transparent;
+  padding:8px 10px; font-size:13px; border-radius:4px; cursor:pointer; color:#0A0A0A;
+}
+.zippo-user-menu-panel button:hover { background:#F5F5F5; }
+
+</style>
+</head>
+<body class="bg-page text-ink font-sans antialiased overflow-hidden" x-data="notifyApp()" x-init="init()" x-cloak>
+  <!-- TOP BAR -->
+  <header class="sticky top-0 z-50 h-14 bg-brand-black text-white border-b border-black flex items-center justify-between px-4 lg:px-6">
+    <div class="flex items-center gap-3">
+      <button @click="mobileNav=!mobileNav" class="lg:hidden p-2 rounded hover:bg-white/10" aria-label="菜单">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+      </button>
+      <div class="flex items-center gap-2">
+        <div>
+          <div class="text-sm font-semibold tracking-wide">ZIPPO</div>
+        </div>
+      </div>
+    </div>
+    
+      <nav class="flex items-center gap-0.5 overflow-x-auto flex-1 min-w-0 py-1 mx-2" aria-label="已打开页面">
+        <template x-for="t in openTabs" :key="t.id">
+          <button type="button" @click="activateTab(t.id)" class="open-tab" :class="activeTabId===t.id ? 'active' : ''" :title="t.label">
+            <span class="truncate" x-text="t.label"></span>
+            <span class="tab-close" @click.stop="closeTab(t.id)" title="关闭">✕</span>
+          </button>
+        </template>
+      </nav>
+<div class="flex items-center gap-2 sm:gap-3">
+      <div class="hidden md:flex items-center gap-2 text-xs text-white/70">
+        <span>演示角色</span>
+        <select x-model="role" @change="onRoleChange()" class="border border-white/20 rounded-md px-2 py-1.5 text-sm bg-black text-white focus:outline-none focus:ring-2 focus:ring-primary/50">
+          <option value="PLATFORM_ADMIN">平台管理员 Root</option>
+          <option value="BRAND_ADMIN">品牌管理员</option>
+          <option value="BRAND_OPERATOR">品牌业务</option>
+          <option value="DISTRIBUTOR">经销商</option>
+          <option value="RETAILER">零售商</option>
+          <option value="MANUFACTURER">加工商</option>
+          <option value="DESIGNER">独立设计师</option>
+        </select>
+      </div>
+      <!-- Bell -->
+      <div class="relative" @click.outside="bellOpen=false">
+        <button @click="bellOpen=!bellOpen; bellTab='ALL'" class="relative p-2 rounded hover:bg-white/10" title="通知">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="2" d="M15 17h5l-1.4-1.4A2 2 0 0118 14.2V11a6 6 0 10-12 0v3.2c0 .5-.2 1-.6 1.4L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+          <span x-show="unreadCount>0" class="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 rounded-full bg-primary text-[10px] font-bold flex items-center justify-center" x-text="unreadBadge"></span>
+        </button>
+        <div x-show="bellOpen" x-transition class="absolute right-0 mt-2 w-[380px] bg-white text-ink rounded-lg shadow-card border border-line-soft overflow-hidden z-50">
+          <div class="px-3 pt-3 pb-2 border-b border-line-soft">
+            <div class="text-sm font-semibold">通知</div>
+          </div>
+          <div class="flex gap-1 px-3 py-2 border-b border-line-soft text-xs">
+            <template x-for="t in [{k:'ALL',l:'全部'},{k:'APPROVAL',l:'审批'},{k:'SYSTEM_ALERT',l:'系统'},{k:'ANNOUNCE',l:'公告'}]" :key="t.k">
+              <button @click="bellTab=t.k" class="px-2.5 py-1 rounded-md"
+                :class="bellTab===t.k ? 'bg-primary text-white' : 'bg-fill text-ink-secondary hover:bg-line-soft'" x-text="t.l"></button>
+            </template>
+          </div>
+          <div class="bell-panel">
+            <template x-if="bellList.length===0">
+              <div class="py-10 text-center text-sm text-ink-tertiary">暂无通知</div>
+            </template>
+            <template x-for="n in bellList" :key="n.id">
+              <div class="px-3 py-2.5 border-b border-line-soft hover:bg-fill flex gap-2"
+                :class="!n.isRead && 'row-unread'">
+                <span class="mt-0.5 text-[10px] px-1.5 py-0.5 rounded shrink-0" :class="typeTag(n.noticeType)" x-text="typeLabel(n.noticeType)"></span>
+                <div class="min-w-0 flex-1">
+                  <button @click="openDetail(n); bellOpen=false" class="w-full text-left">
+                    <div class="flex items-start justify-between gap-2">
+                      <div class="text-sm font-medium truncate" x-text="n.title"></div>
+                      <span class="text-[10px] text-ink-tertiary shrink-0" x-text="n.timeShort"></span>
+                    </div>
+                    <div class="text-xs text-ink-tertiary truncate mt-0.5" x-text="n.summary"></div>
+                  </button>
+                  <button x-show="!n.isRead" @click.stop="markRead(n)" class="mt-1 text-[11px] text-primary hover:underline">标记已读</button>
+                </div>
+                <span x-show="!n.isRead" class="w-2 h-2 rounded-full bg-primary mt-2 shrink-0"></span>
+              </div>
+            </template>
+          </div>
+          <button @click="bellOpen=false; go('inbox')" class="w-full py-2.5 text-sm text-primary font-medium border-t border-line-soft hover:bg-primary-bg">查看全部</button>
+        </div>
+      </div>
+      <button type="button" @click="toast('通知')" class="relative w-8 h-8 flex items-center justify-center rounded hover:bg-white/10 text-white/70" aria-label="通知"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg><span class="absolute top-1 right-1 w-2 h-2 bg-primary rounded-full"></span></button>
+      <div class="flex items-center gap-2 pl-2 border-l border-white/15">
+        <div class="w-8 h-8 rounded-full bg-primary text-white text-xs font-semibold flex items-center justify-center" x-text="currentUser.avatar"></div>
+      </div>
+    </div>
+  </header>
+  <div class="h-1 brand-stripe"></div>
+
+  <div class="zippo-body">
+    <!-- SIDEBAR -->
+    <aside class="proto-sidebar fixed lg:static inset-y-[3.75rem] left-0 z-30 w-56 bg-white text-ink border-r border-line-soft transform transition-transform lg:translate-x-0"
+      :class="mobileNav ? 'translate-x-0' : '-translate-x-full'">
+      <nav class="p-3 space-y-1 sidebar-scroll overflow-y-auto h-full pb-20">
+        <details class="nav-group" open><summary class="nav-l1">消息通知<span class="nav-chev">▾</span></summary><div class="nav-l2-wrap"><button @click="go('inbox'); mobileNav=false"
+          class="w-full flex items-center gap-2 px-3 py-2.5 rounded-md text-sm transition"
+          :class="page==='inbox' ? 'bg-[#2d2d2d] text-white font-medium border-l-[3px] border-l-primary' : 'text-[#E8E8E8] hover:bg-[#2d2d2d] hover:text-white'">
+          <span>🔔</span><span>通知中心</span>
+          <span x-show="unreadCount>0" class="ml-auto text-[10px] px-1.5 py-0.5 rounded-full bg-white text-primary font-semibold" x-text="unreadBadge"></span>
+        </button>
+        </div></details><details class="nav-group" open x-show="canConfig"><summary class="nav-l1">通知渠道<span class="nav-chev">▾</span></summary><div class="nav-l2-wrap"><template x-for="m in channelMenus" :key="m.id">
+          <button x-show="canConfig" @click="go(m.id); mobileNav=false"
+            class="w-full flex items-center gap-2 px-3 py-2.5 rounded-md text-sm transition"
+            :class="page===m.id ? 'bg-[#2d2d2d] text-white font-medium border-l-[3px] border-l-primary' : 'text-[#E8E8E8] hover:bg-[#2d2d2d] hover:text-white'">
+            <span x-text="m.icon"></span><span x-text="m.label"></span>
+          </button>
+        </template>
+        </div></details><details class="nav-group" open x-show="canConfig"><summary class="nav-l1">规则<span class="nav-chev">▾</span></summary><div class="nav-l2-wrap"><button x-show="canConfig" @click="go('rules'); mobileNav=false"
+          class="w-full flex items-center gap-2 px-3 py-2.5 rounded-md text-sm transition"
+          :class="page==='rules' ? 'bg-[#2d2d2d] text-white font-medium border-l-[3px] border-l-primary' : 'text-[#E8E8E8] hover:bg-[#2d2d2d] hover:text-white'">
+          <span>⚙️</span><span>通知规则</span>
+        </button>
+</div></details></nav>
+    </aside>
+    <div x-show="mobileNav" @click="mobileNav=false" class="fixed inset-0 z-20 bg-black/40 lg:hidden"></div>
+
+    <main class="zippo-main flex-1 min-w-0 p-4 lg:p-6">
+      <div class="mb-4 flex items-center justify-between gap-3 flex-wrap">
+        <div class="text-sm text-ink-tertiary">首页 / 消息通知 / <span class="text-ink" x-text="pageTitle"></span></div>
+        <div class="text-[11px] text-ink-tertiary" x-text="scopeHint"></div>
+      </div>
+
+      <!-- ========== 通知中心 ========== -->
+      <section x-show="page==='inbox'" class="bg-white rounded-lg shadow-card border border-line-soft min-h-[calc(100vh-10rem)] flex flex-col">
+        <div class="px-5 py-4 border-b border-line-soft flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h1 class="text-base font-semibold">通知列表</h1>
+            </div>
+          <div class="flex flex-wrap gap-2">
+            <button @click="confirmMarkAll()" class="px-3 py-1.5 text-sm rounded-md border border-line hover:bg-fill" :disabled="unreadCount===0" :class="unreadCount===0&&'opacity-40'">全部标记已读</button>
+            <button @click="simulateLoading()" class="px-3 py-1.5 text-sm rounded-md border border-line hover:bg-fill">刷新</button>
+          </div>
+        </div>
+        <div class="px-5 py-3 border-b border-line-soft flex flex-wrap gap-2 items-center">
+          <template x-for="t in [{k:'ALL',l:'全部'},{k:'APPROVAL',l:'审批'},{k:'SYSTEM_ALERT',l:'系统'},{k:'ANNOUNCE',l:'公告'}]" :key="t.k">
+            <button @click="inboxTab=t.k; inboxPage=1" class="px-3 py-1.5 text-sm rounded-md"
+              :class="inboxTab===t.k?'bg-white text-ink border-r border-line-soft':'bg-fill hover:bg-line-soft'" x-text="t.l"></button>
+          </template>
+          <select x-model="inboxRead" @change="inboxPage=1" class="ml-2 border border-line rounded-md px-2 py-1.5 text-sm">
+            <option value="ALL">全部状态</option>
+            <option value="UNREAD">未读</option>
+            <option value="READ">已读</option>
+          </select>
+          <select x-model="inboxRange" @change="inboxPage=1" class="border border-line rounded-md px-2 py-1.5 text-sm">
+            <option value="ALL">全部时间</option>
+            <option value="7">近 7 天</option>
+            <option value="30">近 30 天</option>
+          </select>
+          <input x-model="inboxKeyword" @input="inboxPage=1" type="text" placeholder="搜索标题关键词…" class="border border-line rounded-md px-3 py-1.5 text-sm w-44 sm:w-56" />
+          <div class="ml-auto text-xs text-ink-tertiary">共 <span class="text-ink font-medium" x-text="filteredNotices.length"></span> 条 · 未读 <span class="text-primary font-medium" x-text="unreadCount"></span></div>
+        </div>
+        <div class="flex-1 table-scroll" :class="loading&&'opacity-50'">
+          <template x-if="pagedNotices.length===0 && !loading">
+            <div class="py-16 text-center text-sm text-ink-tertiary">暂无通知</div>
+          </template>
+          <table x-show="pagedNotices.length>0 || loading" class="w-full text-sm">
+            <thead class="sticky top-0 bg-fill text-ink-tertiary text-xs">
+              <tr class="border-b border-line-soft">
+                <th class="text-left px-5 py-3 font-medium">类型</th>
+                <th class="text-left px-3 py-3 font-medium">标题</th>
+                <th class="text-left px-3 py-3 font-medium">摘要</th>
+                <th class="text-left px-3 py-3 font-medium">时间</th>
+                <th class="text-left px-3 py-3 font-medium">状态</th>
+                <th class="text-right px-5 py-3 font-medium">操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              <template x-for="n in pagedNotices" :key="n.id">
+                <tr class="border-b border-line-soft hover:bg-fill" :class="!n.isRead && 'row-unread'">
+                  <td class="px-5 py-3"><span class="text-[10px] px-1.5 py-0.5 rounded" :class="typeTag(n.noticeType)" x-text="typeLabel(n.noticeType)"></span></td>
+                  <td class="px-3 py-3 font-medium max-w-[180px] truncate" x-text="n.title"></td>
+                  <td class="px-3 py-3 text-ink-secondary max-w-[240px] truncate" x-text="n.summary"></td>
+                  <td class="px-3 py-3 text-xs text-ink-tertiary whitespace-nowrap" x-text="n.createdAt"></td>
+                  <td class="px-3 py-3 text-xs" x-text="n.isRead?'已读':'未读'"></td>
+                  <td class="px-5 py-3 text-right space-x-2 whitespace-nowrap">
+                    <button @click="openDetail(n)" class="text-primary hover:underline text-xs">查看</button>
+                    <button x-show="!n.isRead" @click="markRead(n)" class="text-ink-secondary hover:underline text-xs">标记已读</button>
+                  </td>
+                </tr>
+              </template>
+            </tbody>
+          </table>
+        </div>
+        <div class="px-5 py-3 border-t border-line-soft flex items-center justify-between text-sm">
+          <button @click="inboxPage=Math.max(1,inboxPage-1)" class="px-3 py-1 rounded border border-line hover:bg-fill" :disabled="inboxPage===1" :class="inboxPage===1&&'opacity-40'">上一页</button>
+          <span class="text-ink-tertiary">第 <span class="text-ink" x-text="inboxPage"></span> / <span x-text="inboxTotalPages"></span> 页 · <select x-model.number="pageSize" @change="inboxPage=1" class="border border-line rounded px-2 py-1 text-xs bg-white"><option :value="20">20条/页</option><option :value="50">50条/页</option><option :value="100">100条/页</option></select></span>
+          <button @click="inboxPage=Math.min(inboxTotalPages,inboxPage+1)" class="px-3 py-1 rounded border border-line hover:bg-fill" :disabled="inboxPage>=inboxTotalPages" :class="inboxPage>=inboxTotalPages&&'opacity-40'">下一页</button>
+        </div>
+      </section>
+
+      <!-- ========== 短信模板 ========== -->
+      <section x-show="page==='smsTpl'" class="space-y-4">
+        <div class="bg-white rounded-lg shadow-card border border-line-soft">
+          <div class="px-5 py-4 border-b border-line-soft flex flex-wrap justify-between gap-3">
+            <div>
+              <h1 class="text-base font-semibold">短信模板管理</h1>
+              <p class="text-xs text-ink-tertiary mt-0.5" x-text="role==='PLATFORM_ADMIN'?'全平台模板 · 变量插入 · 超长拆条提示':'本品牌模板 · 变量插入 · 超长拆条提示'"></p>
+            </div>
+            <button @click="openSmsEdit(null)" class="px-3 py-1.5 text-sm rounded-md bg-primary text-white hover:bg-primary-hover">新建模板</button>
+          </div>
+          <div class="px-5 py-3 border-b border-line-soft flex flex-wrap gap-2">
+            <input x-model="smsTplKw" type="text" placeholder="搜索模板名称…" class="border border-line rounded-md px-3 py-1.5 text-sm w-48" />
+            <select x-model="smsTplStatus" class="border border-line rounded-md px-2 py-1.5 text-sm">
+              <option value="ALL">全部状态</option>
+              <option value="ENABLED">启用</option>
+              <option value="DISABLED">停用</option>
+            </select>
+            <span class="ml-auto text-xs text-ink-tertiary self-center">共 <span x-text="filteredSmsTpl.length"></span> 条</span>
+          </div>
+          <div class="table-scroll">
+            <table class="w-full text-sm">
+              <thead class="sticky top-0 bg-fill text-ink-tertiary text-xs">
+                <tr class="border-b border-line-soft">
+                  <th class="text-left px-5 py-3 font-medium">模板名称</th>
+                  <th class="text-left px-3 py-3 font-medium">编码</th>
+                  <th class="text-left px-3 py-3 font-medium">内容预览</th>
+                  <th class="text-left px-3 py-3 font-medium">品牌</th>
+                  <th class="text-left px-3 py-3 font-medium">状态</th>
+                  <th class="text-left px-3 py-3 font-medium">更新时间</th>
+                  <th class="text-right px-5 py-3 font-medium">操作</th>
+                </tr>
+              </thead>
+              <tbody>
+                <template x-for="t in filteredSmsTpl" :key="t.id">
+                  <tr class="border-b border-line-soft hover:bg-fill">
+                    <td class="px-5 py-3 font-medium" x-text="t.name"></td>
+                    <td class="px-3 py-3 text-xs text-ink-tertiary font-mono" x-text="t.code"></td>
+                    <td class="px-3 py-3 text-ink-secondary max-w-xs truncate" x-text="t.content"></td>
+                    <td class="px-3 py-3 text-xs" x-text="t.brand"></td>
+                    <td class="px-3 py-3"><span class="text-[11px] px-2 py-0.5 rounded" :class="t.status==='ENABLED'?'bg-success-bg text-success':'bg-fill text-ink-tertiary'" x-text="t.status==='ENABLED'?'启用':'停用'"></span></td>
+                    <td class="px-3 py-3 text-xs text-ink-tertiary" x-text="t.updatedAt"></td>
+                    <td class="px-5 py-3 text-right space-x-2 whitespace-nowrap">
+                      <button @click="openSmsEdit(t)" class="text-primary hover:underline text-xs">编辑</button>
+                      <button @click="toggleSms(t)" class="text-ink-secondary hover:underline text-xs" x-text="t.status==='ENABLED'?'停用':'启用'"></button>
+                    </td>
+                  </tr>
+                </template>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== 短信发送记录 ========== -->
+      <section x-show="page==='smsRec'" class="bg-white rounded-lg shadow-card border border-line-soft">
+        <div class="px-5 py-4 border-b border-line-soft flex flex-wrap justify-between gap-3">
+          <div>
+            <h1 class="text-base font-semibold">短信发送记录</h1>
+            <p class="text-xs text-ink-tertiary mt-0.5">发出当时快照 · 手机号脱敏 · <span x-text="scopeHint"></span></p>
+          </div>
+        </div>
+        <div class="px-5 py-3 border-b border-line-soft flex flex-wrap gap-2">
+          <select x-model="smsRecStatus" class="border border-line rounded-md px-2 py-1.5 text-sm">
+            <option value="ALL">全部状态</option>
+            <option value="SUCCESS">成功</option>
+            <option value="FAILED">失败</option>
+            <option value="RETRYING">重试中</option>
+            <option value="SENDING">发送中</option>
+          </select>
+          <input x-model="smsRecPhone" type="text" placeholder="手机号后四位…" class="border border-line rounded-md px-3 py-1.5 text-sm w-36" />
+          <span class="ml-auto text-xs text-ink-tertiary self-center">共 <span x-text="filteredSmsRec.length"></span> 条</span>
+        </div>
+        <div class="table-scroll">
+          <table class="w-full text-sm">
+            <thead class="sticky top-0 bg-fill text-ink-tertiary text-xs">
+              <tr class="border-b border-line-soft">
+                <th class="text-left px-5 py-3">发送时间</th>
+                <th class="text-left px-3 py-3">接收手机</th>
+                <th class="text-left px-3 py-3">模板</th>
+                <th class="text-left px-3 py-3">内容快照</th>
+                <th class="text-left px-3 py-3">状态</th>
+                <th class="text-left px-3 py-3">重试</th>
+                <th class="text-left px-5 py-3">失败原因</th>
+              </tr>
+            </thead>
+            <tbody>
+              <template x-for="r in filteredSmsRec" :key="r.id">
+                <tr class="border-b border-line-soft hover:bg-fill">
+                  <td class="px-5 py-3 text-xs whitespace-nowrap" x-text="r.sentAt"></td>
+                  <td class="px-3 py-3 font-mono text-xs" x-text="r.phone"></td>
+                  <td class="px-3 py-3" x-text="r.template"></td>
+                  <td class="px-3 py-3 text-ink-secondary max-w-[220px] truncate" x-text="r.content"></td>
+                  <td class="px-3 py-3"><span class="text-[11px] px-2 py-0.5 rounded" :class="sendStatusClass(r.status)" x-text="sendStatusLabel(r.status)"></span></td>
+                  <td class="px-3 py-3 text-xs" x-text="r.retry"></td>
+                  <td class="px-5 py-3 text-xs text-ink-tertiary" x-text="r.failReason||'—'"></td>
+                </tr>
+              </template>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ========== 邮件模板 ========== -->
+      <section x-show="page==='emailTpl'" class="space-y-4">
+        <div class="bg-white rounded-lg shadow-card border border-line-soft">
+          <div class="px-5 py-4 border-b border-line-soft flex flex-wrap justify-between gap-3">
+            <div>
+              <h1 class="text-base font-semibold">邮件模板管理</h1>
+              <p class="text-xs text-ink-tertiary mt-0.5">主题/正文/预览/测试发送 · 甲方最终签约服务商</p>
+            </div>
+            <button @click="openEmailEdit(null)" class="px-3 py-1.5 text-sm rounded-md bg-primary text-white hover:bg-primary-hover">新建模板</button>
+          </div>
+          <div class="px-5 py-3 border-b border-line-soft flex gap-2">
+            <input x-model="emailTplKw" type="text" placeholder="搜索名称/主题…" class="border border-line rounded-md px-3 py-1.5 text-sm w-56" />
+            <span class="ml-auto text-xs text-ink-tertiary self-center">共 <span x-text="filteredEmailTpl.length"></span> 条</span>
+          </div>
+          <div class="table-scroll">
+            <table class="w-full text-sm">
+              <thead class="sticky top-0 bg-fill text-ink-tertiary text-xs">
+                <tr class="border-b border-line-soft">
+                  <th class="text-left px-5 py-3">模板名称</th>
+                  <th class="text-left px-3 py-3">主题</th>
+                  <th class="text-left px-3 py-3">编码</th>
+                  <th class="text-left px-3 py-3">状态</th>
+                  <th class="text-left px-3 py-3">更新时间</th>
+                  <th class="text-right px-5 py-3">操作</th>
+                </tr>
+              </thead>
+              <tbody>
+                <template x-for="t in filteredEmailTpl" :key="t.id">
+                  <tr class="border-b border-line-soft hover:bg-fill">
+                    <td class="px-5 py-3 font-medium" x-text="t.name"></td>
+                    <td class="px-3 py-3 max-w-xs truncate" x-text="t.subject"></td>
+                    <td class="px-3 py-3 text-xs font-mono text-ink-tertiary" x-text="t.code"></td>
+                    <td class="px-3 py-3"><span class="text-[11px] px-2 py-0.5 rounded" :class="t.status==='ENABLED'?'bg-success-bg text-success':'bg-fill text-ink-tertiary'" x-text="t.status==='ENABLED'?'启用':'停用'"></span></td>
+                    <td class="px-3 py-3 text-xs text-ink-tertiary" x-text="t.updatedAt"></td>
+                    <td class="px-5 py-3 text-right space-x-2 whitespace-nowrap">
+                      <button @click="openEmailEdit(t)" class="text-primary hover:underline text-xs">编辑</button>
+                      <button @click="openTestMail(t)" class="text-ink-secondary hover:underline text-xs">测试</button>
+                      <button @click="toggleEmail(t)" class="text-ink-secondary hover:underline text-xs" x-text="t.status==='ENABLED'?'停用':'启用'"></button>
+                    </td>
+                  </tr>
+                </template>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== 邮件发送记录 ========== -->
+      <section x-show="page==='emailRec'" class="bg-white rounded-lg shadow-card border border-line-soft">
+        <div class="px-5 py-4 border-b border-line-soft">
+          <h1 class="text-base font-semibold">邮件发送记录</h1>
+          <p class="text-xs text-ink-tertiary mt-0.5">收件人脱敏 · 区分测试/正式 · 打开/点击（若服务商支持）</p>
+        </div>
+        <div class="px-5 py-3 border-b border-line-soft flex flex-wrap gap-2">
+          <select x-model="emailRecStatus" class="border border-line rounded-md px-2 py-1.5 text-sm">
+            <option value="ALL">全部状态</option>
+            <option value="SUCCESS">成功</option>
+            <option value="FAILED">失败</option>
+            <option value="RETRYING">重试中</option>
+          </select>
+          <select x-model="emailRecTest" class="border border-line rounded-md px-2 py-1.5 text-sm">
+            <option value="ALL">测试/正式（全部）</option>
+            <option value="TEST">仅测试</option>
+            <option value="REAL">仅正式</option>
+          </select>
+          <span class="ml-auto text-xs text-ink-tertiary self-center">共 <span x-text="filteredEmailRec.length"></span> 条</span>
+        </div>
+        <div class="table-scroll">
+          <table class="w-full text-sm">
+            <thead class="sticky top-0 bg-fill text-ink-tertiary text-xs">
+              <tr class="border-b border-line-soft">
+                <th class="text-left px-5 py-3">发送时间</th>
+                <th class="text-left px-3 py-3">收件人</th>
+                <th class="text-left px-3 py-3">主题</th>
+                <th class="text-left px-3 py-3">模板</th>
+                <th class="text-left px-3 py-3">状态</th>
+                <th class="text-left px-3 py-3">测试</th>
+                <th class="text-left px-3 py-3">打开</th>
+                <th class="text-left px-5 py-3">点击</th>
+              </tr>
+            </thead>
+            <tbody>
+              <template x-for="r in filteredEmailRec" :key="r.id">
+                <tr class="border-b border-line-soft hover:bg-fill">
+                  <td class="px-5 py-3 text-xs whitespace-nowrap" x-text="r.sentAt"></td>
+                  <td class="px-3 py-3 text-xs font-mono" x-text="r.email"></td>
+                  <td class="px-3 py-3 max-w-[200px] truncate" x-text="r.subject"></td>
+                  <td class="px-3 py-3" x-text="r.template"></td>
+                  <td class="px-3 py-3"><span class="text-[11px] px-2 py-0.5 rounded" :class="sendStatusClass(r.status)" x-text="sendStatusLabel(r.status)"></span></td>
+                  <td class="px-3 py-3 text-xs" x-text="r.isTest?'是':'否'"></td>
+                  <td class="px-3 py-3 text-xs" x-text="r.opened?'是':'否'"></td>
+                  <td class="px-5 py-3 text-xs" x-text="r.clicked?'是':'否'"></td>
+                </tr>
+              </template>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ========== 通知规则 ========== -->
+      <section x-show="page==='rules'" class="bg-white rounded-lg shadow-card border border-line-soft">
+        <div class="px-5 py-4 border-b border-line-soft flex flex-wrap justify-between gap-3">
+          <div>
+            <h1 class="text-base font-semibold">通知规则配置</h1>
+            <p class="text-xs text-ink-tertiary mt-0.5">一期 7 类必配事件 · 保存后对新事件即时生效 · 无个人偏好过滤</p>
+          </div>
+        </div>
+        <div class="table-scroll">
+          <table class="w-full text-sm">
+            <thead class="sticky top-0 bg-fill text-ink-tertiary text-xs">
+              <tr class="border-b border-line-soft">
+                <th class="text-left px-5 py-3">事件名称</th>
+                <th class="text-left px-3 py-3">事件编码</th>
+                <th class="text-left px-3 py-3">通知方式</th>
+                <th class="text-left px-3 py-3">静默期</th>
+                <th class="text-left px-3 py-3">状态</th>
+                <th class="text-right px-5 py-3">操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              <template x-for="r in rules" :key="r.id">
+                <tr class="border-b border-line-soft hover:bg-fill">
+                  <td class="px-5 py-3 font-medium" x-text="r.eventName"></td>
+                  <td class="px-3 py-3 text-xs font-mono text-ink-tertiary" x-text="r.eventType"></td>
+                  <td class="px-3 py-3">
+                    <div class="flex flex-wrap gap-1">
+                      <template x-for="c in r.channels" :key="c">
+                        <span class="text-[10px] px-1.5 py-0.5 rounded bg-fill border border-line-soft" x-text="channelLabel(c)"></span>
+                      </template>
+                    </div>
+                  </td>
+                  <td class="px-3 py-3 text-xs" x-text="r.silenceMinutes===0?'不静默':(r.silenceMinutes+' 分钟')"></td>
+                  <td class="px-3 py-3"><span class="text-[11px] px-2 py-0.5 rounded bg-success-bg text-success">启用</span></td>
+                  <td class="px-5 py-3 text-right">
+                    <button @click="openRuleEdit(r)" class="text-primary hover:underline text-xs">配置</button>
+                  </td>
+                </tr>
+              </template>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- 无配置权限提示（切到渠道页却无权限时已由菜单隐藏；兜底） -->
+      <section x-show="!canConfig && ['smsTpl','smsRec','emailTpl','emailRec','rules'].includes(page)" class="bg-white rounded-lg shadow-card border border-line-soft min-h-[60vh] flex flex-col items-center justify-center p-10 text-center">
+        <div class="w-16 h-16 rounded-full bg-fill border border-line flex items-center justify-center text-2xl text-ink-tertiary mb-4">∅</div>
+        <div class="text-lg font-semibold mb-2">无渠道/规则配置权限</div>
+        <p class="text-sm text-ink-secondary max-w-md">当前角色默认仅「通知中心」。请切换为品牌管理员或平台管理员 Root，或演示「功能权限授予」场景。</p>
+        <button @click="go('inbox')" class="mt-4 px-4 py-2 text-sm rounded-md bg-primary text-white">返回通知中心</button>
+      </section>
+    </main>
+  </div>
+
+  <!-- 通知详情 Drawer -->
+  <div x-show="selected" class="fixed inset-0 z-[60] flex justify-end">
+    <div class="absolute inset-0 bg-black/40" @click="selected=null"></div>
+    <div class="relative w-full max-w-md bg-white h-full shadow-card drawer-panel flex flex-col">
+      <div class="px-5 py-4 border-b border-line-soft flex justify-between items-center">
+        <div class="font-semibold text-sm">通知详情</div>
+        <button @click="selected=null" class="text-ink-tertiary hover:text-ink">✕</button>
+      </div>
+      <template x-if="selected">
+        <div class="flex-1 overflow-y-auto p-5 space-y-4">
+          <div class="flex items-center gap-2">
+            <span class="text-[10px] px-1.5 py-0.5 rounded" :class="typeTag(selected.noticeType)" x-text="typeLabel(selected.noticeType)"></span>
+            <span class="text-xs text-ink-tertiary" x-text="selected.createdAt"></span>
+          </div>
+          <h2 class="text-base font-semibold" x-text="selected.title"></h2>
+          <div class="text-sm text-ink-secondary leading-relaxed whitespace-pre-line border border-line-soft rounded-lg p-4 bg-fill" x-text="selected.content"></div>
+          <button x-show="selected.linkLabel==='去审批'" @click="goApproval(selected)" class="w-full px-3 py-2 text-sm rounded-md bg-primary text-white hover:bg-primary-hover">去审批</button>
+          <div class="border border-line-soft rounded-lg overflow-hidden">
+            <div class="px-4 py-2.5 bg-fill border-b border-line-soft text-sm font-semibold">历史相关通知</div>
+            <template x-for="h in selected.history" :key="h.id">
+              <div class="px-4 py-2.5 border-b border-line-soft text-sm flex justify-between gap-2">
+                <span class="truncate" x-text="h.title"></span>
+                <span class="text-xs text-ink-tertiary shrink-0" x-text="h.time"></span>
+              </div>
+            </template>
+            <div x-show="!selected.history.length" class="px-4 py-6 text-center text-xs text-ink-tertiary">暂无历史相关通知</div>
+          </div>
+        </div>
+      </template>
+    </div>
+  </div>
+
+  <!-- SMS Edit Drawer -->
+  <div x-show="smsEditOpen" class="fixed inset-0 z-[60] flex justify-end">
+    <div class="absolute inset-0 bg-black/40" @click="smsEditOpen=false"></div>
+    <div class="relative w-full max-w-md bg-white h-full shadow-card drawer-panel flex flex-col">
+      <div class="px-5 py-4 border-b border-line-soft flex justify-between items-center">
+        <div class="font-semibold text-sm" x-text="smsForm.id?'编辑短信模板':'新建短信模板'"></div>
+        <button @click="smsEditOpen=false" class="text-ink-tertiary hover:text-ink">✕</button>
+      </div>
+      <div class="flex-1 overflow-y-auto p-5 space-y-4">
+        <div>
+          <label class="text-xs text-ink-tertiary">模板名称 *</label>
+          <input x-model="smsForm.name" class="mt-1 w-full border border-line rounded-md px-3 py-2 text-sm" placeholder="如：破价预警短信" />
+        </div>
+        <div>
+          <label class="text-xs text-ink-tertiary">短信内容 *（建议 ≤70 字/条）</label>
+          <textarea x-model="smsForm.content" rows="5" class="mt-1 w-full border border-line rounded-md px-3 py-2 text-sm" placeholder="插入变量如 {productName}"></textarea>
+          <div class="mt-1 text-[11px] text-ink-tertiary">字数 <span x-text="smsForm.content.length"></span> · 预计拆分 <span class="text-primary" x-text="Math.max(1, Math.ceil(smsForm.content.length/70))"></span> 条</div>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <template x-for="v in ['productName','price','occurredAt','approvalCode']" :key="v">
+            <button type="button" @click="smsForm.content+='{'+v+'}'" class="text-xs px-2 py-1 rounded border border-line hover:bg-fill" x-text="'插入 '+v"></button>
+          </template>
+        </div>
+      </div>
+      <div class="px-5 py-4 border-t border-line-soft flex justify-end gap-2">
+        <button @click="smsEditOpen=false" class="px-3 py-1.5 text-sm rounded-md border border-line">取消</button>
+        <button @click="saveSms()" class="px-3 py-1.5 text-sm rounded-md bg-primary text-white">提交</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Email Edit Modal -->
+  <div x-show="emailEditOpen" class="fixed inset-0 z-[60] flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/40" @click="emailEditOpen=false"></div>
+    <div class="relative bg-white rounded-lg shadow-card border border-line-soft w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col drawer-panel">
+      <div class="px-5 py-4 border-b border-line-soft flex justify-between">
+        <div class="font-semibold text-sm" x-text="emailForm.id?'编辑邮件模板':'新建邮件模板'"></div>
+        <button @click="emailEditOpen=false">✕</button>
+      </div>
+      <div class="grid md:grid-cols-2 flex-1 min-h-0 overflow-hidden">
+        <div class="p-5 space-y-3 overflow-y-auto border-r border-line-soft">
+          <input x-model="emailForm.name" class="w-full border border-line rounded-md px-3 py-2 text-sm" placeholder="模板名称 *" />
+          <input x-model="emailForm.subject" class="w-full border border-line rounded-md px-3 py-2 text-sm" placeholder="邮件主题 *" />
+          <textarea x-model="emailForm.body" rows="12" class="w-full border border-line rounded-md px-3 py-2 text-sm" placeholder="正文 HTML / 文本"></textarea>
+        </div>
+        <div class="p-5 overflow-y-auto bg-fill">
+          <div class="text-xs text-ink-tertiary mb-2">实时预览</div>
+          <div class="bg-white border border-line-soft rounded-lg p-4 shadow-sm">
+            <div class="text-[11px] text-ink-tertiary mb-1">主题</div>
+            <div class="font-semibold text-sm mb-3" x-text="emailForm.subject||'（主题预览）'"></div>
+            <div class="h-px bg-line-soft mb-3"></div>
+            <div class="text-sm text-ink-secondary whitespace-pre-wrap" x-text="emailForm.body||'（正文预览）'"></div>
+          </div>
+        </div>
+      </div>
+      <div class="px-5 py-4 border-t border-line-soft flex justify-between gap-2">
+        <button @click="openTestMail(emailForm)" class="px-3 py-1.5 text-sm rounded-md border border-line">发送测试邮件</button>
+        <div class="flex gap-2">
+          <button @click="emailEditOpen=false" class="px-3 py-1.5 text-sm rounded-md border border-line">取消</button>
+          <button @click="saveEmail()" class="px-3 py-1.5 text-sm rounded-md bg-primary text-white">提交</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Test mail -->
+  <div x-show="testMailOpen" class="fixed inset-0 z-[70] flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/40" @click="testMailOpen=false"></div>
+    <div class="relative bg-white rounded-lg shadow-card w-full max-w-sm p-5">
+      <div class="font-semibold text-sm mb-3">发送测试邮件</div>
+      <input x-model="testEmail" type="email" class="w-full border border-line rounded-md px-3 py-2 text-sm mb-2" placeholder="测试邮箱 *" />
+      <p class="text-[11px] text-ink-tertiary mb-4">每模板每分钟 ≤3 次 · 写入发送记录并标记为测试</p>
+      <div class="flex justify-end gap-2">
+        <button @click="testMailOpen=false" class="px-3 py-1.5 text-sm border rounded-md">取消</button>
+        <button @click="sendTestMail()" class="px-3 py-1.5 text-sm bg-primary text-white rounded-md">发送</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Rule modal -->
+  <div x-show="ruleOpen" class="fixed inset-0 z-[60] flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/40" @click="ruleOpen=false"></div>
+    <div class="relative bg-white rounded-lg shadow-card w-full max-w-lg p-5 drawer-panel">
+      <div class="font-semibold text-sm mb-1">配置通知规则</div>
+      <div class="text-xs text-ink-tertiary mb-4" x-text="ruleForm.eventName+' · '+ruleForm.eventType"></div>
+      <div class="space-y-3 text-sm">
+        <div class="font-medium text-xs text-ink-tertiary">通知方式（至少一种）</div>
+        <label class="flex items-center gap-2"><input type="checkbox" x-model="ruleForm.chInApp" class="accent-primary" /> 站内</label>
+        <label class="flex items-center gap-2"><input type="checkbox" x-model="ruleForm.chSms" class="accent-primary" /> 短信
+          <select x-show="ruleForm.chSms" x-model="ruleForm.smsTplId" class="ml-2 border border-line rounded px-2 py-1 text-xs">
+            <option value="">选择已启用模板</option>
+            <template x-for="t in smsTemplates.filter(x=>x.status==='ENABLED')" :key="t.id">
+              <option :value="t.id" x-text="t.name"></option>
+            </template>
+          </select>
+        </label>
+        <label class="flex items-center gap-2"><input type="checkbox" x-model="ruleForm.chEmail" class="accent-primary" /> 邮件
+          <select x-show="ruleForm.chEmail" x-model="ruleForm.emailTplId" class="ml-2 border border-line rounded px-2 py-1 text-xs">
+            <option value="">选择已启用模板</option>
+            <template x-for="t in emailTemplates.filter(x=>x.status==='ENABLED')" :key="t.id">
+              <option :value="t.id" x-text="t.name"></option>
+            </template>
+          </select>
+        </label>
+        <div>
+          <label class="text-xs text-ink-tertiary">接收人（角色）</label>
+          <input x-model="ruleForm.receivers" class="mt-1 w-full border border-line rounded-md px-3 py-2 text-sm" placeholder="如 BRAND_OPERATOR,DISTRIBUTOR" />
+        </div>
+        <div>
+          <label class="text-xs text-ink-tertiary">静默期（分钟）</label>
+          <input type="number" min="0" max="1440" x-model.number="ruleForm.silenceMinutes" class="mt-1 w-full border border-line rounded-md px-3 py-2 text-sm" />
+        </div>
+      </div>
+      <div class="flex justify-end gap-2 mt-5">
+        <button @click="ruleOpen=false" class="px-3 py-1.5 text-sm border rounded-md">取消</button>
+        <button @click="saveRule()" class="px-3 py-1.5 text-sm bg-primary text-white rounded-md">提交并生效</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Confirm -->
+  <div x-show="confirmOpen" class="fixed inset-0 z-[80] flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/40" @click="confirmOpen=false"></div>
+    <div class="relative bg-white rounded-lg shadow-card w-full max-w-sm p-5">
+      <div class="font-semibold text-sm mb-2" x-text="confirmTitle"></div>
+      <p class="text-sm text-ink-secondary mb-4" x-text="confirmMsg"></p>
+      <div class="flex justify-end gap-2">
+        <button @click="confirmOpen=false" class="px-3 py-1.5 text-sm border rounded-md">取消</button>
+        <button @click="confirmOk()" class="px-3 py-1.5 text-sm bg-primary text-white rounded-md">确认</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div x-show="toastShow" x-transition class="toast-enter fixed top-16 right-4 z-[90] bg-white text-ink border-r border-line-soft text-sm px-4 py-2.5 rounded-md shadow-card max-w-sm" x-text="toastMsg"></div>
+
+  <script>
+    function pad(n){ return String(n).padStart(2,'0'); }
+    function daysAgo(d, h=10, m=0){
+      const dt = new Date(); dt.setDate(dt.getDate()-d); dt.setHours(h,m,0,0);
+      return `${dt.getFullYear()}-${pad(dt.getMonth()+1)}-${pad(dt.getDate())} ${pad(dt.getHours())}:${pad(dt.getMinutes())}`;
+    }
+    function maskPhone(i){ return `139****${String(1000+i).slice(-4)}`; }
+    function maskEmail(i){ return `u${i}**@zippo-demo.com`; }
+
+    function notifyApp(){
+      const brands = ['ZIPPO 中国','ZIPPO 渠道演示品牌','平台公共'];
+      const titles = [
+        ['APPROVAL','商品审批待办','SPU「Zippo 经典铬」已提交，请及时审批','APPROVAL_PENDING','去审批'],
+        ['APPROVAL','价格审批待办','经销商价调价单待您处理','APPROVAL_PENDING','去审批'],
+        ['APPROVAL','审批结果通知','您发起的商品审批已通过','APPROVAL_RESULT',null],
+        ['APPROVAL','审批结果通知','创意审核已驳回，请查看原因','APPROVAL_RESULT',null],
+        ['SYSTEM_ALERT','破价预警','商品「Zippo 黑哑漆」渠道售价低于底线','PRICE_BREAK_ALERT',null],
+        ['SYSTEM_ALERT','短信通道异常','短信网关连续失败，请排查','CHANNEL_FAULT_ALERT',null],
+        ['SYSTEM_ALERT','渠道发布结果','Listing 发布至京东成功','CHANNEL_PUBLISH_RESULT',null],
+        ['SYSTEM_ALERT','设计师申请通知','独立设计师「林创」提交入驻申请','PARTNER_APPLY_NOTICE',null],
+        ['SYSTEM_ALERT','加工商申请通知','加工商「精工制造」提交资质审核','PARTNER_APPLY_NOTICE',null],
+        ['ANNOUNCE','系统公告','本周六 02:00–04:00 平台维护窗口','SYSTEM_ANNOUNCEMENT',null],
+        ['ANNOUNCE','系统公告','消息通知模块上线说明','SYSTEM_ANNOUNCEMENT',null],
+      ];
+      const notices = [];
+      for(let i=0;i<120;i++){
+        const t = titles[i % titles.length];
+        const unread = i % 3 !== 0;
+        notices.push({
+          id: 'N'+(1000+i),
+          noticeType: t[0],
+          eventType: t[3],
+          title: t[1] + (i>10?` #${i}`:''),
+          summary: t[2],
+          content: `${t[2]}\n\n事件类型：${t[3]}\n业务对象：DEMO-${2000+i}\n发生时间：${daysAgo(i%14, 9+(i%8), (i*7)%60)}\n\n请登录商品中心查看详情并按职责处理。`,
+          isRead: !unread,
+          createdAt: daysAgo(i%14, 9+(i%8), (i*7)%60),
+          ageDays: i%14,
+          timeShort: i===0?'刚刚':(i<6?`${i}小时前`:`${i%14}天前`),
+          linkLabel: t[4],
+          linkRoute: t[4]? '/approval-center/my-approval': null,
+          history: i%4===0?[{id:'H'+i,title:'同单历史：曾被退回补资料',time:daysAgo(i%14+2,11,0)}]:[],
+        });
+      }
+
+      const smsTemplates = [];
+      const smsNames = ['破价预警短信','审批待办短信','审批结果短信','通道异常短信','发布结果短信','入驻申请短信','公告摘要短信','库存预警短信','价签变更短信','渠道下架短信','测试验证短信','活动提醒短信'];
+      smsNames.forEach((name,i)=>{
+        smsTemplates.push({
+          id: 'ST'+(i+1),
+          name,
+          code: 'SMS_'+['PRICE_BREAK','APPROVAL_PENDING','APPROVAL_RESULT','FAULT','PUBLISH','PARTNER','ANNOUNCE','STOCK','PRICE_TAG','OFFLINE','TEST','PROMO'][i],
+          content: `【Zippo】${name.replace('短信','')}：{productName} 价格{price} 时间{occurredAt}，请登录处理。`,
+          status: i===7||i===10?'DISABLED':'ENABLED',
+          brand: brands[i%3],
+          updatedAt: daysAgo(i%10, 14, 20),
+        });
+      });
+
+      const smsRecords = [];
+      for(let i=0;i<36;i++){
+        const st = ['SUCCESS','SUCCESS','SUCCESS','FAILED','RETRYING','SENDING','SUCCESS'][i%7];
+        smsRecords.push({
+          id: 'SR'+(i+1),
+          sentAt: daysAgo(i%12, 8+(i%10), (i*11)%60),
+          phone: maskPhone(i),
+          template: smsNames[i%smsNames.length],
+          content: `【Zippo】演示快照内容 ${i+1}：经典铬售价…`,
+          status: st,
+          retry: st==='FAILED'?3:(st==='RETRYING'?1:0),
+          failReason: st==='FAILED'?(i%2?'网关超时':'号码空号'):'',
+          brand: brands[i%3],
+        });
+      }
+
+      const emailTemplates = [];
+      const emailNames = ['破价预警邮件','系统公告邮件','审批结果邮件','入驻审核邮件','发布结果邮件','通道告警邮件','周报摘要邮件','测试模板邮件','价策变更邮件','维护通知邮件'];
+      emailNames.forEach((name,i)=>{
+        emailTemplates.push({
+          id: 'ET'+(i+1),
+          name,
+          code: 'EMAIL_'+['PRICE','ANNOUNCE','APPROVAL','PARTNER','PUBLISH','FAULT','WEEKLY','TEST','POLICY','MAINT'][i],
+          subject: `【Zippo】${name.replace('邮件','')} — {productName}`,
+          body: `您好：\n\n这是「${name}」正文预览。\n商品：{productName}\n时间：{occurredAt}\n\n—— ZIPPO 商品中心`,
+          status: i===7?'DISABLED':'ENABLED',
+          updatedAt: daysAgo(i%8, 15, 10),
+        });
+      });
+
+      const emailRecords = [];
+      for(let i=0;i<32;i++){
+        const st = ['SUCCESS','SUCCESS','FAILED','RETRYING','SUCCESS'][i%5];
+        emailRecords.push({
+          id: 'ER'+(i+1),
+          sentAt: daysAgo(i%11, 10+(i%6), (i*13)%60),
+          email: maskEmail(i),
+          subject: `【Zippo】演示主题 ${i+1}`,
+          template: emailNames[i%emailNames.length],
+          status: st,
+          isTest: i%9===0,
+          opened: st==='SUCCESS' && i%2===0,
+          clicked: st==='SUCCESS' && i%5===0,
+        });
+      }
+
+      const rules = [
+        { id:'R1', eventName:'审批待办', eventType:'APPROVAL_PENDING', channels:['IN_APP','SMS'], silenceMinutes:0, receivers:'当前审批人', smsTplId:'ST2', emailTplId:'' },
+        { id:'R2', eventName:'审批结果', eventType:'APPROVAL_RESULT', channels:['IN_APP'], silenceMinutes:0, receivers:'发起人', smsTplId:'', emailTplId:'' },
+        { id:'R3', eventName:'破价预警', eventType:'PRICE_BREAK_ALERT', channels:['IN_APP','SMS'], silenceMinutes:30, receivers:'BRAND_OPERATOR,DISTRIBUTOR', smsTplId:'ST1', emailTplId:'' },
+        { id:'R4', eventName:'渠道发布结果', eventType:'CHANNEL_PUBLISH_RESULT', channels:['IN_APP'], silenceMinutes:0, receivers:'发布发起人', smsTplId:'', emailTplId:'' },
+        { id:'R5', eventName:'系统公告', eventType:'SYSTEM_ANNOUNCEMENT', channels:['IN_APP','EMAIL'], silenceMinutes:0, receivers:'全员', smsTplId:'', emailTplId:'ET2' },
+        { id:'R6', eventName:'通道异常告警', eventType:'CHANNEL_FAULT_ALERT', channels:['IN_APP'], silenceMinutes:15, receivers:'PLATFORM_ADMIN,BRAND_ADMIN', smsTplId:'', emailTplId:'' },
+        { id:'R7', eventName:'设计师/加工商申请通知', eventType:'PARTNER_APPLY_NOTICE', channels:['IN_APP'], silenceMinutes:0, receivers:'品牌审核人', smsTplId:'', emailTplId:'' },
+      ];
+
+      return {
+        role: 'BRAND_ADMIN',
+        mobileNav: false,
+        openTabs: [{ id: 'home', label: '消息通知', page: null }],
+        activeTabId: 'home',
+        activateTab(id) {
+          const t = this.openTabs.find(x => x.id === id);
+          if (!t) return;
+          this.activeTabId = id;
+          if (t.page && typeof this.go === 'function') this.go(t.page, true);
+        },
+        closeTab(id) {
+          if (this.openTabs.length <= 1) return;
+          const i = this.openTabs.findIndex(x => x.id === id);
+          if (i < 0) return;
+          this.openTabs.splice(i, 1);
+          if (this.activeTabId === id) {
+            const next = this.openTabs[Math.max(0, i - 1)];
+            this.activateTab(next.id);
+          }
+        },
+        ensureOpenTab(page, label) {
+          const id = 'p-' + page;
+          let t = this.openTabs.find(x => x.id === id);
+          if (!t) {
+            this.openTabs.push({ id, label, page });
+          } else {
+            t.label = label;
+          }
+          this.activeTabId = id;
+        },
+
+        page: 'inbox',
+        bellOpen: false,
+        bellTab: 'ALL',
+        loading: false,
+        toastShow: false,
+        toastMsg: '',
+        confirmOpen: false,
+        confirmTitle: '',
+        confirmMsg: '',
+        confirmAction: null,
+        notices,
+        selected: null,
+        inboxTab: 'ALL',
+        inboxRead: 'ALL',
+        inboxKeyword: '',
+        inboxRange: 'ALL',
+        inboxPage: 1,
+        pageSize: 20,
+        smsTemplates,
+        smsTplKw: '',
+        smsTplStatus: 'ALL',
+        smsEditOpen: false,
+        smsForm: { id:'', name:'', content:'' },
+        smsRecords,
+        smsRecStatus: 'ALL',
+        smsRecPhone: '',
+        emailTemplates,
+        emailTplKw: '',
+        emailEditOpen: false,
+        emailForm: { id:'', name:'', subject:'', body:'' },
+        emailRecords,
+        emailRecStatus: 'ALL',
+        emailRecTest: 'ALL',
+        testMailOpen: false,
+        testEmail: '',
+        testTarget: null,
+        rules,
+        ruleOpen: false,
+        ruleForm: {},
+        channelMenus: [
+          { id:'smsTpl', label:'短信模板', icon:'📱' },
+          { id:'smsRec', label:'短信发送记录', icon:'📋' },
+          { id:'emailTpl', label:'邮件模板', icon:'✉️' },
+          { id:'emailRec', label:'邮件发送记录', icon:'📬' },
+        ],
+        get currentUser(){
+          const map = {
+            PLATFORM_ADMIN: { name:'赵运维', avatar:'赵' },
+            BRAND_ADMIN: { name:'陈品牌', avatar:'陈' },
+            BRAND_OPERATOR: { name:'李运营', avatar:'李' },
+            DISTRIBUTOR: { name:'王经销', avatar:'王' },
+            RETAILER: { name:'周零售', avatar:'周' },
+            MANUFACTURER: { name:'吴加工', avatar:'吴' },
+            DESIGNER: { name:'林创', avatar:'林' },
+          };
+          return map[this.role] || map.BRAND_OPERATOR;
+        },
+        get roleLabel(){
+          return ({
+            PLATFORM_ADMIN:'平台管理员 Root · 全平台',
+            BRAND_ADMIN:'品牌管理员 · 本品牌',
+            BRAND_OPERATOR:'品牌业务 · 仅通知中心',
+            DISTRIBUTOR:'经销商 · 仅通知中心',
+            RETAILER:'零售商 · 仅通知中心',
+            MANUFACTURER:'加工商 · 仅通知中心',
+            DESIGNER:'独立设计师 · 仅通知中心',
+          })[this.role];
+        },
+        get canConfig(){ return this.role==='PLATFORM_ADMIN' || this.role==='BRAND_ADMIN'; },
+        get scopeHint(){
+          if(!this.canConfig) return '数据范围：仅本人站内通知';
+          return this.role==='PLATFORM_ADMIN' ? '数据范围：全平台 / 全租户' : '数据范围：仅本品牌';
+        },
+        get pageTitle(){
+          return ({ inbox:'通知中心', smsTpl:'短信模板', smsRec:'短信发送记录', emailTpl:'邮件模板', emailRec:'邮件发送记录', rules:'通知规则' })[this.page] || '';
+        },
+        get unreadCount(){ return this.notices.filter(n=>!n.isRead).length; },
+        get unreadBadge(){ return this.unreadCount>99?'99+':String(this.unreadCount); },
+        get bellList(){
+          let list = this.notices.slice(0, 14);
+          if(this.bellTab!=='ALL') list = list.filter(n=>n.noticeType===this.bellTab);
+          return list.slice(0,10);
+        },
+        get filteredNotices(){
+          return this.notices.filter(n=>{
+            if(this.inboxTab!=='ALL' && n.noticeType!==this.inboxTab) return false;
+            if(this.inboxRead==='UNREAD' && n.isRead) return false;
+            if(this.inboxRead==='READ' && !n.isRead) return false;
+            if(this.inboxKeyword && !(n.title+n.summary).includes(this.inboxKeyword)) return false;
+            if(this.inboxRange==='7' && n.ageDays>7) return false;
+            if(this.inboxRange==='30' && n.ageDays>30) return false;
+            return true;
+          });
+        },
+        get inboxTotalPages(){ return Math.max(1, Math.ceil(this.filteredNotices.length/this.pageSize)); },
+        get pagedNotices(){
+          const s=(this.inboxPage-1)*this.pageSize;
+          return this.filteredNotices.slice(s, s+this.pageSize);
+        },
+        get filteredSmsTpl(){
+          return this.smsTemplates.filter(t=>{
+            if(this.smsTplStatus!=='ALL' && t.status!==this.smsTplStatus) return false;
+            if(this.smsTplKw && !t.name.includes(this.smsTplKw)) return false;
+            if(this.role==='BRAND_ADMIN' && t.brand==='平台公共') return false;
+            return true;
+          });
+        },
+        get filteredSmsRec(){
+          return this.smsRecords.filter(r=>{
+            if(this.smsRecStatus!=='ALL' && r.status!==this.smsRecStatus) return false;
+            if(this.smsRecPhone && !r.phone.includes(this.smsRecPhone)) return false;
+            if(this.role==='BRAND_ADMIN' && r.brand==='平台公共') return false;
+            return true;
+          });
+        },
+        get filteredEmailTpl(){
+          return this.emailTemplates.filter(t=>!this.emailTplKw || t.name.includes(this.emailTplKw) || t.subject.includes(this.emailTplKw));
+        },
+        get filteredEmailRec(){
+          return this.emailRecords.filter(r=>{
+            if(this.emailRecStatus!=='ALL' && r.status!==this.emailRecStatus) return false;
+            if(this.emailRecTest==='TEST' && !r.isTest) return false;
+            if(this.emailRecTest==='REAL' && r.isTest) return false;
+            return true;
+          });
+        },
+        typeLabel(t){ return ({APPROVAL:'审批',SYSTEM_ALERT:'系统',ANNOUNCE:'公告',OTHER:'其他'})[t]||t; },
+        typeTag(t){ return ({APPROVAL:'tag-approval',SYSTEM_ALERT:'tag-system',ANNOUNCE:'tag-announce'})[t]||'tag-other'; },
+        channelLabel(c){ return ({IN_APP:'站内',SMS:'短信',EMAIL:'邮件'})[c]||c; },
+        sendStatusLabel(s){ return ({SUCCESS:'成功',FAILED:'失败',RETRYING:'重试中',SENDING:'发送中',PENDING:'待发送'})[s]||s; },
+        sendStatusClass(s){
+          if(s==='SUCCESS') return 'bg-success-bg text-success';
+          if(s==='FAILED') return 'bg-danger-bg text-danger';
+          if(s==='RETRYING'||s==='SENDING') return 'bg-warning-bg text-warning';
+          return 'bg-fill text-ink-tertiary';
+        },
+        go(id){
+          if(!this.canConfig && ['smsTpl','smsRec','emailTpl','emailRec','rules'].includes(id)){
+            this.toast('当前角色无渠道/规则菜单权限');
+            this.page='inbox';
+            return;
+          }
+          this.page=id;
+        },
+        onRoleChange(){
+          this.bellOpen=false;
+          if(!this.canConfig && ['smsTpl','smsRec','emailTpl','emailRec','rules'].includes(this.page)) this.page='inbox';
+          this.toast('已切换为：'+this.roleLabel);
+        },
+        toast(msg){
+          this.toastMsg=msg; this.toastShow=true;
+          clearTimeout(this._tt); this._tt=setTimeout(()=>this.toastShow=false, 2200);
+        },
+        openDetail(n){
+          this.page='inbox';
+          this.selected=n;
+          if(!n.isRead) this.markRead(n, true);
+        },
+        markRead(n, silent){
+          n.isRead=true;
+          if(!silent) this.toast('已标记已读');
+        },
+        markAllRead(){
+          this.notices.forEach(n=>n.isRead=true);
+          this.toast('全部通知已标记为已读');
+        },
+        confirmMarkAll(){
+          if(this.unreadCount===0) return;
+          this.confirmTitle='全部标记已读';
+          this.confirmMsg=`确认将 ${this.unreadCount} 条未读全部标为已读？`;
+          this.confirmAction=()=>this.markAllRead();
+          this.confirmOpen=true;
+        },
+        confirmOk(){
+          this.confirmOpen=false;
+          if(typeof this.confirmAction==='function') this.confirmAction();
+        },
+        goApproval(n){
+          this.toast('演示跳转审批中心：'+ (n.linkRoute||'/approval-center') +'（目标页权限由 D11 校验）');
+        },
+        simulateLoading(){
+          this.loading=true;
+          setTimeout(()=>{ this.loading=false; this.toast('列表已刷新'); }, 600);
+        },
+        openSmsEdit(t){
+          this.smsForm = t? { id:t.id, name:t.name, content:t.content } : { id:'', name:'', content:'' };
+          this.smsEditOpen=true;
+        },
+        saveSms(){
+          if(!this.smsForm.name.trim()||!this.smsForm.content.trim()){ this.toast('请填写名称与内容'); return; }
+          if(this.smsForm.id){
+            const t=this.smsTemplates.find(x=>x.id===this.smsForm.id);
+            if(t){ t.name=this.smsForm.name; t.content=this.smsForm.content; t.updatedAt=daysAgo(0,16,0); }
+            this.toast('短信模板已更新');
+          } else {
+            this.smsTemplates.unshift({
+              id:'ST'+Date.now(), name:this.smsForm.name, code:'SMS_CUSTOM_'+this.smsTemplates.length,
+              content:this.smsForm.content, status:'ENABLED', brand: this.role==='PLATFORM_ADMIN'?'平台公共':'ZIPPO 中国', updatedAt:daysAgo(0,16,5)
+            });
+            this.toast('短信模板已创建（默认启用）');
+          }
+          this.smsEditOpen=false;
+        },
+        toggleSms(t){
+          if(t.status==='ENABLED'){
+            this.confirmTitle='停用短信模板';
+            this.confirmMsg=`「${t.name}」可能被规则引用。停用后新发送不可再使用该模板，相关规则需改绑。是否继续？`;
+            this.confirmAction=()=>{ t.status='DISABLED'; this.toast('模板已停用'); };
+            this.confirmOpen=true;
+          } else {
+            t.status='ENABLED'; this.toast('模板已启用');
+          }
+        },
+        openEmailEdit(t){
+          this.emailForm = t? { id:t.id, name:t.name, subject:t.subject, body:t.body } : { id:'', name:'', subject:'', body:'' };
+          this.emailEditOpen=true;
+        },
+        saveEmail(){
+          if(!this.emailForm.name||!this.emailForm.subject||!this.emailForm.body){ this.toast('请填写名称、主题与正文'); return; }
+          if(this.emailForm.id){
+            const t=this.emailTemplates.find(x=>x.id===this.emailForm.id);
+            if(t){ Object.assign(t,{ name:this.emailForm.name, subject:this.emailForm.subject, body:this.emailForm.body, updatedAt:daysAgo(0,16,0)}); }
+            this.toast('邮件模板已更新');
+          } else {
+            this.emailTemplates.unshift({
+              id:'ET'+Date.now(), name:this.emailForm.name, code:'EMAIL_CUSTOM',
+              subject:this.emailForm.subject, body:this.emailForm.body, status:'ENABLED', updatedAt:daysAgo(0,16,8)
+            });
+            this.toast('邮件模板已创建');
+          }
+          this.emailEditOpen=false;
+        },
+        toggleEmail(t){
+          t.status = t.status==='ENABLED'?'DISABLED':'ENABLED';
+          this.toast(t.status==='ENABLED'?'邮件模板已启用':'邮件模板已停用');
+        },
+        openTestMail(t){
+          this.testTarget=t; this.testEmail=''; this.testMailOpen=true;
+        },
+        sendTestMail(){
+          if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.testEmail)){ this.toast('邮箱格式不正确'); return; }
+          this.emailRecords.unshift({
+            id:'ER'+Date.now(), sentAt:daysAgo(0,16,30), email: this.testEmail.replace(/(.{1}).+(@.+)/,'$1**$2'),
+            subject: (this.testTarget && this.testTarget.subject)||'测试邮件', template:(this.testTarget&&this.testTarget.name)||'未命名',
+            status:'SUCCESS', isTest:true, opened:false, clicked:false
+          });
+          this.testMailOpen=false; this.toast('测试邮件已发送，记录已标记为测试');
+        },
+        openRuleEdit(r){
+          this.ruleForm = {
+            id:r.id, eventName:r.eventName, eventType:r.eventType,
+            chInApp: r.channels.includes('IN_APP'),
+            chSms: r.channels.includes('SMS'),
+            chEmail: r.channels.includes('EMAIL'),
+            smsTplId: r.smsTplId||'',
+            emailTplId: r.emailTplId||'',
+            receivers: r.receivers,
+            silenceMinutes: r.silenceMinutes,
+          };
+          this.ruleOpen=true;
+        },
+        saveRule(){
+          if(!this.ruleForm.chInApp && !this.ruleForm.chSms && !this.ruleForm.chEmail){ this.toast('至少选择一种通知方式'); return; }
+          if(this.ruleForm.chSms && !this.ruleForm.smsTplId){ this.toast('勾选短信须绑定已启用模板'); return; }
+          if(this.ruleForm.chEmail && !this.ruleForm.emailTplId){ this.toast('勾选邮件须绑定已启用模板'); return; }
+          if(!this.ruleForm.receivers.trim()){ this.toast('接收人不能为空'); return; }
+          const r=this.rules.find(x=>x.id===this.ruleForm.id);
+          if(r){
+            r.channels=[];
+            if(this.ruleForm.chInApp) r.channels.push('IN_APP');
+            if(this.ruleForm.chSms) r.channels.push('SMS');
+            if(this.ruleForm.chEmail) r.channels.push('EMAIL');
+            r.silenceMinutes=this.ruleForm.silenceMinutes;
+            r.receivers=this.ruleForm.receivers;
+            r.smsTplId=this.ruleForm.smsTplId;
+            r.emailTplId=this.ruleForm.emailTplId;
+          }
+          this.ruleOpen=false;
+          this.toast('规则已保存，对新事件立即生效（已发生事件不回溯）');
+        },
+        init(){
+          this.selected = this.notices.find(n=>!n.isRead) || this.notices[0];
+        }
+      };
+    }
+  </script>
+<script src="view-guard.js"></script>
+</body>
+
+<script>
+/* ZIPPO_GLOBAL_SHELL_V2 */
+(function(){
+  if(window.__zippoShellV2) return;
+  window.__zippoShellV2 = 1;
+  document.querySelectorAll('.card').forEach(function(card){
+    if(card.querySelector('.table-wrap table')) card.classList.add('has-table');
+  });
+  document.querySelectorAll('.pager, .pagination').forEach(function(p){
+    p.classList.add('zippo-pager-sticky');
+  });
+  function wrapAvatar(el){
+    if(!el || el.closest('.zippo-user-menu')) return;
+    var wrap = document.createElement('div');
+    wrap.className = 'zippo-user-menu';
+    var panel = document.createElement('div');
+    panel.className = 'zippo-user-menu-panel';
+    panel.innerHTML = '<button type="button" data-act="profile">个人中心</button><button type="button" data-act="logout">退出登录</button>';
+    el.parentNode.insertBefore(wrap, el);
+    wrap.appendChild(el);
+    wrap.appendChild(panel);
+    el.style.cursor = 'pointer';
+    el.addEventListener('click', function(e){ e.stopPropagation(); wrap.classList.toggle('open'); });
+    panel.querySelector('[data-act=profile]').onclick = function(){
+      wrap.classList.remove('open');
+      var t=document.getElementById('toast'); if(t){t.textContent='个人中心';t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1600);} else alert('个人中心');
+    };
+    panel.querySelector('[data-act=logout]').onclick = function(){
+      wrap.classList.remove('open');
+      var t=document.getElementById('toast'); if(t){t.textContent='已退出登录';t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1600);} else alert('已退出登录');
+    };
+    document.addEventListener('click', function(){ wrap.classList.remove('open'); });
+  }
+  document.querySelectorAll('[aria-label="账号"], [title="管理员"], .d05-avatar, .d03-avatar, .zippo-avatar-trigger').forEach(wrapAvatar);
+  document.querySelectorAll('.top-right span[title], .global-topbar .top-right > span[style*="border-radius:50%"]').forEach(function(el){
+    if(el.textContent && el.textContent.length<=2) wrapAvatar(el);
+  });
+  document.querySelectorAll('.w-8.h-8.rounded-full, .rounded-full.bg-primary').forEach(function(el){
+    if(el.closest('header') && !el.closest('.zippo-user-menu')) wrapAvatar(el);
+  });
+})();
+</script>
+
+</html>

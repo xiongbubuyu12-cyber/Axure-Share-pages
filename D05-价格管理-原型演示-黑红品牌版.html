@@ -1,0 +1,570 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<!-- poc-embed-guest -->
+<script src="poc-embed-guest.js"></script>
+
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>价格管理中心 · 高保真原型</title>
+  <style>
+    :root {
+      --black: #0A0A0A;
+      --ink: #252525;
+      --muted: #6b6b6b;
+      --line: #e7e7e7;
+      --line-strong: #d4d4d4;
+      --surface: #ffffff;
+      --canvas: #EDEDED;
+      --soft: #fafafa;
+      --red: #C8102E;
+      --red-dark: #a30e22;
+      --red-soft: #FDE8EC;
+      --green: #237a4b;
+      --green-soft: #edf8f1;
+      --amber: #9b5b00;
+      --amber-soft: #fff7e6;
+      --blue: #2e5f9a;
+      --blue-soft: #eef5ff;
+      --radius: 8px;
+      --shadow: 0 8px 24px rgba(15, 15, 15, .06);
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; color: var(--ink); background: var(--canvas); font-size: 14px; }
+    button, input, select { font: inherit; }
+    button { cursor: pointer; }
+    .app { display: grid; grid-template-columns: 232px 1fr; min-height: 100vh; }
+    .sidebar { background: #0A0A0A; color: #fff; padding: 8px 6px; display: flex; flex-direction: column; border-right: 0; }
+    .brand { display: none; }
+    .brand-mark, .brand strong, .brand small { display: none; }
+    .nav { margin-top: 0; display: flex; flex-direction: column; gap: 4px; flex: 1 1 auto; min-height: 0; overflow-y: auto; align-content: flex-start; padding: 10px 8px; }
+    .nav-label { color: #8f8f8f; font-size: 11px; letter-spacing: .06em; padding: 10px 8px 4px; font-weight: 600; margin-top: 4px; }
+    .nav-label:first-child { margin-top: 0; }
+    .nav button { border: 0; background: transparent; color: #cfcfcf; text-align: left; padding: 0 12px; height: 40px; min-height: 40px; max-height: 40px; margin: 0; border-radius: 4px; display: flex; align-items: center; gap: 10px; width: 100%; font-size: 13px; line-height: 1; border-left: 3px solid transparent; box-shadow: none; flex-shrink: 0; }
+    .nav button:hover { background: #2d2d2d; color: #fff; }
+    .nav button.active { background: #2d2d2d; color: #fff; font-weight: 600; border-left-color: var(--red); }
+    .nav .count { margin-left: auto; background: #434343; color: #fff; border-radius: 10px; padding: 1px 7px; font-size: 11px; }
+    .nav button.active .count { background: #C8102E; color: #fff; }
+    .sidebar-foot { flex: 0 0 auto; margin-top: auto; color: #999; border-top: 1px solid #363636; padding: 16px 12px 0; font-size: 12px; line-height: 1.7; }
+    .main { min-width: 0; display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
+    .topbar { height: 48px; background: var(--surface); border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; padding: 0 24px; flex: 0 0 auto; }
+    .crumb { color: var(--muted); font-size: 13px; }
+    .crumb b { color: var(--ink); font-weight: 600; }
+    .top-actions { display: flex; align-items: center; gap: 14px; }
+    .icon-btn { width: 32px; height: 32px; border: 1px solid var(--line); background: white; border-radius: 6px; color: var(--muted); }
+    .avatar { width: 31px; height: 31px; border-radius: 50%; background: var(--black); color: white; display: grid; place-items: center; font-size: 12px; font-weight: 700; }
+    .workspace { padding: 20px 24px 32px; max-width: none; margin: 0; width: 100%; box-sizing: border-box; }
+    .page-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 18px; margin-bottom: 24px; }
+    h1 { font-size: 24px; margin: 0; letter-spacing: -.02em; }
+    .subhead { color: var(--muted); margin-top: 8px; }
+    .actions { display: flex; gap: 9px; align-items: center; }
+    .btn { border-radius: 6px; padding: 9px 15px; border: 1px solid var(--line-strong); background: white; color: var(--ink); font-weight: 600; }
+    .btn:hover { border-color: #a9a9a9; }
+    .btn.primary { background: var(--red); border-color: var(--red); color: white; }
+    .btn.primary:hover { background: var(--red-dark); }
+    .btn.danger { color: var(--red); border-color: #f0b7c0; background: white; }
+    .btn.text { border: 0; padding: 5px 7px; color: var(--red); background: transparent; font-weight: 600; }
+    .stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; margin-bottom: 18px; }
+    .stat { background: white; border: 1px solid var(--line); border-radius: var(--radius); padding: 17px 18px; box-shadow: var(--shadow); }
+    .stat .label { color: var(--muted); font-size: 12px; }
+    .stat .value { margin-top: 9px; font-size: 26px; font-weight: 750; letter-spacing: -.04em; }
+    .stat .hint { font-size: 12px; margin-top: 7px; color: var(--muted); }
+    .stat .hint.up { color: var(--green); }
+    .stat .hint.warn { color: var(--red); }
+    .card { background: white; border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); }
+    .card-head { padding: 17px 20px; border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .card-head h2 { margin: 0; font-size: 16px; }
+    .filters { padding: 17px 20px; display: grid; grid-template-columns: 1.25fr 1fr 1fr 1fr auto; gap: 10px; background: var(--soft); border-bottom: 1px solid var(--line); }
+    .field { display: grid; gap: 6px; }
+    .field label { color: var(--muted); font-size: 12px; }
+    input, select { border: 1px solid var(--line-strong); border-radius: 6px; height: 36px; padding: 0 11px; background: white; color: var(--ink); outline: none; }
+    input:focus, select:focus { border-color: var(--red); box-shadow: 0 0 0 3px var(--red-soft); }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; min-width: 920px; }
+    th, td { padding: 13px 16px; border-bottom: 1px solid var(--line); text-align: left; white-space: nowrap; }
+    th { background: #fafafa; color: var(--muted); font-size: 12px; font-weight: 650; }
+    tbody tr:hover { background: #fcfcfc; }
+    td strong { font-weight: 650; }
+    td.num { font-variant-numeric: tabular-nums; }
+    .tag { display: inline-flex; align-items: center; gap: 5px; border-radius: 4px; padding: 4px 8px; font-size: 12px; line-height: 1; font-weight: 600; }
+    .tag.green { background: var(--green-soft); color: var(--green); }
+    .tag.red { background: var(--red-soft); color: var(--red); }
+    .tag.amber { background: var(--amber-soft); color: var(--amber); }
+    .tag.gray-alt { background: var(--blue-soft); color: var(--blue); }
+    .tag.gray { background: #f1f1f1; color: #6b6b6b; }
+    .pager { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; color: var(--muted); font-size: 12px; }
+    .pager .pages { display: flex; gap: 5px; }
+    .page-btn { width: 29px; height: 29px; border: 1px solid var(--line); border-radius: 5px; background: white; color: var(--muted); }
+    .page-btn.active { border-color: var(--red); color: var(--red); background: var(--red-soft); }
+    .split { display: grid; grid-template-columns: 1.35fr .85fr; gap: 16px; }
+    .risk-card { padding: 20px; }
+    .risk-row { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid var(--line); }
+    .risk-row:last-child { border-bottom: 0; }
+    .risk-name { display: flex; align-items: center; gap: 10px; }
+    .risk-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--red); }
+    .risk-dot.amber { background: #d99216; }
+    .risk-dot.green { background: var(--green); }
+    .bar { height: 8px; background: #f0f0f0; border-radius: 99px; overflow: hidden; margin-top: 9px; }
+    .bar i { display: block; height: 100%; border-radius: inherit; background: var(--red); }
+    .detail-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; padding: 20px; }
+    .detail { border: 1px solid var(--line); border-radius: 6px; padding: 13px; }
+    .detail small { display: block; color: var(--muted); font-size: 12px; margin-bottom: 8px; }
+    .detail strong { font-size: 17px; }
+    .view { display: none; }
+    .view.active { display: flex; flex-direction: column; flex: 1 1 auto; min-height: 0; overflow: hidden; }
+    .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.35); display: none; align-items: center; justify-content: center; z-index: 10; }
+    .modal-backdrop.open { display: flex; }
+    .modal { background: white; width: min(620px, calc(100vw - 40px)); border-radius: 10px; box-shadow: 0 20px 70px rgba(0,0,0,.22); }
+    .modal-head { padding: 18px 22px; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; align-items: center; }
+    .modal-head h3 { margin: 0; font-size: 17px; }
+    .modal-body { padding: 20px 22px; display: grid; gap: 14px; }
+    .modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 13px; }
+    .modal-foot { padding: 15px 22px; border-top: 1px solid var(--line); display: flex; justify-content: flex-end; gap: 9px; }
+    .toast { position: fixed; right: 30px; bottom: 25px; background: var(--black); color: white; padding: 12px 16px; border-radius: 6px; display: none; box-shadow: var(--shadow); }
+    .toast.show { display: block; }
+    /* 截图模式：保持页面结构不变，仅用于导出完整页面预览。 */
+    body.capture { zoom: .22; }
+    body.capture .workspace { max-width: none; margin-left: 0; margin-right: 0; }
+    @media (max-width: 1100px) { .app { grid-template-columns: 76px 1fr; } .brand strong, .brand small, .nav-label, .nav button span, .sidebar-foot { display: none; } .brand { justify-content: center; padding-left: 0; padding-right: 0; } .nav button { justify-content: center; } .stats { grid-template-columns: repeat(2, 1fr); } .split { grid-template-columns: 1fr; } }
+    @media (max-width: 720px) { .app { display: block; } .sidebar { display: none; } .topbar { padding: 0 16px; } .workspace { padding: 20px 16px 32px; } .page-head { display: block; } .actions { margin-top: 15px; } .filters { grid-template-columns: 1fr 1fr; } .filters .field:first-child { grid-column: span 2; } .stats { gap: 10px; } .detail-grid { grid-template-columns: 1fr 1fr; } }
+  
+    .brand-stripe { height: 4px; background: linear-gradient(90deg, #0A0A0A 0%, #0A0A0A 72%, #C8102E 72%, #C8102E 100%); }
+
+    /* §2.2 已打开页面 Tab */
+    .open-tabs { display:flex; align-items:center; gap:2px; flex:1; min-width:0; overflow-x:auto; margin:0 12px; }
+    .open-tab {
+      display: inline-flex; align-items: center; gap: 6px; max-width: 160px;
+      padding: 6px 10px; font-size: 13px; border-radius: 4px; cursor:pointer;
+      color: rgba(255,255,255,.72); white-space: nowrap; transition: all .15s;
+      border: 0; border-bottom: 2px solid transparent; background: transparent;
+    }
+    .open-tab:hover { color: #fff; background: rgba(255,255,255,.08); }
+    .open-tab.active { color: #fff; font-weight: 600; border-bottom-color: #C8102E; background: rgba(200,16,46,.18); }
+    .open-tab .tab-close { opacity: .55; font-size: 12px; line-height: 1; padding: 2px 4px; border-radius: 3px; }
+    .open-tab .tab-close:hover { opacity: 1; background: rgba(255,255,255,.15); }
+    .global-topbar {
+      height: 56px; display:flex; align-items:center; padding:0 16px;
+      background:#0A0A0A; color:#fff; position:sticky; top:0; z-index:50;
+    }
+    .global-topbar .logo { font-weight:700; letter-spacing:.06em; font-size:14px; flex-shrink:0; }
+    .global-topbar .top-right { display:flex; align-items:center; gap:10px; flex-shrink:0; margin-left:auto; }
+    .global-topbar .top-right select {
+      background:rgba(255,255,255,.08); color:#fff; border:1px solid rgba(255,255,255,.2);
+      border-radius:4px; padding:4px 8px; font-size:12px;
+    }
+    .d05-icon { width:32px;height:32px;border:0;border-radius:4px;background:transparent;color:rgba(255,255,255,.7);display:inline-grid;place-items:center; }
+    .d05-icon:hover { background:rgba(255,255,255,.1); color:#fff; }
+    .page-size-select {
+      border:1px solid #d4d4d4; border-radius:4px; padding:3px 6px; font-size:12px; background:#fff; margin:0 8px;
+    }
+
+
+    html, body { height:100%; margin:0; overflow:hidden; }
+    body > .global-topbar, body > .brand-stripe { flex:0 0 auto; }
+    body.zippo-fixed {
+      display:flex; flex-direction:column; height:100vh; overflow:hidden;
+    }
+    body.zippo-fixed > .app {
+      flex:1 1 auto; min-height:0; height:auto !important;
+      display:grid !important; grid-template-columns:232px 1fr; overflow:hidden !important;
+    }
+    body.zippo-fixed > .app > .sidebar {
+      height:100% !important; min-height:0; overflow:hidden; display:flex; flex-direction:column;
+    }
+    body.zippo-fixed > .app > .main, body.zippo-fixed > .app > main {
+      height:100%; min-height:0; overflow:hidden; display:flex; flex-direction:column;
+    }
+    .app > .main > .workspace, .app > main > .workspace {
+      flex:1 1 auto; min-height:0; overflow:hidden;
+      display:flex; flex-direction:column;
+      padding: 20px 24px 16px;
+    }
+    .view.active {
+      display:flex !important; flex-direction:column; flex:1 1 auto; min-height:0; overflow:hidden;
+    }
+    .view.active > .page-head,
+    .view.active > .stats { flex-shrink:0; }
+    .view.active > .card.has-table {
+      flex:1 1 auto; min-height:0; overflow:hidden; margin-bottom:0;
+    }
+    .card.has-table > .card-head,
+    .card.has-table > .filters { flex-shrink:0; }
+    .table-wrap { overflow-x:auto; }
+
+
+    /* body 纵向壳：顶栏固定，下方 zippo-body 占满剩余高度 */
+    body.overflow-hidden, body.zippo-fixed, body.d06-shell {
+      display: flex !important; flex-direction: column !important; height: 100vh !important; margin: 0;
+    }
+    body > header, body > .brand-stripe, body > .h-1.brand-stripe, body > div.h-1 {
+      flex: 0 0 auto !important;
+    }
+    .zippo-body { flex: 1 1 auto !important; min-height: 0 !important; height: auto !important; }
+    main.zippo-main, .zippo-main {
+      flex: 1 1 auto !important; min-width: 0 !important; min-height: 0 !important;
+      overflow-y: auto !important;
+    }
+
+
+
+
+/* ZIPPO_NAV_HIERARCHY_V3 */
+details.nav-group { margin: 0 0 6px; border: 0; }
+details.nav-group > summary.nav-l1 {
+  list-style: none; cursor: pointer; user-select: none;
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  min-height: 40px; padding: 0 12px; margin: 0; border-radius: 4px;
+  font-size: 13px !important; font-weight: 600 !important; line-height: 1.2;
+  color: #FFFFFF !important; letter-spacing: 0 !important; text-transform: none !important;
+  background: transparent;
+}
+details.nav-group > summary.nav-l1::-webkit-details-marker { display: none; }
+details.nav-group > summary.nav-l1 .nav-chev {
+  font-size: 10px; color: rgba(255,255,255,.7); transition: transform .15s;
+}
+details.nav-group:not([open]) > summary.nav-l1 .nav-chev { transform: rotate(-90deg); }
+details.nav-group > summary.nav-l1:hover { background: #2d2d2d; }
+.nav-l2-wrap { display: flex; flex-direction: column; gap: 2px; padding: 2px 0 6px; }
+.nav-l2-wrap .proto-nav-item,
+.nav-l2-wrap > button,
+.nav-l2-wrap .nav-item,
+aside .nav-l2-wrap button {
+  font-size: 13px !important;
+  color: #E8E8E8 !important;
+  min-height: 40px;
+}
+/* dark sidebar contrast: kill low-contrast tertiary / selected white block */
+aside.proto-sidebar, aside.sidebar, aside.module-sidebar, .proto-sidebar {
+  color: #E8E8E8 !important;
+}
+aside.proto-sidebar .text-ink-secondary,
+aside.proto-sidebar .text-ink-tertiary,
+aside.proto-sidebar .text-ink,
+aside .nav-label {
+  color: #E8E8E8 !important;
+}
+aside.proto-sidebar button.text-ink-secondary,
+aside.proto-sidebar a.text-ink-secondary {
+  color: #E8E8E8 !important;
+}
+aside.proto-sidebar .bg-\[\#F5F5F5\],
+aside.proto-sidebar button.bg-\[\#F5F5F5\] {
+  background: #2d2d2d !important;
+  color: #FFFFFF !important;
+}
+aside.proto-sidebar .hover\:bg-fill:hover,
+aside.proto-sidebar button:hover {
+  background: #2d2d2d !important;
+  color: #FFFFFF !important;
+}
+/* L1 labels that are not yet details */
+.nav-label, .proto-nav-group, .proto-sidebar-title {
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  color: #FFFFFF !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+}
+.proto-nav-item, .nav button, aside .nav button {
+  color: #E8E8E8 !important;
+  font-size: 13px !important;
+}
+.proto-nav-item.active, .nav button.active {
+  color: #FFFFFF !important;
+}
+/* hide sidebar bottom notes / brand footnotes */
+.sidebar-note, .sidebar-foot, .sidebar-footer,
+aside .zippo-sidebar-note,
+aside nav > .mt-6.px-3.py-3.rounded-lg {
+  display: none !important;
+}
+
+/* ZIPPO_NAV_SPACING_V2 */
+.nav, .proto-sidebar-nav, aside .nav, .sidebar .nav {
+  gap: 4px !important;
+}
+.proto-nav-item, .nav button, .nav-item, .side-nav a, .menu-item {
+  min-height: 40px !important;
+  height: auto !important;
+  max-height: none !important;
+  padding-top: 8px !important;
+  padding-bottom: 8px !important;
+  box-sizing: border-box !important;
+  flex-shrink: 0 !important;
+}
+.nav-label, .proto-sidebar-title .label {
+  padding-top: 10px !important;
+  padding-bottom: 4px !important;
+}
+
+/* ZIPPO_GLOBAL_SHELL_V2 */
+.card.has-table { display:flex; flex-direction:column; min-height:0; overflow:hidden; }
+.card.has-table > .table-wrap { flex:1 1 auto; min-height:0; overflow:auto; -webkit-overflow-scrolling:touch; }
+.card > .pager, .card > .pager.pagination, .pager.zippo-pager-sticky {
+  position:relative; flex-shrink:0; z-index:5;
+  background:#fff; border-top:1px solid #EBEBEB; margin-top:0;
+  box-shadow:none;
+}
+.sidebar-foot, .sidebar-footer { display:none !important; }
+.zippo-user-menu { position:relative; display:inline-flex; }
+.zippo-user-menu-panel {
+  display:none; position:absolute; right:0; top:calc(100% + 6px); min-width:128px;
+  background:#fff; color:#0A0A0A; border:1px solid #EBEBEB; border-radius:6px;
+  box-shadow:0 8px 24px rgba(0,0,0,.12); padding:4px; z-index:80;
+}
+.zippo-user-menu.open .zippo-user-menu-panel { display:block; }
+.zippo-user-menu-panel button {
+  display:block; width:100%; text-align:left; border:0; background:transparent;
+  padding:8px 10px; font-size:13px; border-radius:4px; cursor:pointer; color:#0A0A0A;
+}
+.zippo-user-menu-panel button:hover { background:#F5F5F5; }
+
+</style>
+</head>
+<body class="zippo-fixed">
+  
+<header class="global-topbar" aria-label="全局顶栏">
+  <div class="logo">ZIPPO</div>
+  <nav class="open-tabs" id="openTabsBar" aria-label="已打开页面">
+    <button type="button" class="open-tab active" data-id="home" title="价格政策"><span>价格政策</span><span class="tab-close" title="关闭">✕</span></button>
+  </nav>
+  <div class="top-right">
+    <select aria-label="演示角色"><option>品牌运营</option><option>管理员</option></select>
+    <button type="button" class="d05-icon" title="通知" aria-label="通知" style="position:relative" onclick="document.getElementById('toast').textContent='3 条未读通知';document.getElementById('toast').classList.add('show');setTimeout(()=>document.getElementById('toast').classList.remove('show'),1800)"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg><span class="zippo-notify-dot" style="position:absolute;top:6px;right:6px;width:6px;height:6px;border-radius:50%;background:#C8102E"></span></button>
+    <span style="width:28px;height:28px;border-radius:50%;background:#C8102E;display:inline-grid;place-items:center;font-size:12px;font-weight:700;color:#fff" aria-label="账号" title="管理员">管</span>
+  </div>
+</header>
+<div class="brand-stripe" style="height:4px;background:linear-gradient(90deg,#0A0A0A 0%,#0A0A0A 72%,#C8102E 72%,#C8102E 100%)"></div>
+<div class="app">
+    <aside class="sidebar">
+      <nav class="nav">
+        <details class="nav-group" open><summary class="nav-l1">业务管理<span class="nav-chev">▾</span></summary><div class="nav-l2-wrap">
+        <button class="active" data-view="policy"><span>▦</span><span>价格政策</span></button>
+        <button data-view="lists"><span>▤</span><span>价目表</span></button>
+        <button data-view="current"><span>⌕</span><span>当前价格</span></button>
+        <button data-view="minimum"><span>◇</span><span>最低售价</span></button>
+        <button data-view="monitor"><span>⚠</span><span>价格监控</span><span class="count">12</span></button>
+        <button data-view="exemption"><span>✓</span><span>豁免管理</span></button>
+        </div></details><details class="nav-group" open><summary class="nav-l1">系统<span class="nav-chev">▾</span></summary><div class="nav-l2-wrap">
+        <button data-view="org"><span>⚙</span><span>组织价格属性</span></button>
+      </div></details></nav>
+      </aside>
+    <main class="main">
+      <header class="topbar"><div class="crumb">价格管理中心 / <b id="crumbText">价格政策</b></div></header>
+      <div class="workspace">
+        <section class="view active" id="view-policy">
+          <div class="page-head"><div><h1>价格政策</h1><div class="subhead">定义价格类型与适用对象，作为价目表的维护基础。</div></div><div class="actions"><button class="btn">导出</button><button class="btn primary" id="openPolicy">＋ 新建价格政策</button></div></div>
+          <div class="stats"><div class="stat"><div class="label">启用中的价格政策</div><div class="value">18</div><div class="hint up">较上月 +2</div></div><div class="stat"><div class="label">当前生效价目表</div><div class="value">42</div><div class="hint">覆盖 8,642 个 SKU</div></div><div class="stat"><div class="label">待处理破价</div><div class="value">12</div><div class="hint warn">需在今日处理</div></div><div class="stat"><div class="label">有效豁免</div><div class="value">7</div><div class="hint">均设有结束时间</div></div></div>
+          <div class="card"><div class="card-head"><h2>政策列表</h2><div class="actions"><button class="btn">批量停用</button><button class="btn">记录</button></div></div><div class="filters"><div class="field"><label>政策名称</label><input placeholder="输入政策名称或编码" /></div><div class="field"><label>价格类型</label><select><option>全部价格类型</option><option>一级经销商供货价</option><option>二级经销商供货价</option><option>官方零售价</option></select></div><div class="field"><label>适用对象</label><select><option>全部对象</option><option>一级经销商</option><option>二级经销商</option><option>指定店铺</option></select></div><div class="field"><label>状态</label><select><option>全部状态</option><option>启用</option><option>停用</option></select></div><div class="field"><label>&nbsp;</label><button class="btn primary">查询</button><button class="btn" type="button">重置</button></div></div><div class="table-wrap"><table><thead><tr><th>政策名称</th><th>价格类型</th><th>适用对象</th><th>优先级</th><th>当前价目表</th><th>状态</th><th>更新时间</th><th>操作</th></tr></thead><tbody><tr><td><strong>一级经销商标准供货政策</strong><br><small class="muted">POL-001</small></td><td>一级经销商供货价</td><td>一级经销商</td><td class="num">10</td><td>2026 Q3 · V3</td><td><span class="tag green">● 启用</span></td><td>2026-07-30 16:42</td><td><button class="btn text">查看</button><button class="btn text">编辑</button></td></tr><tr><td><strong>二级经销商标准供货政策</strong><br><small class="muted">POL-002</small></td><td>二级经销商供货价</td><td>二级经销商</td><td class="num">20</td><td>2026 Q3 · V2</td><td><span class="tag green">● 启用</span></td><td>2026-07-28 10:18</td><td><button class="btn text">查看</button><button class="btn text">编辑</button></td></tr><tr><td><strong>官方店一口价政策</strong><br><small class="muted">POL-005</small></td><td>官方零售价</td><td>官方店铺</td><td class="num">30</td><td>2026 Q3 · V5</td><td><span class="tag green">● 启用</span></td><td>2026-07-25 09:31</td><td><button class="btn text">查看</button><button class="btn text">编辑</button></td></tr><tr><td><strong>零售商公开价格政策</strong><br><small class="muted">POL-008</small></td><td>建议零售价</td><td>零售商店铺</td><td class="num">40</td><td>2026 Q3 · V1</td><td><span class="tag gray">● 停用</span></td><td>2026-07-20 14:05</td><td><button class="btn text">查看</button><button class="btn text">启用</button></td></tr></tbody></table></div><div class="pager"><span>共 18 条政策</span><div class="pages"><button class="page-btn active">1</button><button class="page-btn">2</button><button class="page-btn">3</button><button class="page-btn">›</button></div></div></div>
+        </section>
+
+        <section class="view" id="view-lists"><div class="page-head"><div><h1>价目表</h1><div class="subhead">以全量或增量方式维护价格，发布后按计划生效。</div></div><div class="actions"><button class="btn">导入 Excel</button><button class="btn">导出</button><button class="btn primary" id="openList">＋ 新建价目表</button></div></div><div class="card"><div class="card-head"><h2>价目表列表</h2><div class="tag gray">共 42 份价目表</div></div><div class="filters"><div class="field"><label>价目表名称</label><input placeholder="输入名称、版本或编码" /></div><div class="field"><label>价格政策</label><select><option>全部政策</option><option>一级经销商标准供货政策</option><option>官方店一口价政策</option></select></div><div class="field"><label>维护方式</label><select><option>全部方式</option><option>全量</option><option>增量</option></select></div><div class="field"><label>状态</label><select><option>全部状态</option><option>草稿</option><option>待生效</option><option>生效中</option><option>已失效</option></select></div><div class="field"><label>&nbsp;</label><button class="btn primary">查询</button><button class="btn" type="button">重置</button></div></div><div class="table-wrap"><table><thead><tr><th>价目表名称</th><th>价格政策</th><th>方式</th><th>版本</th><th>SKU 数</th><th>状态</th><th>生效时间</th><th>操作</th></tr></thead><tbody><tr><td><strong>一级经销商供货价 · 2026 Q3</strong><br><small>PL-2026-Q3-001</small></td><td>一级经销商标准供货政策</td><td><span class="tag gray">全量</span></td><td>V3</td><td class="num">3,486</td><td><span class="tag green">● 生效中</span></td><td>2026-07-01 00:00</td><td><button class="btn text">查看</button><button class="btn text">复制</button></td></tr><tr><td><strong>官方店一口价 · 7月修订</strong><br><small>PL-2026-07-005</small></td><td>官方店一口价政策</td><td><span class="tag amber">增量</span></td><td>V5</td><td class="num">126</td><td><span class="tag amber">● 待生效</span></td><td>2026-08-01 00:00</td><td><button class="btn text">查看</button><button class="btn text">编辑</button></td></tr><tr><td><strong>零售商公开价格 · 草稿</strong><br><small>PL-2026-08-002</small></td><td>零售商公开价格政策</td><td><span class="tag gray">全量</span></td><td>V1</td><td class="num">3,486</td><td><span class="tag gray">● 草稿</span></td><td>未设置</td><td><button class="btn text">再编</button><button class="btn text">校验</button></td></tr></tbody></table></div><div class="pager"><span>共 42 份价目表</span><div class="pages"><button class="page-btn active">1</button><button class="page-btn">2</button><button class="page-btn">3</button><button class="page-btn">›</button></div></div></div></section>
+
+        <section class="view" id="view-current"><div class="page-head"><div><h1>当前价格</h1><div class="subhead">查询当前有效价格、来源价目表和生效记录。</div></div><div class="actions"><button class="btn">导出查询结果</button></div></div><div class="card"><div class="card-head"><h2>当前价格查询</h2><span class="tag gray">数据更新时间：2026-08-03 09:20</span></div><div class="filters"><div class="field"><label>SKU / 商品名称</label><input placeholder="输入 SKU 或商品名称" /></div><div class="field"><label>价格类型</label><select><option>全部价格类型</option><option>一级经销商供货价</option><option>官方零售价</option><option>建议零售价</option></select></div><div class="field"><label>适用对象</label><select><option>全部对象</option><option>一级经销商</option><option>指定经销商</option><option>指定店铺</option></select></div><div class="field"><label>店铺</label><select><option>全部店铺</option><option>ZIPPO 官方旗舰店</option><option>上海经销商天猫店</option></select></div><div class="field"><label>&nbsp;</label><button class="btn primary">查询</button><button class="btn" type="button">重置</button></div></div><div class="table-wrap"><table><thead><tr><th>SKU</th><th>商品名称</th><th>价格类型</th><th>适用对象</th><th>当前价格</th><th>来源价目表</th><th>生效时间</th><th>操作</th></tr></thead><tbody><tr><td><strong>ZIPPO-218</strong></td><td>黑冰经典打火机</td><td>一级经销商供货价</td><td>一级经销商</td><td class="num"><strong>¥168.00</strong></td><td>2026 Q3 · V3</td><td>2026-07-01</td><td><button class="btn text">详情</button><button class="btn text">历史</button></td></tr><tr><td><strong>ZIPPO-218</strong></td><td>黑冰经典打火机</td><td>官方零售价</td><td>ZIPPO 官方旗舰店</td><td class="num"><strong>¥299.00</strong></td><td>官方店 · V5</td><td>2026-08-01</td><td><button class="btn text">详情</button><button class="btn text">历史</button></td></tr><tr><td><strong>ZIPPO-193</strong></td><td>哑光黑经典款</td><td>建议零售价</td><td>零售商店铺</td><td class="num"><strong>¥259.00</strong></td><td>零售商公开价格 · V1</td><td>2026-07-15</td><td><button class="btn text">详情</button><button class="btn text">历史</button></td></tr></tbody></table></div></div></section>
+
+        <section class="view" id="view-minimum"><div class="page-head"><div><h1>最低售价</h1><div class="subhead">维护固定金额、折扣比例和商品类目规则引用。</div></div><div class="actions"><button class="btn">导入</button><button class="btn">导出</button><button class="btn primary">＋ 新建最低售价规则</button></div></div><div class="card"><div class="card-head"><h2>最低售价规则</h2><span class="tag green">启用 36 条</span></div><div class="filters"><div class="field"><label>商品范围</label><input placeholder="SKU、品牌或类目" /></div><div class="field"><label>规则来源</label><select><option>全部来源</option><option>固定金额</option><option>折扣比例</option><option>商品中心类目规则</option></select></div><div class="field"><label>状态</label><select><option>全部状态</option><option>启用</option><option>停用</option></select></div><div class="field"><label>有效期</label><select><option>全部</option><option>当前有效</option><option>即将生效</option></select></div><div class="field"><label>&nbsp;</label><button class="btn primary">查询</button><button class="btn" type="button">重置</button></div></div><div class="table-wrap"><table><thead><tr><th>适用范围</th><th>规则类型</th><th>最低售价</th><th>来源</th><th>有效期</th><th>状态</th><th>更新时间</th><th>操作</th></tr></thead><tbody><tr><td><strong>黑冰系列</strong></td><td>折扣比例</td><td class="num">建议零售价 × 85%</td><td>价格管理中心</td><td>2026-07-01 至长期</td><td><span class="tag green">● 启用</span></td><td>2026-07-28</td><td><button class="btn text">编辑</button><button class="btn text">停用</button></td></tr><tr><td><strong>ZIPPO-193</strong></td><td>固定金额</td><td class="num">¥229.00</td><td>价格管理中心</td><td>2026-08-01 至 2026-09-30</td><td><span class="tag green">● 启用</span></td><td>2026-07-30</td><td><button class="btn text">编辑</button><button class="btn text">停用</button></td></tr><tr><td><strong>联名系列</strong></td><td>类目规则引用</td><td class="num">商品中心规则</td><td>商品中心</td><td>当前有效</td><td><span class="tag amber">● 待确认</span></td><td>2026-07-27</td><td><button class="btn text">引用</button></td></tr></tbody></table></div></div></section>
+
+        <section class="view" id="view-monitor"><div class="page-head"><div><h1>价格监控</h1><div class="subhead">每日检查店铺公开一口价，记录破价事件并跟进处理。</div></div><div class="actions"><button class="btn">导出</button><button class="btn primary">监控规则</button></div></div><div class="stats"><div class="stat"><div class="label">待处理破价</div><div class="value" style="color:var(--red)">12</div><div class="hint warn">较昨日 +3</div></div><div class="stat"><div class="label">今日已处理</div><div class="value">28</div><div class="hint up">处理完成率 70%</div></div><div class="stat"><div class="label">有效豁免</div><div class="value">7</div><div class="hint">均在有效期内</div></div><div class="stat"><div class="label">最近监控</div><div class="value" style="font-size:20px">09:00</div><div class="hint">每日任务已完成</div></div></div><div class="card"><div class="card-head"><h2>破价列表</h2><div class="actions"><button class="btn">全部</button><button class="btn danger">待处理 12</button></div></div><div class="filters"><div class="field"><label>SKU / 店铺</label><input placeholder="输入 SKU 或店铺名称" /></div><div class="field"><label>风险状态</label><select><option>全部状态</option><option>高风险</option><option>中风险</option><option>已处理</option></select></div><div class="field"><label>发现时间</label><select><option>最近 7 天</option><option>今天</option><option>最近 30 天</option></select></div><div class="field"><label>&nbsp;</label><button class="btn primary">查询</button><button class="btn" type="button">重置</button></div></div><div class="table-wrap"><table><thead><tr><th>风险</th><th>SKU / 商品</th><th>店铺</th><th>公开一口价</th><th>最低售价</th><th>状态</th><th>最近发现</th><th>操作</th></tr></thead><tbody><tr><td><span class="tag red">⚠ 高风险</span></td><td><strong>ZIPPO-193</strong><br><small>哑光黑经典款</small></td><td>经销商 A · 京东店</td><td class="num">¥199.00</td><td class="num">¥229.00</td><td><span class="tag red">待处理</span></td><td>今天 08:52</td><td><button class="btn text">详情</button><button class="btn text">通知</button></td></tr><tr><td><span class="tag amber">⚠ 中风险</span></td><td><strong>ZIPPO-218</strong><br><small>黑冰经典打火机</small></td><td>零售商 B · 天猫店</td><td class="num">¥279.00</td><td class="num">¥289.00</td><td><span class="tag amber">待处理</span></td><td>今天 08:50</td><td><button class="btn text">详情</button><button class="btn text">通知</button></td></tr><tr><td><span class="tag green">✓ 正常</span></td><td><strong>ZIPPO-193</strong><br><small>哑光黑经典款</small></td><td>经销商 C · 拼多多店</td><td class="num">¥229.00</td><td class="num">¥229.00</td><td><span class="tag green">已恢复</span></td><td>昨天 18:22</td><td><button class="btn text">详情</button></td></tr></tbody></table></div><div class="pager"><span>共 40 条事件</span><div class="pages"><button class="page-btn active">1</button><button class="page-btn">2</button><button class="page-btn">›</button></div></div></section>
+
+        <section class="view" id="view-exemption"><div class="page-head"><div><h1>豁免管理</h1><div class="subhead">处理店铺提交的限时豁免申请，到期后自动恢复监控。</div></div><div class="actions"><button class="btn">导出记录</button></div></div><div class="card"><div class="card-head"><h2>豁免申请</h2><span class="tag amber">待审核 4</span></div><div class="filters"><div class="field"><label>申请编号 / SKU</label><input placeholder="输入申请编号或 SKU" /></div><div class="field"><label>状态</label><select><option>全部状态</option><option>待审核</option><option>生效中</option><option>已失效</option><option>已驳回</option></select></div><div class="field"><label>申请组织</label><select><option>全部组织</option><option>经销商 A</option><option>零售商 B</option></select></div><div class="field"><label>时间范围</label><select><option>最近 30 天</option><option>最近 7 天</option></select></div><div class="field"><label>&nbsp;</label><button class="btn primary">查询</button><button class="btn" type="button">重置</button></div></div><div class="table-wrap"><table><thead><tr><th>申请编号</th><th>SKU / 店铺</th><th>申请原因</th><th>有效期</th><th>申请人</th><th>状态</th><th>提交时间</th><th>操作</th></tr></thead><tbody><tr><td><strong>EX-20260803-004</strong></td><td>ZIPPO-193<br><small>经销商 A · 京东店</small></td><td>授权经营安排</td><td>08-03 至 08-10</td><td>李明</td><td><span class="tag amber">待审核</span></td><td>今天 08:58</td><td><button class="btn text">审核</button><button class="btn text">详情</button></td></tr><tr><td><strong>EX-20260802-011</strong></td><td>ZIPPO-218<br><small>零售商 B · 天猫店</small></td><td>门店整改期</td><td>08-02 至 08-05</td><td>王芳</td><td><span class="tag green">生效中</span></td><td>昨天 15:22</td><td><button class="btn text">详情</button><button class="btn text">终止</button></td></tr><tr><td><strong>EX-20260728-006</strong></td><td>ZIPPO-193<br><small>经销商 C · 拼多多店</small></td><td>证明材料不足</td><td>07-28 至 07-30</td><td>周凯</td><td><span class="tag gray">已失效</span></td><td>07-28 11:04</td><td><button class="btn text">详情</button></td></tr></tbody></table></div></div></section>
+
+        <section class="view" id="view-org"><div class="page-head"><div><h1>组织价格属性</h1><div class="subhead">引用组织中心数据，维护经销商等级、官方店和纳入价格管理范围。</div></div><div class="actions"><button class="btn">导出</button><button class="btn primary">同步组织数据</button></div></div><div class="card"><div class="card-head"><h2>组织属性列表</h2><span class="tag gray">来源：组织中心</span></div><div class="filters"><div class="field"><label>组织编码 / 名称</label><input placeholder="输入组织编码或名称" /></div><div class="field"><label>组织类型</label><select><option>全部类型</option><option>经销商</option><option>店铺</option><option>官方直营</option></select></div><div class="field"><label>经销商等级</label><select><option>全部等级</option><option>一级经销商</option><option>二级经销商</option><option>不适用</option></select></div><div class="field"><label>纳入管理</label><select><option>全部</option><option>是</option><option>否</option></select></div><div class="field"><label>&nbsp;</label><button class="btn primary">查询</button><button class="btn" type="button">重置</button></div></div><div class="table-wrap"><table><thead><tr><th>组织编码</th><th>组织名称</th><th>组织类型</th><th>经销商等级</th><th>官方店</th><th>纳入管理</th><th>最后同步</th><th>操作</th></tr></thead><tbody><tr><td><strong>ORG-1001</strong></td><td>上海经销商 A</td><td>经销商</td><td>一级经销商</td><td><span class="tag gray">否</span></td><td><span class="tag green">是</span></td><td>今天 09:00</td><td><button class="btn text">编辑</button></td></tr><tr><td><strong>ORG-2008</strong></td><td>ZIPPO 官方旗舰店</td><td>店铺</td><td>不适用</td><td><span class="tag gray">是</span></td><td><span class="tag green">是</span></td><td>今天 09:00</td><td><button class="btn text">编辑</button></td></tr><tr><td><strong>ORG-3012</strong></td><td>零售商 B 京东店</td><td>店铺</td><td>不适用</td><td><span class="tag gray">否</span></td><td><span class="tag gray">否</span></td><td>今天 09:00</td><td><button class="btn text">编辑</button></td></tr></tbody></table></div></div></section>
+      </div>
+    </main>
+  </div>
+  <div class="modal-backdrop" id="modal"><div class="modal"><div class="modal-head"><h3 id="modalTitle">新建价格政策</h3><button class="icon-btn" id="closeModal">×</button></div><div class="modal-body"><div class="modal-grid"><div class="field"><label>政策名称</label><input placeholder="例如：一级经销商标准供货政策" /></div><div class="field"><label>价格类型</label><select><option>请选择价格类型</option><option>一级经销商供货价</option><option>二级经销商供货价</option><option>官方零售价</option></select></div><div class="field"><label>适用对象</label><select><option>请选择适用对象</option><option>一级经销商</option><option>二级经销商</option><option>指定经销商</option><option>指定店铺</option></select></div><div class="field"><label>价格优先级</label><input type="number" placeholder="数字越小优先级越高" /></div></div><div class="field"><label>备注</label><input placeholder="补充该政策的业务说明" /></div></div><div class="modal-foot"><button class="btn" id="cancelModal">取消</button><button class="btn primary" id="saveModal">保存草稿</button></div></div></div>
+  <div class="toast" id="toast">已保存为草稿</div>
+  <script>
+    if (new URLSearchParams(location.search).get('capture') === '1') document.body.classList.add('capture');
+    const names = { policy: '价格政策', lists: '价目表', current: '当前价格', minimum: '最低售价', monitor: '价格监控', exemption: '豁免管理', org: '组织价格属性' };
+    const show = key => { document.querySelectorAll('.view').forEach(v => v.classList.remove('active')); document.getElementById('view-' + key).classList.add('active'); document.querySelectorAll('.nav button').forEach(b => b.classList.toggle('active', b.dataset.view === key)); document.getElementById('crumbText').textContent = names[key]; };
+    document.querySelectorAll('.nav button').forEach(btn => btn.addEventListener('click', () => show(btn.dataset.view)));
+    const modal = document.getElementById('modal');
+    const open = title => { document.getElementById('modalTitle').textContent = title; modal.classList.add('open'); };
+    document.getElementById('openPolicy').addEventListener('click', () => open('新建价格政策'));
+    document.getElementById('openList').addEventListener('click', () => open('新建价目表'));
+    document.getElementById('closeModal').addEventListener('click', () => modal.classList.remove('open'));
+    document.getElementById('cancelModal').addEventListener('click', () => modal.classList.remove('open'));
+    document.getElementById('saveModal').addEventListener('click', () => { modal.classList.remove('open'); const toast = document.getElementById('toast'); toast.classList.add('show'); setTimeout(() => toast.classList.remove('show'), 1800); });
+  </script>
+
+<script>
+(function(){
+  function ensureTabs(rootLabel, tabDefs){
+    const bar = document.getElementById('openTabsBar');
+    if(!bar) return;
+    let tabs = tabDefs.slice();
+    let active = tabs[0] && tabs[0].id;
+    function render(){
+      bar.innerHTML = tabs.map(t => {
+        const act = t.id===active ? ' active' : '';
+        return '<button type="button" class="open-tab'+act+'" data-id="'+t.id+'" title="'+t.label+'"><span>'+t.label+'</span><span class="tab-close" data-close="'+t.id+'" title="关闭">✕</span></button>';
+      }).join('');
+      bar.querySelectorAll('.open-tab').forEach(btn=>{
+        btn.addEventListener('click', (e)=>{
+          if(e.target && e.target.getAttribute('data-close')) return;
+          active = btn.getAttribute('data-id');
+          const t = tabs.find(x=>x.id===active);
+          if(t && t.onActivate) t.onActivate();
+          render();
+        });
+      });
+      bar.querySelectorAll('[data-close]').forEach(x=>{
+        x.addEventListener('click', (e)=>{
+          e.stopPropagation();
+          const id = x.getAttribute('data-close');
+          if(tabs.length<=1) return;
+          const i = tabs.findIndex(t=>t.id===id);
+          if(i<0) return;
+          tabs.splice(i,1);
+          if(active===id) active = tabs[Math.max(0,i-1)].id;
+          render();
+        });
+      });
+    }
+    window.__zippoOpenTab = function(id, label, onActivate){
+      let t = tabs.find(x=>x.id===id);
+      if(!t){ t={id,label,onActivate}; tabs.push(t); }
+      else { t.label=label; if(onActivate) t.onActivate=onActivate; }
+      active=id; if(onActivate) onActivate(); render();
+    };
+    render();
+  }
+  window.__zippoEnsureTabs = ensureTabs;
+})();
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  if (window.__zippoEnsureTabs) {
+    window.__zippoEnsureTabs('价格政策', [{ id:'home', label:'价格政策' }]);
+  }
+  document.querySelectorAll('.pagination, .pager').forEach(function(el){
+    if (el.querySelector('.page-size-select')) return;
+    var span = el.querySelector('span') || el.firstElementChild;
+    var sel = document.createElement('select');
+    sel.className = 'page-size-select';
+    sel.setAttribute('aria-label','每页条数');
+    sel.innerHTML = '<option value="20" selected>20条/页</option><option value="50">50条/页</option><option value="100">100条/页</option>';
+    if (span && span.parentNode === el) el.insertBefore(sel, span.nextSibling);
+    else el.appendChild(sel);
+  });
+});
+</script>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  document.querySelectorAll('.nav button[data-view]').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var id = btn.getAttribute('data-view');
+      var label = (btn.querySelectorAll('span')[1]||btn).textContent.trim().replace(/\d+/g,'').trim() || id;
+      if (typeof show === 'function') show(id);
+      if (window.__zippoOpenTab) window.__zippoOpenTab('v-'+id, label, function(){ if (typeof show==='function') show(id); });
+    });
+  });
+});
+</script>
+
+
+<script>
+/* ZIPPO_MOCK_LIST_PAD: expand first large table to 120 rows + real pager */
+(function(){
+  const TARGET = 120;
+  function padTable(table){
+    if(!table || table.dataset.mockPadded) return;
+    const tb = table.tBodies[0];
+    if(!tb || !tb.rows.length) return;
+    const seed = [...tb.rows].map(r => r.outerHTML);
+    while(tb.rows.length < TARGET){
+      const html = seed[tb.rows.length % seed.length]
+        .replace(/>([^<]{0,40})</, (m,g)=> '>'+g.replace(/(\d+)/, n => String(+n+tb.rows.length))+'<');
+      tb.insertAdjacentHTML('beforeend', html);
+    }
+    table.dataset.mockPadded = '1';
+    wirePager(table);
+  }
+  function wirePager(table){
+    let page=1, size=20;
+    const card = table.closest('.card') || table.closest('.view') || table.parentElement;
+    if (card) card.classList.add('has-table');
+    // remove pagers wrongly nested inside table-wrap
+    const tw = table.closest('.table-wrap');
+    if (tw) tw.querySelectorAll('.pager, .pagination').forEach(el => el.remove());
+    let pager = Array.from(card.querySelectorAll(':scope > .pager, :scope > .pagination')).pop();
+    if(!pager){
+      pager = document.createElement('div');
+      pager.className = 'pager pagination zippo-pager-sticky';
+      card.appendChild(pager);
+    }
+    const all = [...table.tBodies[0].rows];
+    function render(){
+      const pages = Math.max(1, Math.ceil(all.length/size));
+      if(page>pages) page=pages;
+      all.forEach((r,i)=>{ r.style.display = (i>=(page-1)*size && i<page*size) ? '' : 'none'; });
+      pager.innerHTML = '<span>共 '+all.length+' 条 · 第 '+page+'/'+pages+' 页</span>'+
+        '<div style="display:flex;align-items:center;gap:8px">'+
+        '<select aria-label="每页条数"><option value="20">20条/页</option><option value="50">50条/页</option><option value="100">100条/页</option></select>'+
+        '<button type="button" class="pg-prev">上一页</button><button type="button" class="pg-next">下一页</button></div>';
+      const sel = pager.querySelector('select'); sel.value = String(size);
+      sel.onchange = ()=>{ size=+sel.value; page=1; render(); };
+      pager.querySelector('.pg-prev').onclick = ()=>{ page=Math.max(1,page-1); render(); };
+      pager.querySelector('.pg-next').onclick = ()=>{ page=Math.min(pages,page+1); render(); };
+    }
+    render();
+  }
+  document.addEventListener('DOMContentLoaded', function(){
+    document.querySelectorAll('.view .table-wrap table').forEach((tb)=>{
+      padTable(tb);
+    });
+  });
+})();
+</script>
+
+<script src="view-guard.js"></script>
+</body>
+
+<script>
+/* ZIPPO_GLOBAL_SHELL_V2 */
+(function(){
+  if(window.__zippoShellV2) return;
+  window.__zippoShellV2 = 1;
+  document.querySelectorAll('.card').forEach(function(card){
+    if(card.querySelector('.table-wrap table')) card.classList.add('has-table');
+  });
+  document.querySelectorAll('.pager, .pagination').forEach(function(p){
+    p.classList.add('zippo-pager-sticky');
+  });
+  function wrapAvatar(el){
+    if(!el || el.closest('.zippo-user-menu')) return;
+    var wrap = document.createElement('div');
+    wrap.className = 'zippo-user-menu';
+    var panel = document.createElement('div');
+    panel.className = 'zippo-user-menu-panel';
+    panel.innerHTML = '<button type="button" data-act="profile">个人中心</button><button type="button" data-act="logout">退出登录</button>';
+    el.parentNode.insertBefore(wrap, el);
+    wrap.appendChild(el);
+    wrap.appendChild(panel);
+    el.style.cursor = 'pointer';
+    el.addEventListener('click', function(e){ e.stopPropagation(); wrap.classList.toggle('open'); });
+    panel.querySelector('[data-act=profile]').onclick = function(){
+      wrap.classList.remove('open');
+      var t=document.getElementById('toast'); if(t){t.textContent='个人中心';t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1600);} else alert('个人中心');
+    };
+    panel.querySelector('[data-act=logout]').onclick = function(){
+      wrap.classList.remove('open');
+      var t=document.getElementById('toast'); if(t){t.textContent='已退出登录';t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1600);} else alert('已退出登录');
+    };
+    document.addEventListener('click', function(){ wrap.classList.remove('open'); });
+  }
+  document.querySelectorAll('[aria-label="账号"], [title="管理员"], .d05-avatar, .d03-avatar, .zippo-avatar-trigger').forEach(wrapAvatar);
+  document.querySelectorAll('.top-right span[title], .global-topbar .top-right > span[style*="border-radius:50%"]').forEach(function(el){
+    if(el.textContent && el.textContent.length<=2) wrapAvatar(el);
+  });
+  document.querySelectorAll('.w-8.h-8.rounded-full, .rounded-full.bg-primary').forEach(function(el){
+    if(el.closest('header') && !el.closest('.zippo-user-menu')) wrapAvatar(el);
+  });
+})();
+</script>
+
+</html>
