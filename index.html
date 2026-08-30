@@ -1,43 +1,60 @@
 ﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>鍟嗗搧涓績 鍘熷瀷</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>商品中心 原型</title>
   <style>
-    :root { --black:#0a0a0a; --red:#c8102e; --gray-1:#f0f0f0; --gray-2:#6b6b6b; --white:#fff; }
-    body { margin:0; min-height:100vh; font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif; background:#f0f0f0; }
-    header { background:#0a0a0a; color:#fff; padding:28px 24px; border-bottom:4px solid #c8102e; }
-    header h1 { margin:0; font-size:1.5rem; }
-    main { max-width:960px; margin:0 auto; padding:24px 16px; }
-    .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:12px; }
-    .card { display:block; background:#fff; border:1px solid #d4d4d4; border-radius:10px; padding:16px; text-decoration:none; color:inherit; }
-    .code { color:#c8102e; font-size:.75rem; font-weight:700; }
-    .title { font-weight:600; margin:8px 0 4px; }
-    .desc { font-size:.8125rem; color:#6b6b6b; }
+    :root { --black: #0a0a0a; --red: #c8102e; --gray-1: #f0f0f0; --gray-2: #6b6b6b; --white: #fff; }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; min-height: 100vh;
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+      background: var(--gray-1); color: var(--black);
+    }
+    header {
+      background: var(--black); color: var(--white);
+      padding: 28px 24px 24px; border-bottom: 4px solid var(--red);
+    }
+    header h1 { margin: 0; font-size: 1.5rem; font-weight: 700; }
+    main { max-width: 960px; margin: 0 auto; padding: 24px 16px 48px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+    .card {
+      display: block; background: var(--white); border: 1px solid #d4d4d4;
+      border-radius: 10px; padding: 16px 18px; text-decoration: none; color: inherit;
+    }
+    .card:hover { border-color: var(--red); box-shadow: 0 4px 16px rgba(200,16,46,.12); }
+    .code { display: inline-block; font-size: 0.75rem; font-weight: 700; color: var(--red); background: #fde8ec; padding: 2px 8px; border-radius: 4px; margin-bottom: 8px; }
+    .title { font-size: 1rem; font-weight: 600; margin-bottom: 6px; }
+    .desc { font-size: 0.8125rem; color: var(--gray-2); line-height: 1.5; }
   </style>
 </head>
 <body>
-  <header><h1>鍟嗗搧涓績 鍘熷瀷</h1></header>
+  <header><h1>商品中心 原型</h1></header>
   <main><div class="grid" id="list"></div></main>
   <script src="view-guard.js"></script>
   <script>
     const modules = [
-      { id:'d01', code:'D01+D13', title:'鐧诲綍宸ヤ綔鍙颁笌绯荤粺璁剧疆', desc:'鐧诲綍 / 宸ヤ綔鍙?/ 绯荤粺璁剧疆' },
-      { id:'d02', code:'D02', title:'閫夊搧涓績', desc:'閫夊搧鎻愭姤' },
-      { id:'d03', code:'D03', title:'鐏垫劅鍒涙剰', desc:'鐏垫劅鍒涙剰搴? },
-      { id:'d04', code:'D04', title:'宸ヨ壓鐭ヨ瘑搴?, desc:'宸ヨ壓鐭ヨ瘑搴? },
-      { id:'d05', code:'D05', title:'浠锋牸绠＄悊', desc:'浠风洰琛?/ 鐩戞帶' },
-      { id:'d06', code:'D06', title:'鍟嗗搧绠＄悊', desc:'鍟嗗搧涓绘暟鎹? },
-      { id:'d07', code:'D07', title:'绱犳潗绠＄悊', desc:'绱犳潗绌洪棿' },
-      { id:'d08', code:'D08', title:'娓犻亾绠＄悊', desc:'娓犻亾閰嶇疆' },
-      { id:'d09', code:'D09', title:'閫€甯傜鐞?, desc:'閫€甯?/ 澶嶆椿' },
-      { id:'d10', code:'D10', title:'娑堟伅閫氱煡', desc:'娑堟伅涓庡叕鍛? },
-      { id:'d11', code:'D11', title:'瀹℃壒涓績', desc:'寰呭姙 / 娴佺▼' },
-      { id:'d12', code:'D12', title:'缁勭粐鏉冮檺', desc:'缁勭粐涓庢潈闄? },
+      { id: 'd01', code: 'D01+D13', title: '登录工作台与系统设置', desc: '登录 / 工作台 / 系统设置' },
+      { id: 'd02', code: 'D02', title: '选品中心', desc: '选品提报与数据洞察' },
+      { id: 'd03', code: 'D03', title: '灵感创意', desc: '灵感创意库' },
+      { id: 'd04', code: 'D04', title: '工艺知识库', desc: '工艺知识库' },
+      { id: 'd05', code: 'D05', title: '价格管理', desc: '价格政策 / 价目表' },
+      { id: 'd06', code: 'D06', title: '商品管理', desc: '商品主数据' },
+      { id: 'd07', code: 'D07', title: '素材管理', desc: '素材空间交互原型' },
+      { id: 'd08', code: 'D08', title: '渠道管理', desc: '渠道配置与同步' },
+      { id: 'd09', code: 'D09', title: '退市管理', desc: '退市申请 / 复活' },
+      { id: 'd10', code: 'D10', title: '消息通知', desc: '消息与公告' },
+      { id: 'd11', code: 'D11', title: '审批中心', desc: '待办 / 流程' },
+      { id: 'd12', code: 'D12', title: '组织权限', desc: '组织与权限' },
     ];
-    document.getElementById('list').innerHTML = modules.map(m =>
-      `<a class="card" href="viewer.html?id=${m.id}"><div class="code">${m.code}</div><div class="title">${m.title}</div><div class="desc">${m.desc}</div></a>`
-    ).join('');
+    document.getElementById('list').innerHTML = modules.map(m => `
+      <a class="card" href="viewer.html?id=${m.id}">
+        <span class="code">${m.code}</span>
+        <div class="title">${m.title}</div>
+        <div class="desc">${m.desc}</div>
+      </a>
+    `).join('');
   </script>
 </body>
 </html>

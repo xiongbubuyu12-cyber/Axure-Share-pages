@@ -1,39 +1,52 @@
 ﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>鍟嗗搧涓績 鍘熷瀷</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>商品中心 原型</title>
   <style>
-    html,body { margin:0; height:100%; overflow:hidden; background:#0a0a0a; font-family:sans-serif; }
-    .bar { height:44px; display:flex; align-items:center; gap:12px; padding:0 14px; background:#0a0a0a; color:#fff; border-bottom:3px solid #c8102e; }
-    .bar a { color:rgba(255,255,255,.85); text-decoration:none; }
-    .bar .title { flex:1; font-size:.875rem; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-    iframe { width:100%; height:calc(100vh - 44px); border:0; }
+    :root { --black: #0a0a0a; --red: #c8102e; --white: #fff; }
+    html, body { margin: 0; height: 100%; overflow: hidden; background: var(--black); font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif; }
+    .bar {
+      height: 44px; display: flex; align-items: center; gap: 12px; padding: 0 14px;
+      background: var(--black); color: var(--white); border-bottom: 3px solid var(--red);
+    }
+    .bar a { color: rgba(255,255,255,.85); text-decoration: none; font-size: 0.875rem; }
+    .bar .title { flex: 1; font-size: 0.875rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    iframe { display: block; width: 100%; height: calc(100vh - 44px); border: 0; background: #fff; }
   </style>
 </head>
 <body>
-  <div class="bar"><a href="index.html">鈫?杩斿洖</a><span class="title" id="title"></span></div>
-  <iframe id="frame" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals"></iframe>
+  <div class="bar">
+    <a href="index.html">← 返回目录</a>
+    <span class="title" id="title">加载中…</span>
+  </div>
+  <iframe id="frame" title="原型预览" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals"></iframe>
   <script src="view-guard.js"></script>
   <script>
     var modules = {
-      d01:{ title:'鐧诲綍宸ヤ綔鍙颁笌绯荤粺璁剧疆', file:'D01+D13-鐧诲綍宸ヤ綔鍙颁笌绯荤粺璁剧疆-鍘熷瀷婕旂ず-榛戠孩鍝佺墝鐗?html' },
-      d02:{ title:'閫夊搧涓績', file:'D02-閫夊搧涓績-鍘熷瀷婕旂ず-榛戠孩鍝佺墝鐗?html' },
-      d03:{ title:'鐏垫劅鍒涙剰', file:'D03-鐏垫劅鍒涙剰-鍘熷瀷婕旂ず-榛戠孩鍝佺墝鐗?html' },
-      d04:{ title:'宸ヨ壓鐭ヨ瘑搴?, file:'D04-宸ヨ壓鐭ヨ瘑-鍘熷瀷婕旂ず-榛戠孩鍝佺墝鐗?html' },
-      d05:{ title:'浠锋牸绠＄悊', file:'D05-浠锋牸绠＄悊-鍘熷瀷婕旂ず-榛戠孩鍝佺墝鐗?html' },
-      d06:{ title:'鍟嗗搧绠＄悊', file:'D06-鍟嗗搧绠＄悊-鍘熷瀷婕旂ず-榛戠孩鍝佺墝鐗?html' },
-      d07:{ title:'绱犳潗绠＄悊', file:'D07-绱犳潗绌洪棿_浜や簰鍘熷瀷-榛戠孩鍝佺墝鐗?html' },
-      d08:{ title:'娓犻亾绠＄悊', file:'D08-娓犻亾绠＄悊-鍘熷瀷婕旂ず-榛戠孩鍝佺墝鐗?html' },
-      d09:{ title:'閫€甯傜鐞?, file:'D09-閫€甯傜鐞?鍘熷瀷婕旂ず-榛戠孩鍝佺墝鐗?html' },
-      d10:{ title:'娑堟伅閫氱煡', file:'D10-娑堟伅閫氱煡-鍘熷瀷婕旂ず-榛戠孩鍝佺墝鐗?html' },
-      d11:{ title:'瀹℃壒涓績', file:'D11-瀹℃壒涓績-鍘熷瀷婕旂ず-榛戠孩鍝佺墝鐗?html' },
-      d12:{ title:'缁勭粐鏉冮檺', file:'D12-缁勭粐鏉冮檺-鍘熷瀷婕旂ず-榛戠孩鍝佺墝鐗?html' }
+      d01: { title: '登录工作台与系统设置', file: 'D01+D13-登录工作台与系统设置-原型演示-黑红品牌版.html' },
+      d02: { title: '选品中心', file: 'D02-选品中心-原型演示-黑红品牌版.html' },
+      d03: { title: '灵感创意', file: 'D03-灵感创意-原型演示-黑红品牌版.html' },
+      d04: { title: '工艺知识库', file: 'D04-工艺知识-原型演示-黑红品牌版.html' },
+      d05: { title: '价格管理', file: 'D05-价格管理-原型演示-黑红品牌版.html' },
+      d06: { title: '商品管理', file: 'D06-商品管理-原型演示-黑红品牌版.html' },
+      d07: { title: '素材管理', file: 'D07-素材空间_交互原型-黑红品牌版.html' },
+      d08: { title: '渠道管理', file: 'D08-渠道管理-原型演示-黑红品牌版.html' },
+      d09: { title: '退市管理', file: 'D09-退市管理-原型演示-黑红品牌版.html' },
+      d10: { title: '消息通知', file: 'D10-消息通知-原型演示-黑红品牌版.html' },
+      d11: { title: '审批中心', file: 'D11-审批中心-原型演示-黑红品牌版.html' },
+      d12: { title: '组织权限', file: 'D12-组织权限-原型演示-黑红品牌版.html' }
     };
     var id = (new URLSearchParams(location.search).get('id') || '').toLowerCase();
     var mod = modules[id];
-    if (!mod) location.replace('index.html');
-    else { document.getElementById('title').textContent = mod.title; sessionStorage.setItem('pim-viewer','1'); document.getElementById('frame').src = mod.file; }
+    if (!mod) {
+      location.replace('index.html');
+    } else {
+      document.getElementById('title').textContent = mod.title;
+      sessionStorage.setItem('pim-viewer', '1');
+      document.getElementById('frame').src = mod.file;
+    }
   </script>
 </body>
 </html>
