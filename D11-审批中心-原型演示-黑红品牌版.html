@@ -241,9 +241,9 @@ aside nav > .mt-6.px-3.py-3.rounded-lg {
       </nav>
 <div class="flex items-center gap-3">
       <div class="hidden sm:flex items-center gap-2 text-xs text-white/70">
-        <span>演示角色</span>
-        <select x-model="role" @change="onRoleChange()" class="border border-white/20 rounded-md px-2 py-1.5 text-sm bg-black text-white focus:outline-none focus:ring-2 focus:ring-primary/50">
-          <option value="BRAND_HQ">品牌总部</option>
+        <span>当前角色</span>
+        <select x-model="role" @change="onRoleChange()" class="border border-white/20 rounded-md px-2 py-1.5 text-sm bg-black text-white focus:outline-none focus:ring-2 focus:ring-primary/50" title="对齐 D12：仅当前活跃角色生效，待办按组织+角色匹配（非并集）">
+          <option value="BRAND_HQ">品牌管理员</option>
           <option value="BRAND_OPERATOR">品牌业务</option>
           <option value="PLATFORM_ADMIN">平台管理员</option>
           <option value="DISTRIBUTOR">经销商</option>
@@ -448,7 +448,7 @@ aside nav > .mt-6.px-3.py-3.rounded-lg {
       <section x-show="page==='query'" class="space-y-4">
         <div x-show="!canQuery" class="bg-white rounded-lg border border-line-soft p-10 text-center">
           <div class="text-ink-secondary font-medium mb-1">无权限</div>
-          <div class="text-sm text-ink-tertiary">审批单查询仅开放给平台管理员 / 品牌总部。请切换演示角色体验。</div>
+          <div class="text-sm text-ink-tertiary">审批单查询仅开放给平台管理员 / 品牌管理员。请切换当前角色体验（待办按组织+当前角色匹配）。</div>
         </div>
         <div x-show="canQuery" class="bg-white rounded-lg shadow-card border border-line-soft">
           <div class="px-5 py-4 border-b border-line-soft">
@@ -961,7 +961,7 @@ aside nav > .mt-6.px-3.py-3.rounded-lg {
 
         get currentUser() { return users[this.role]; },
         get roleLabel() {
-          return ({ BRAND_HQ: '品牌总部', BRAND_OPERATOR: '品牌业务', PLATFORM_ADMIN: '平台管理员', DISTRIBUTOR: '经销商' })[this.role];
+          return ({ BRAND_HQ: '品牌管理员', BRAND_OPERATOR: '品牌业务', PLATFORM_ADMIN: '平台管理员', DISTRIBUTOR: '经销商' })[this.role];
         },
         get canQuery() { return this.role === 'BRAND_HQ' || this.role === 'PLATFORM_ADMIN'; },
         get canForceReject() { return this.role === 'BRAND_HQ' || this.role === 'PLATFORM_ADMIN'; },
@@ -1091,7 +1091,7 @@ aside nav > .mt-6.px-3.py-3.rounded-lg {
         },
         onRoleChange() {
           if (this.page === 'query' && !this.canQuery) this.page = 'todo';
-          this.toast('已切换为「' + this.roleLabel + '」');
+          this.toast('已切换当前角色「' + this.roleLabel + '」，待办可见范围已立即刷新（非角色并集）');
         },
         refreshList() {
           this.loading = true;

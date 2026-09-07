@@ -1,25 +1,22 @@
 <!doctype html>
 <html lang="zh-CN">
 <head>
-<!-- poc-embed-guest -->
-<script src="poc-embed-guest.js"></script>
-
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>价格管理中心 · 高保真原型</title>
   <style>
     :root {
-      --black: #0A0A0A;
+      --black: #171717;
       --ink: #252525;
       --muted: #6b6b6b;
       --line: #e7e7e7;
       --line-strong: #d4d4d4;
       --surface: #ffffff;
-      --canvas: #EDEDED;
+      --canvas: #f5f5f5;
       --soft: #fafafa;
-      --red: #C8102E;
+      --red: #c5162e;
       --red-dark: #a30e22;
-      --red-soft: #FDE8EC;
+      --red-soft: #fff0f2;
       --green: #237a4b;
       --green-soft: #edf8f1;
       --amber: #9b5b00;
@@ -34,26 +31,26 @@
     button, input, select { font: inherit; }
     button { cursor: pointer; }
     .app { display: grid; grid-template-columns: 232px 1fr; min-height: 100vh; }
-    .sidebar { background: #0A0A0A; color: #fff; padding: 8px 6px; display: flex; flex-direction: column; border-right: 0; }
-    .brand { display: none; }
-    .brand-mark, .brand strong, .brand small { display: none; }
-    .nav { margin-top: 0; display: flex; flex-direction: column; gap: 4px; flex: 1 1 auto; min-height: 0; overflow-y: auto; align-content: flex-start; padding: 10px 8px; }
-    .nav-label { color: #8f8f8f; font-size: 11px; letter-spacing: .06em; padding: 10px 8px 4px; font-weight: 600; margin-top: 4px; }
-    .nav-label:first-child { margin-top: 0; }
-    .nav button { border: 0; background: transparent; color: #cfcfcf; text-align: left; padding: 0 12px; height: 40px; min-height: 40px; max-height: 40px; margin: 0; border-radius: 4px; display: flex; align-items: center; gap: 10px; width: 100%; font-size: 13px; line-height: 1; border-left: 3px solid transparent; box-shadow: none; flex-shrink: 0; }
-    .nav button:hover { background: #2d2d2d; color: #fff; }
-    .nav button.active { background: #2d2d2d; color: #fff; font-weight: 600; border-left-color: var(--red); }
+    .sidebar { background: var(--black); color: #fff; padding: 22px 14px; display: flex; flex-direction: column; }
+    .brand { display: flex; align-items: center; gap: 10px; padding: 0 12px 26px; border-bottom: 1px solid #363636; }
+    .brand-mark { width: 30px; height: 30px; border-radius: 7px; display: grid; place-items: center; background: var(--red); color: white; font-weight: 800; }
+    .brand strong { font-size: 15px; letter-spacing: .04em; }
+    .brand small { display: block; color: #a7a7a7; font-size: 11px; margin-top: 3px; }
+    .nav { margin-top: 22px; display: grid; gap: 5px; }
+    .nav-label { color: #8f8f8f; font-size: 11px; letter-spacing: .08em; padding: 12px 12px 7px; text-transform: uppercase; }
+    .nav button { border: 0; background: transparent; color: #cfcfcf; text-align: left; padding: 11px 12px; border-radius: 6px; display: flex; align-items: center; gap: 10px; }
+    .nav button:hover, .nav button.active { background: #2d2d2d; color: white; }
+    .nav button.active { box-shadow: inset 3px 0 0 var(--red); }
     .nav .count { margin-left: auto; background: #434343; color: #fff; border-radius: 10px; padding: 1px 7px; font-size: 11px; }
-    .nav button.active .count { background: #C8102E; color: #fff; }
-    .sidebar-foot { flex: 0 0 auto; margin-top: auto; color: #999; border-top: 1px solid #363636; padding: 16px 12px 0; font-size: 12px; line-height: 1.7; }
-    .main { min-width: 0; display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
-    .topbar { height: 48px; background: var(--surface); border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; padding: 0 24px; flex: 0 0 auto; }
+    .sidebar-foot { margin-top: auto; color: #999; border-top: 1px solid #363636; padding: 16px 12px 0; font-size: 12px; line-height: 1.7; }
+    .main { min-width: 0; }
+    .topbar { height: 62px; background: var(--surface); border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; padding: 0 30px; }
     .crumb { color: var(--muted); font-size: 13px; }
     .crumb b { color: var(--ink); font-weight: 600; }
     .top-actions { display: flex; align-items: center; gap: 14px; }
     .icon-btn { width: 32px; height: 32px; border: 1px solid var(--line); background: white; border-radius: 6px; color: var(--muted); }
     .avatar { width: 31px; height: 31px; border-radius: 50%; background: var(--black); color: white; display: grid; place-items: center; font-size: 12px; font-weight: 700; }
-    .workspace { padding: 20px 24px 32px; max-width: none; margin: 0; width: 100%; box-sizing: border-box; }
+    .workspace { padding: 28px 30px 42px; max-width: 1520px; margin: 0 auto; }
     .page-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 18px; margin-bottom: 24px; }
     h1 { font-size: 24px; margin: 0; letter-spacing: -.02em; }
     .subhead { color: var(--muted); margin-top: 8px; }
@@ -90,7 +87,7 @@
     .tag.green { background: var(--green-soft); color: var(--green); }
     .tag.red { background: var(--red-soft); color: var(--red); }
     .tag.amber { background: var(--amber-soft); color: var(--amber); }
-    .tag.gray-alt { background: var(--blue-soft); color: var(--blue); }
+    .tag.blue { background: var(--blue-soft); color: var(--blue); }
     .tag.gray { background: #f1f1f1; color: #6b6b6b; }
     .pager { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; color: var(--muted); font-size: 12px; }
     .pager .pages { display: flex; gap: 5px; }
@@ -111,7 +108,7 @@
     .detail small { display: block; color: var(--muted); font-size: 12px; margin-bottom: 8px; }
     .detail strong { font-size: 17px; }
     .view { display: none; }
-    .view.active { display: flex; flex-direction: column; flex: 1 1 auto; min-height: 0; overflow: hidden; }
+    .view.active { display: block; }
     .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.35); display: none; align-items: center; justify-content: center; z-index: 10; }
     .modal-backdrop.open { display: flex; }
     .modal { background: white; width: min(620px, calc(100vw - 40px)); border-radius: 10px; box-shadow: 0 20px 70px rgba(0,0,0,.22); }
@@ -120,6 +117,44 @@
     .modal-body { padding: 20px 22px; display: grid; gap: 14px; }
     .modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 13px; }
     .modal-foot { padding: 15px 22px; border-top: 1px solid var(--line); display: flex; justify-content: flex-end; gap: 9px; }
+    .column-options { display:grid; gap:10px; }
+    .column-option { display:flex; align-items:center; gap:10px; padding:11px 12px; border:1px solid var(--line); border-radius:7px; cursor:pointer; }
+    .column-option:hover { border-color: var(--red); background: var(--red-soft); }
+    .column-option input { accent-color: var(--red); width:16px; height:16px; }
+    #view-policy { display:none !important; }
+    .row-check { accent-color: var(--red); width:16px; height:16px; cursor:pointer; }
+    .column-option small { display:block; color:var(--muted); margin-top:2px; }
+    .price-cell { position: relative; cursor: help; }
+    .price-cell:hover::after { content: attr(data-history); position: absolute; z-index: 8; left: 50%; bottom: calc(100% + 8px); transform: translateX(-50%); width: 230px; padding: 10px 12px; border-radius: 7px; background: #242424; color: #fff; font-size: 12px; line-height: 1.7; white-space: pre-line; text-align: left; box-shadow: 0 8px 22px rgba(0,0,0,.2); pointer-events: none; }
+    .price-cell:hover::before { content: ''; position: absolute; z-index: 8; left: 50%; bottom: calc(100% + 3px); transform: translateX(-50%); border: 5px solid transparent; border-top-color: #242424; pointer-events: none; }
+    .trade-price-cell { position: relative; cursor: help; }
+    .trade-price-cell:hover::after { content: attr(data-history); position: absolute; z-index: 8; left: 50%; bottom: calc(100% + 8px); transform: translateX(-50%); width: 360px; padding: 10px 12px; border-radius: 7px; background: #242424; color: #fff; font-size: 11px; line-height: 1.7; white-space: pre-line; text-align: left; box-shadow: 0 8px 22px rgba(0,0,0,.2); pointer-events: none; }
+    .trade-price-cell:hover::before { content: ''; position: absolute; z-index: 8; left: 50%; bottom: calc(100% + 3px); transform: translateX(-50%); border: 5px solid transparent; border-top-color: #242424; pointer-events: none; }
+    .trade-price-cell:hover::after, .trade-price-cell:hover::before { display: none; }
+    .trade-tooltip { position: fixed; z-index: 9999; display: none; width: 430px; max-height: 180px; overflow: auto; padding: 6px 8px; border-radius: 6px; background: #242424; color: #fff; box-shadow: 0 6px 16px rgba(0,0,0,.22); pointer-events: none; }
+    .trade-tooltip table { width: 100%; table-layout: fixed; border-collapse: collapse; font-size: 10px; }
+    .trade-tooltip th, .trade-tooltip td { padding: 3px 4px; border-bottom: 1px solid #4a4a4a; text-align: left; white-space: normal; word-break: break-all; line-height: 1.2; }
+    .trade-tooltip th:nth-child(1), .trade-tooltip td:nth-child(1), .trade-tooltip th:nth-child(2), .trade-tooltip td:nth-child(2) { width: 31%; }
+    .trade-tooltip th:nth-child(3), .trade-tooltip td:nth-child(3) { width: 14%; }
+    .trade-tooltip th:nth-child(4), .trade-tooltip td:nth-child(4) { width: 24%; }
+    .trade-tooltip th { color: #ffb3bd; font-weight: 600; }
+    .asp-history-tooltip { width: 560px; }
+    .asp-history-tooltip th:nth-child(1), .asp-history-tooltip td:nth-child(1), .asp-history-tooltip th:nth-child(2), .asp-history-tooltip td:nth-child(2) { width: 24%; }
+    .asp-history-tooltip th:nth-child(3), .asp-history-tooltip td:nth-child(3) { width: 10%; }
+    .asp-history-tooltip th:nth-child(4), .asp-history-tooltip td:nth-child(4) { width: 23%; }
+    .asp-history-tooltip th:nth-child(5), .asp-history-tooltip td:nth-child(5) { width: 19%; }
+    #view-current .filters { grid-template-columns: repeat(4, minmax(150px, 1fr)); }
+    #view-current .price-list-wrap { max-height: 620px; overflow: auto; border-top: 1px solid var(--line); }
+    #view-current .price-list-wrap table { min-width: 1180px; }
+    #view-current .price-list-wrap th:nth-child(-n+2), #view-current .price-list-wrap td:nth-child(-n+2) { position: sticky; z-index: 2; background: #fff; }
+    #view-current .price-list-wrap th:nth-child(1), #view-current .price-list-wrap td:nth-child(1) { left: 0; min-width: 48px; }
+    #view-current .price-list-wrap th:nth-child(2), #view-current .price-list-wrap td:nth-child(2) { left: 48px; min-width: 180px; box-shadow: 6px 0 8px -8px rgba(0,0,0,.28); }
+    #view-current .price-list-wrap th:nth-child(-n+2) { background: #fafafa; }
+    #view-current .price-list-wrap th[data-price-column] { color: var(--red); }
+    #view-monitor .stats, #view-monitor .risk-card { display: none; }
+    #view-monitor .split { display: block; }
+    #view-monitor .table-wrap { max-height: 650px; overflow: auto; }
+    #view-monitor table { min-width: 1250px; }
     .toast { position: fixed; right: 30px; bottom: 25px; background: var(--black); color: white; padding: 12px 16px; border-radius: 6px; display: none; box-shadow: var(--shadow); }
     .toast.show { display: block; }
     /* 截图模式：保持页面结构不变，仅用于导出完整页面预览。 */
@@ -127,444 +162,547 @@
     body.capture .workspace { max-width: none; margin-left: 0; margin-right: 0; }
     @media (max-width: 1100px) { .app { grid-template-columns: 76px 1fr; } .brand strong, .brand small, .nav-label, .nav button span, .sidebar-foot { display: none; } .brand { justify-content: center; padding-left: 0; padding-right: 0; } .nav button { justify-content: center; } .stats { grid-template-columns: repeat(2, 1fr); } .split { grid-template-columns: 1fr; } }
     @media (max-width: 720px) { .app { display: block; } .sidebar { display: none; } .topbar { padding: 0 16px; } .workspace { padding: 20px 16px 32px; } .page-head { display: block; } .actions { margin-top: 15px; } .filters { grid-template-columns: 1fr 1fr; } .filters .field:first-child { grid-column: span 2; } .stats { gap: 10px; } .detail-grid { grid-template-columns: 1fr 1fr; } }
-  
-    .brand-stripe { height: 4px; background: linear-gradient(90deg, #0A0A0A 0%, #0A0A0A 72%, #C8102E 72%, #C8102E 100%); }
-
-    /* §2.2 已打开页面 Tab */
-    .open-tabs { display:flex; align-items:center; gap:2px; flex:1; min-width:0; overflow-x:auto; margin:0 12px; }
-    .open-tab {
-      display: inline-flex; align-items: center; gap: 6px; max-width: 160px;
-      padding: 6px 10px; font-size: 13px; border-radius: 4px; cursor:pointer;
-      color: rgba(255,255,255,.72); white-space: nowrap; transition: all .15s;
-      border: 0; border-bottom: 2px solid transparent; background: transparent;
-    }
-    .open-tab:hover { color: #fff; background: rgba(255,255,255,.08); }
-    .open-tab.active { color: #fff; font-weight: 600; border-bottom-color: #C8102E; background: rgba(200,16,46,.18); }
-    .open-tab .tab-close { opacity: .55; font-size: 12px; line-height: 1; padding: 2px 4px; border-radius: 3px; }
-    .open-tab .tab-close:hover { opacity: 1; background: rgba(255,255,255,.15); }
-    .global-topbar {
-      height: 56px; display:flex; align-items:center; padding:0 16px;
-      background:#0A0A0A; color:#fff; position:sticky; top:0; z-index:50;
-    }
-    .global-topbar .logo { font-weight:700; letter-spacing:.06em; font-size:14px; flex-shrink:0; }
-    .global-topbar .top-right { display:flex; align-items:center; gap:10px; flex-shrink:0; margin-left:auto; }
-    .global-topbar .top-right select {
-      background:rgba(255,255,255,.08); color:#fff; border:1px solid rgba(255,255,255,.2);
-      border-radius:4px; padding:4px 8px; font-size:12px;
-    }
-    .d05-icon { width:32px;height:32px;border:0;border-radius:4px;background:transparent;color:rgba(255,255,255,.7);display:inline-grid;place-items:center; }
-    .d05-icon:hover { background:rgba(255,255,255,.1); color:#fff; }
-    .page-size-select {
-      border:1px solid #d4d4d4; border-radius:4px; padding:3px 6px; font-size:12px; background:#fff; margin:0 8px;
-    }
-
-
-    html, body { height:100%; margin:0; overflow:hidden; }
-    body > .global-topbar, body > .brand-stripe { flex:0 0 auto; }
-    body.zippo-fixed {
-      display:flex; flex-direction:column; height:100vh; overflow:hidden;
-    }
-    body.zippo-fixed > .app {
-      flex:1 1 auto; min-height:0; height:auto !important;
-      display:grid !important; grid-template-columns:232px 1fr; overflow:hidden !important;
-    }
-    body.zippo-fixed > .app > .sidebar {
-      height:100% !important; min-height:0; overflow:hidden; display:flex; flex-direction:column;
-    }
-    body.zippo-fixed > .app > .main, body.zippo-fixed > .app > main {
-      height:100%; min-height:0; overflow:hidden; display:flex; flex-direction:column;
-    }
-    .app > .main > .workspace, .app > main > .workspace {
-      flex:1 1 auto; min-height:0; overflow:hidden;
-      display:flex; flex-direction:column;
-      padding: 20px 24px 16px;
-    }
-    .view.active {
-      display:flex !important; flex-direction:column; flex:1 1 auto; min-height:0; overflow:hidden;
-    }
-    .view.active > .page-head,
-    .view.active > .stats { flex-shrink:0; }
-    .view.active > .card.has-table {
-      flex:1 1 auto; min-height:0; overflow:hidden; margin-bottom:0;
-    }
-    .card.has-table > .card-head,
-    .card.has-table > .filters { flex-shrink:0; }
-    .table-wrap { overflow-x:auto; }
-
-
-    /* body 纵向壳：顶栏固定，下方 zippo-body 占满剩余高度 */
-    body.overflow-hidden, body.zippo-fixed, body.d06-shell {
-      display: flex !important; flex-direction: column !important; height: 100vh !important; margin: 0;
-    }
-    body > header, body > .brand-stripe, body > .h-1.brand-stripe, body > div.h-1 {
-      flex: 0 0 auto !important;
-    }
-    .zippo-body { flex: 1 1 auto !important; min-height: 0 !important; height: auto !important; }
-    main.zippo-main, .zippo-main {
-      flex: 1 1 auto !important; min-width: 0 !important; min-height: 0 !important;
-      overflow-y: auto !important;
-    }
-
-
-
-
-/* ZIPPO_NAV_HIERARCHY_V3 */
-details.nav-group { margin: 0 0 6px; border: 0; }
-details.nav-group > summary.nav-l1 {
-  list-style: none; cursor: pointer; user-select: none;
-  display: flex; align-items: center; justify-content: space-between; gap: 8px;
-  min-height: 40px; padding: 0 12px; margin: 0; border-radius: 4px;
-  font-size: 13px !important; font-weight: 600 !important; line-height: 1.2;
-  color: #FFFFFF !important; letter-spacing: 0 !important; text-transform: none !important;
-  background: transparent;
-}
-details.nav-group > summary.nav-l1::-webkit-details-marker { display: none; }
-details.nav-group > summary.nav-l1 .nav-chev {
-  font-size: 10px; color: rgba(255,255,255,.7); transition: transform .15s;
-}
-details.nav-group:not([open]) > summary.nav-l1 .nav-chev { transform: rotate(-90deg); }
-details.nav-group > summary.nav-l1:hover { background: #2d2d2d; }
-.nav-l2-wrap { display: flex; flex-direction: column; gap: 2px; padding: 2px 0 6px; }
-.nav-l2-wrap .proto-nav-item,
-.nav-l2-wrap > button,
-.nav-l2-wrap .nav-item,
-aside .nav-l2-wrap button {
-  font-size: 13px !important;
-  color: #E8E8E8 !important;
-  min-height: 40px;
-}
-/* dark sidebar contrast: kill low-contrast tertiary / selected white block */
-aside.proto-sidebar, aside.sidebar, aside.module-sidebar, .proto-sidebar {
-  color: #E8E8E8 !important;
-}
-aside.proto-sidebar .text-ink-secondary,
-aside.proto-sidebar .text-ink-tertiary,
-aside.proto-sidebar .text-ink,
-aside .nav-label {
-  color: #E8E8E8 !important;
-}
-aside.proto-sidebar button.text-ink-secondary,
-aside.proto-sidebar a.text-ink-secondary {
-  color: #E8E8E8 !important;
-}
-aside.proto-sidebar .bg-\[\#F5F5F5\],
-aside.proto-sidebar button.bg-\[\#F5F5F5\] {
-  background: #2d2d2d !important;
-  color: #FFFFFF !important;
-}
-aside.proto-sidebar .hover\:bg-fill:hover,
-aside.proto-sidebar button:hover {
-  background: #2d2d2d !important;
-  color: #FFFFFF !important;
-}
-/* L1 labels that are not yet details */
-.nav-label, .proto-nav-group, .proto-sidebar-title {
-  font-size: 13px !important;
-  font-weight: 600 !important;
-  color: #FFFFFF !important;
-  letter-spacing: 0 !important;
-  text-transform: none !important;
-}
-.proto-nav-item, .nav button, aside .nav button {
-  color: #E8E8E8 !important;
-  font-size: 13px !important;
-}
-.proto-nav-item.active, .nav button.active {
-  color: #FFFFFF !important;
-}
-/* hide sidebar bottom notes / brand footnotes */
-.sidebar-note, .sidebar-foot, .sidebar-footer,
-aside .zippo-sidebar-note,
-aside nav > .mt-6.px-3.py-3.rounded-lg {
-  display: none !important;
-}
-
-/* ZIPPO_NAV_SPACING_V2 */
-.nav, .proto-sidebar-nav, aside .nav, .sidebar .nav {
-  gap: 4px !important;
-}
-.proto-nav-item, .nav button, .nav-item, .side-nav a, .menu-item {
-  min-height: 40px !important;
-  height: auto !important;
-  max-height: none !important;
-  padding-top: 8px !important;
-  padding-bottom: 8px !important;
-  box-sizing: border-box !important;
-  flex-shrink: 0 !important;
-}
-.nav-label, .proto-sidebar-title .label {
-  padding-top: 10px !important;
-  padding-bottom: 4px !important;
-}
-
-/* ZIPPO_GLOBAL_SHELL_V2 */
-.card.has-table { display:flex; flex-direction:column; min-height:0; overflow:hidden; }
-.card.has-table > .table-wrap { flex:1 1 auto; min-height:0; overflow:auto; -webkit-overflow-scrolling:touch; }
-.card > .pager, .card > .pager.pagination, .pager.zippo-pager-sticky {
-  position:relative; flex-shrink:0; z-index:5;
-  background:#fff; border-top:1px solid #EBEBEB; margin-top:0;
-  box-shadow:none;
-}
-.sidebar-foot, .sidebar-footer { display:none !important; }
-.zippo-user-menu { position:relative; display:inline-flex; }
-.zippo-user-menu-panel {
-  display:none; position:absolute; right:0; top:calc(100% + 6px); min-width:128px;
-  background:#fff; color:#0A0A0A; border:1px solid #EBEBEB; border-radius:6px;
-  box-shadow:0 8px 24px rgba(0,0,0,.12); padding:4px; z-index:80;
-}
-.zippo-user-menu.open .zippo-user-menu-panel { display:block; }
-.zippo-user-menu-panel button {
-  display:block; width:100%; text-align:left; border:0; background:transparent;
-  padding:8px 10px; font-size:13px; border-radius:4px; cursor:pointer; color:#0A0A0A;
-}
-.zippo-user-menu-panel button:hover { background:#F5F5F5; }
-
-</style>
+  </style>
 </head>
-<body class="zippo-fixed">
-  
-<header class="global-topbar" aria-label="全局顶栏">
-  <div class="logo">ZIPPO</div>
-  <nav class="open-tabs" id="openTabsBar" aria-label="已打开页面">
-    <button type="button" class="open-tab active" data-id="home" title="价格政策"><span>价格政策</span><span class="tab-close" title="关闭">✕</span></button>
-  </nav>
-  <div class="top-right">
-    <select aria-label="演示角色"><option>品牌运营</option><option>管理员</option></select>
-    <button type="button" class="d05-icon" title="通知" aria-label="通知" style="position:relative" onclick="document.getElementById('toast').textContent='3 条未读通知';document.getElementById('toast').classList.add('show');setTimeout(()=>document.getElementById('toast').classList.remove('show'),1800)"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg><span class="zippo-notify-dot" style="position:absolute;top:6px;right:6px;width:6px;height:6px;border-radius:50%;background:#C8102E"></span></button>
-    <span style="width:28px;height:28px;border-radius:50%;background:#C8102E;display:inline-grid;place-items:center;font-size:12px;font-weight:700;color:#fff" aria-label="账号" title="管理员">管</span>
-  </div>
-</header>
-<div class="brand-stripe" style="height:4px;background:linear-gradient(90deg,#0A0A0A 0%,#0A0A0A 72%,#C8102E 72%,#C8102E 100%)"></div>
-<div class="app">
+<body>
+  <div class="app">
     <aside class="sidebar">
+      <div class="brand"><div class="brand-mark">Z</div><div><strong>ZIPPO PIM</strong><small>价格管理中心</small></div></div>
       <nav class="nav">
-        <details class="nav-group" open><summary class="nav-l1">业务管理<span class="nav-chev">▾</span></summary><div class="nav-l2-wrap">
-        <button class="active" data-view="policy"><span>▦</span><span>价格政策</span></button>
+        <div class="nav-label">业务管理</div>
+        <button class="active" data-view="definition"><span>▦</span><span>价格定义</span></button>
         <button data-view="lists"><span>▤</span><span>价目表</span></button>
-        <button data-view="current"><span>⌕</span><span>当前价格</span></button>
-        <button data-view="minimum"><span>◇</span><span>最低售价</span></button>
+        <button data-view="trade"><span>¥</span><span>品牌贸易协议价</span></button>
+        <button data-view="asp"><span>▣</span><span>品牌 ASP 价格</span></button>
+        <button data-view="current"><span>⌕</span><span>品牌商品价格表</span></button>
+        <button data-view="downstream"><span>⇄</span><span>价格列表</span></button>
         <button data-view="monitor"><span>⚠</span><span>价格监控</span><span class="count">12</span></button>
         <button data-view="exemption"><span>✓</span><span>豁免管理</span></button>
-        </div></details><details class="nav-group" open><summary class="nav-l1">系统<span class="nav-chev">▾</span></summary><div class="nav-l2-wrap">
+        <div class="nav-label">系统</div>
         <button data-view="org"><span>⚙</span><span>组织价格属性</span></button>
-      </div></details></nav>
-      </aside>
+      </nav>
+      <div class="sidebar-foot">数据范围：总部及授权组织<br/>当前环境：正式业务环境</div>
+    </aside>
     <main class="main">
-      <header class="topbar"><div class="crumb">价格管理中心 / <b id="crumbText">价格政策</b></div></header>
+      <header class="topbar"><div class="crumb">价格管理中心 / <b id="crumbText">价格定义</b></div><div class="top-actions"><button class="icon-btn" title="通知">♢</button><button class="icon-btn" title="帮助">?</button><div class="avatar">CW</div></div></header>
       <div class="workspace">
         <section class="view active" id="view-policy">
           <div class="page-head"><div><h1>价格政策</h1><div class="subhead">定义价格类型与适用对象，作为价目表的维护基础。</div></div><div class="actions"><button class="btn">导出</button><button class="btn primary" id="openPolicy">＋ 新建价格政策</button></div></div>
           <div class="stats"><div class="stat"><div class="label">启用中的价格政策</div><div class="value">18</div><div class="hint up">较上月 +2</div></div><div class="stat"><div class="label">当前生效价目表</div><div class="value">42</div><div class="hint">覆盖 8,642 个 SKU</div></div><div class="stat"><div class="label">待处理破价</div><div class="value">12</div><div class="hint warn">需在今日处理</div></div><div class="stat"><div class="label">有效豁免</div><div class="value">7</div><div class="hint">均设有结束时间</div></div></div>
-          <div class="card"><div class="card-head"><h2>政策列表</h2><div class="actions"><button class="btn">批量停用</button><button class="btn">记录</button></div></div><div class="filters"><div class="field"><label>政策名称</label><input placeholder="输入政策名称或编码" /></div><div class="field"><label>价格类型</label><select><option>全部价格类型</option><option>一级经销商供货价</option><option>二级经销商供货价</option><option>官方零售价</option></select></div><div class="field"><label>适用对象</label><select><option>全部对象</option><option>一级经销商</option><option>二级经销商</option><option>指定店铺</option></select></div><div class="field"><label>状态</label><select><option>全部状态</option><option>启用</option><option>停用</option></select></div><div class="field"><label>&nbsp;</label><button class="btn primary">查询</button><button class="btn" type="button">重置</button></div></div><div class="table-wrap"><table><thead><tr><th>政策名称</th><th>价格类型</th><th>适用对象</th><th>优先级</th><th>当前价目表</th><th>状态</th><th>更新时间</th><th>操作</th></tr></thead><tbody><tr><td><strong>一级经销商标准供货政策</strong><br><small class="muted">POL-001</small></td><td>一级经销商供货价</td><td>一级经销商</td><td class="num">10</td><td>2026 Q3 · V3</td><td><span class="tag green">● 启用</span></td><td>2026-07-30 16:42</td><td><button class="btn text">查看</button><button class="btn text">编辑</button></td></tr><tr><td><strong>二级经销商标准供货政策</strong><br><small class="muted">POL-002</small></td><td>二级经销商供货价</td><td>二级经销商</td><td class="num">20</td><td>2026 Q3 · V2</td><td><span class="tag green">● 启用</span></td><td>2026-07-28 10:18</td><td><button class="btn text">查看</button><button class="btn text">编辑</button></td></tr><tr><td><strong>官方店一口价政策</strong><br><small class="muted">POL-005</small></td><td>官方零售价</td><td>官方店铺</td><td class="num">30</td><td>2026 Q3 · V5</td><td><span class="tag green">● 启用</span></td><td>2026-07-25 09:31</td><td><button class="btn text">查看</button><button class="btn text">编辑</button></td></tr><tr><td><strong>零售商公开价格政策</strong><br><small class="muted">POL-008</small></td><td>建议零售价</td><td>零售商店铺</td><td class="num">40</td><td>2026 Q3 · V1</td><td><span class="tag gray">● 停用</span></td><td>2026-07-20 14:05</td><td><button class="btn text">查看</button><button class="btn text">启用</button></td></tr></tbody></table></div><div class="pager"><span>共 18 条政策</span><div class="pages"><button class="page-btn active">1</button><button class="page-btn">2</button><button class="page-btn">3</button><button class="page-btn">›</button></div></div></div>
+          <div class="card"><div class="card-head"><h2>政策列表</h2><div class="actions"><button class="btn">批量停用</button><button class="btn">查看操作记录</button></div></div><div class="filters"><div class="field"><label>政策名称</label><input placeholder="输入政策名称或编码" /></div><div class="field"><label>价格类型</label><select><option>全部价格类型</option><option>一级经销商供货价</option><option>二级经销商供货价</option><option>官方零售价</option></select></div><div class="field"><label>适用对象</label><select><option>全部对象</option><option>一级经销商</option><option>二级经销商</option><option>指定店铺</option></select></div><div class="field"><label>状态</label><select><option>全部状态</option><option>启用</option><option>停用</option></select></div><div class="field"><label>&nbsp;</label><button class="btn primary">查询</button></div></div><div class="table-wrap"><table><thead><tr><th>政策名称</th><th>价格类型</th><th>适用对象</th><th>优先级</th><th>当前价目表</th><th>状态</th><th>更新时间</th><th>操作</th></tr></thead><tbody><tr><td><strong>一级经销商标准供货政策</strong><br><small class="muted">POL-001</small></td><td>一级经销商供货价</td><td>一级经销商</td><td class="num">10</td><td>2026 Q3 · V3</td><td><span class="tag green">● 启用</span></td><td>2026-07-30 16:42</td><td><button class="btn text">查看</button><button class="btn text">编辑</button></td></tr><tr><td><strong>二级经销商标准供货政策</strong><br><small class="muted">POL-002</small></td><td>二级经销商供货价</td><td>二级经销商</td><td class="num">20</td><td>2026 Q3 · V2</td><td><span class="tag green">● 启用</span></td><td>2026-07-28 10:18</td><td><button class="btn text">查看</button><button class="btn text">编辑</button></td></tr><tr><td><strong>官方店一口价政策</strong><br><small class="muted">POL-005</small></td><td>官方零售价</td><td>官方店铺</td><td class="num">30</td><td>2026 Q3 · V5</td><td><span class="tag green">● 启用</span></td><td>2026-07-25 09:31</td><td><button class="btn text">查看</button><button class="btn text">编辑</button></td></tr><tr><td><strong>零售商公开价格政策</strong><br><small class="muted">POL-008</small></td><td>建议零售价</td><td>零售商店铺</td><td class="num">40</td><td>2026 Q3 · V1</td><td><span class="tag gray">● 停用</span></td><td>2026-07-20 14:05</td><td><button class="btn text">查看</button><button class="btn text">启用</button></td></tr></tbody></table></div><div class="pager"><span>共 18 条政策</span><div class="pages"><button class="page-btn active">1</button><button class="page-btn">2</button><button class="page-btn">3</button><button class="page-btn">›</button></div></div></div>
         </section>
 
-        <section class="view" id="view-lists"><div class="page-head"><div><h1>价目表</h1><div class="subhead">以全量或增量方式维护价格，发布后按计划生效。</div></div><div class="actions"><button class="btn">导入 Excel</button><button class="btn">导出</button><button class="btn primary" id="openList">＋ 新建价目表</button></div></div><div class="card"><div class="card-head"><h2>价目表列表</h2><div class="tag gray">共 42 份价目表</div></div><div class="filters"><div class="field"><label>价目表名称</label><input placeholder="输入名称、版本或编码" /></div><div class="field"><label>价格政策</label><select><option>全部政策</option><option>一级经销商标准供货政策</option><option>官方店一口价政策</option></select></div><div class="field"><label>维护方式</label><select><option>全部方式</option><option>全量</option><option>增量</option></select></div><div class="field"><label>状态</label><select><option>全部状态</option><option>草稿</option><option>待生效</option><option>生效中</option><option>已失效</option></select></div><div class="field"><label>&nbsp;</label><button class="btn primary">查询</button><button class="btn" type="button">重置</button></div></div><div class="table-wrap"><table><thead><tr><th>价目表名称</th><th>价格政策</th><th>方式</th><th>版本</th><th>SKU 数</th><th>状态</th><th>生效时间</th><th>操作</th></tr></thead><tbody><tr><td><strong>一级经销商供货价 · 2026 Q3</strong><br><small>PL-2026-Q3-001</small></td><td>一级经销商标准供货政策</td><td><span class="tag gray">全量</span></td><td>V3</td><td class="num">3,486</td><td><span class="tag green">● 生效中</span></td><td>2026-07-01 00:00</td><td><button class="btn text">查看</button><button class="btn text">复制</button></td></tr><tr><td><strong>官方店一口价 · 7月修订</strong><br><small>PL-2026-07-005</small></td><td>官方店一口价政策</td><td><span class="tag amber">增量</span></td><td>V5</td><td class="num">126</td><td><span class="tag amber">● 待生效</span></td><td>2026-08-01 00:00</td><td><button class="btn text">查看</button><button class="btn text">编辑</button></td></tr><tr><td><strong>零售商公开价格 · 草稿</strong><br><small>PL-2026-08-002</small></td><td>零售商公开价格政策</td><td><span class="tag gray">全量</span></td><td>V1</td><td class="num">3,486</td><td><span class="tag gray">● 草稿</span></td><td>未设置</td><td><button class="btn text">再编</button><button class="btn text">校验</button></td></tr></tbody></table></div><div class="pager"><span>共 42 份价目表</span><div class="pages"><button class="page-btn active">1</button><button class="page-btn">2</button><button class="page-btn">3</button><button class="page-btn">›</button></div></div></div></section>
+        <section class="view" id="view-lists"><div class="page-head"><div><h1>价目表</h1><div class="subhead">以全量或增量方式维护价格，发布后按计划生效。</div></div><div class="actions"><button class="btn">导入 Excel</button><button class="btn">导出</button><button class="btn primary" id="openList">＋ 新建价目表</button></div></div><div class="card"><div class="card-head"><h2>价目表列表</h2><div class="tag blue">共 42 份价目表</div></div><div class="filters"><div class="field"><label>价目表名称</label><input placeholder="输入名称、版本或编码" /></div><div class="field"><label>价格政策</label><select><option>全部政策</option><option>一级经销商标准供货政策</option><option>官方店一口价政策</option></select></div><div class="field"><label>维护方式</label><select><option>全部方式</option><option>全量</option><option>增量</option></select></div><div class="field"><label>状态</label><select><option>全部状态</option><option>草稿</option><option>待生效</option><option>生效中</option><option>已失效</option></select></div><div class="field"><label>&nbsp;</label><button class="btn primary">查询</button></div></div><div class="table-wrap"><table><thead><tr><th>价目表名称</th><th>价格政策</th><th>方式</th><th>版本</th><th>SKU 数</th><th>状态</th><th>生效时间</th><th>操作</th></tr></thead><tbody><tr><td><strong>一级经销商供货价 · 2026 Q3</strong><br><small>PL-2026-Q3-001</small></td><td>一级经销商标准供货政策</td><td><span class="tag blue">全量</span></td><td>V3</td><td class="num">3,486</td><td><span class="tag green">● 生效中</span></td><td>2026-07-01 00:00</td><td><button class="btn text">查看</button><button class="btn text">复制</button></td></tr><tr><td><strong>官方店一口价 · 7月修订</strong><br><small>PL-2026-07-005</small></td><td>官方店一口价政策</td><td><span class="tag amber">增量</span></td><td>V5</td><td class="num">126</td><td><span class="tag amber">● 待生效</span></td><td>2026-08-01 00:00</td><td><button class="btn text">查看</button><button class="btn text">编辑</button></td></tr><tr><td><strong>零售商公开价格 · 草稿</strong><br><small>PL-2026-08-002</small></td><td>零售商公开价格政策</td><td><span class="tag blue">全量</span></td><td>V1</td><td class="num">3,486</td><td><span class="tag gray">● 草稿</span></td><td>未设置</td><td><button class="btn text">继续编辑</button><button class="btn text">校验</button></td></tr></tbody></table></div><div class="pager"><span>共 42 份价目表</span><div class="pages"><button class="page-btn active">1</button><button class="page-btn">2</button><button class="page-btn">3</button><button class="page-btn">›</button></div></div></div></section>
 
-        <section class="view" id="view-current"><div class="page-head"><div><h1>当前价格</h1><div class="subhead">查询当前有效价格、来源价目表和生效记录。</div></div><div class="actions"><button class="btn">导出查询结果</button></div></div><div class="card"><div class="card-head"><h2>当前价格查询</h2><span class="tag gray">数据更新时间：2026-08-03 09:20</span></div><div class="filters"><div class="field"><label>SKU / 商品名称</label><input placeholder="输入 SKU 或商品名称" /></div><div class="field"><label>价格类型</label><select><option>全部价格类型</option><option>一级经销商供货价</option><option>官方零售价</option><option>建议零售价</option></select></div><div class="field"><label>适用对象</label><select><option>全部对象</option><option>一级经销商</option><option>指定经销商</option><option>指定店铺</option></select></div><div class="field"><label>店铺</label><select><option>全部店铺</option><option>ZIPPO 官方旗舰店</option><option>上海经销商天猫店</option></select></div><div class="field"><label>&nbsp;</label><button class="btn primary">查询</button><button class="btn" type="button">重置</button></div></div><div class="table-wrap"><table><thead><tr><th>SKU</th><th>商品名称</th><th>价格类型</th><th>适用对象</th><th>当前价格</th><th>来源价目表</th><th>生效时间</th><th>操作</th></tr></thead><tbody><tr><td><strong>ZIPPO-218</strong></td><td>黑冰经典打火机</td><td>一级经销商供货价</td><td>一级经销商</td><td class="num"><strong>¥168.00</strong></td><td>2026 Q3 · V3</td><td>2026-07-01</td><td><button class="btn text">详情</button><button class="btn text">历史</button></td></tr><tr><td><strong>ZIPPO-218</strong></td><td>黑冰经典打火机</td><td>官方零售价</td><td>ZIPPO 官方旗舰店</td><td class="num"><strong>¥299.00</strong></td><td>官方店 · V5</td><td>2026-08-01</td><td><button class="btn text">详情</button><button class="btn text">历史</button></td></tr><tr><td><strong>ZIPPO-193</strong></td><td>哑光黑经典款</td><td>建议零售价</td><td>零售商店铺</td><td class="num"><strong>¥259.00</strong></td><td>零售商公开价格 · V1</td><td>2026-07-15</td><td><button class="btn text">详情</button><button class="btn text">历史</button></td></tr></tbody></table></div></div></section>
+        <section class="view" id="view-trade"><div class="page-head"><div><h1>品牌贸易协议价</h1><div class="subhead">维护品牌与不同经销商层级之间的 SKU 贸易价格，并保留每次价格的生效生命周期。</div></div><div class="actions"><button class="btn">导出协议价</button><button class="btn" id="openTradeBulk">批量调价</button><button class="btn primary" id="openTradeEntry">＋ 新增协议价</button></div></div><div class="card"><div class="card-head"><h2>品牌贸易协议价列表</h2><span class="tag blue">共 50 条</span></div><div class="filters"><div class="field"><label>SKU</label><input id="tradeSkuFilter" placeholder="输入 SKU" /></div><div class="field"><label>经销商层级</label><select id="tradeLevelFilter"><option>全部层级</option><option>A级经销商</option><option>B级经销商</option></select></div><div class="field"><label>&nbsp;</label><button class="btn primary" id="tradeSearch">筛选</button></div></div><div class="muted" style="padding:10px 14px;background:#fff8e8;border:1px solid #f2dfaa;border-radius:6px;margin:0 0 14px">生效时间校验：同一 SKU＋运营组的 WSP，或同一 SKU 的 MASP，价格区间不允许重叠。新增或更新发生冲突时将禁止保存，并提示冲突记录。</div><div class="table-wrap"><table style="min-width:1050px"><thead><tr><th>SKU</th><th>运营组</th><th>经销商层级</th><th>WSP</th><th>MASP</th><th>最近变更时间</th></tr></thead><tbody id="tradeRows"></tbody></table></div><div class="pager"><span id="tradeCount">共 50 条协议价</span><div class="pages"><button class="page-btn active">1</button><button class="page-btn">2</button><button class="page-btn">3</button><button class="page-btn">›</button></div></div></div></section>
 
-        <section class="view" id="view-minimum"><div class="page-head"><div><h1>最低售价</h1><div class="subhead">维护固定金额、折扣比例和商品类目规则引用。</div></div><div class="actions"><button class="btn">导入</button><button class="btn">导出</button><button class="btn primary">＋ 新建最低售价规则</button></div></div><div class="card"><div class="card-head"><h2>最低售价规则</h2><span class="tag green">启用 36 条</span></div><div class="filters"><div class="field"><label>商品范围</label><input placeholder="SKU、品牌或类目" /></div><div class="field"><label>规则来源</label><select><option>全部来源</option><option>固定金额</option><option>折扣比例</option><option>商品中心类目规则</option></select></div><div class="field"><label>状态</label><select><option>全部状态</option><option>启用</option><option>停用</option></select></div><div class="field"><label>有效期</label><select><option>全部</option><option>当前有效</option><option>即将生效</option></select></div><div class="field"><label>&nbsp;</label><button class="btn primary">查询</button><button class="btn" type="button">重置</button></div></div><div class="table-wrap"><table><thead><tr><th>适用范围</th><th>规则类型</th><th>最低售价</th><th>来源</th><th>有效期</th><th>状态</th><th>更新时间</th><th>操作</th></tr></thead><tbody><tr><td><strong>黑冰系列</strong></td><td>折扣比例</td><td class="num">建议零售价 × 85%</td><td>价格管理中心</td><td>2026-07-01 至长期</td><td><span class="tag green">● 启用</span></td><td>2026-07-28</td><td><button class="btn text">编辑</button><button class="btn text">停用</button></td></tr><tr><td><strong>ZIPPO-193</strong></td><td>固定金额</td><td class="num">¥229.00</td><td>价格管理中心</td><td>2026-08-01 至 2026-09-30</td><td><span class="tag green">● 启用</span></td><td>2026-07-30</td><td><button class="btn text">编辑</button><button class="btn text">停用</button></td></tr><tr><td><strong>联名系列</strong></td><td>类目规则引用</td><td class="num">商品中心规则</td><td>商品中心</td><td>当前有效</td><td><span class="tag amber">● 待确认</span></td><td>2026-07-27</td><td><button class="btn text">引用</button></td></tr></tbody></table></div></div></section>
+        <section class="view" id="view-asp"><div class="page-head"><div><h1>品牌 ASP 价格</h1><div class="subhead">管理品牌为经销商店铺设定的 ASP 活动底价；本页不展示 RPA 抓取的店铺实际售价。</div></div><div class="actions"><button class="btn" id="exportAsp">导出 ASP</button><button class="btn" id="openAspBulk">批量调价</button><button class="btn primary" id="openAspEntry">＋ 新增品牌 ASP</button></div></div><div class="card"><div class="card-head"><h2>已设置 ASP 价格列表</h2><span class="tag blue" id="aspCount">共 50 条</span></div><div class="filters"><div class="field"><label>SKU</label><input id="aspSkuFilter" placeholder="输入 SKU" /></div><div class="field"><label>平台</label><select id="aspPlatformFilter"><option>全部平台</option><option>天猫</option><option>京东</option><option>拼多多</option><option>抖音</option></select></div><div class="field"><label>运营组</label><select id="aspGroupFilter"><option>全部运营组</option><option>A级经销商</option><option>B级经销商</option></select></div><div class="field"><label>店铺</label><input id="aspStoreFilter" placeholder="输入店铺名称" /></div><div class="field"><label>&nbsp;</label><button class="btn primary" id="aspSearch">筛选</button></div></div><div class="table-wrap"><table style="min-width:1250px"><thead><tr><th><input type="checkbox" id="selectAllAsp" aria-label="选择全部 ASP"></th><th>SKU</th><th>运营组</th><th>平台</th><th>店铺名称</th><th>品牌 ASP 底价</th><th>生效开始时间</th><th>生效结束时间</th><th>最近变更时间</th><th>操作</th></tr></thead><tbody id="aspRows"></tbody></table></div><div class="pager"><span>品牌已设置 ASP 的商品记录</span><div class="pages"><button class="page-btn active">1</button><button class="page-btn">2</button><button class="page-btn">3</button><button class="page-btn">›</button></div></div></div></section>
 
-        <section class="view" id="view-monitor"><div class="page-head"><div><h1>价格监控</h1><div class="subhead">每日检查店铺公开一口价，记录破价事件并跟进处理。</div></div><div class="actions"><button class="btn">导出</button><button class="btn primary">监控规则</button></div></div><div class="stats"><div class="stat"><div class="label">待处理破价</div><div class="value" style="color:var(--red)">12</div><div class="hint warn">较昨日 +3</div></div><div class="stat"><div class="label">今日已处理</div><div class="value">28</div><div class="hint up">处理完成率 70%</div></div><div class="stat"><div class="label">有效豁免</div><div class="value">7</div><div class="hint">均在有效期内</div></div><div class="stat"><div class="label">最近监控</div><div class="value" style="font-size:20px">09:00</div><div class="hint">每日任务已完成</div></div></div><div class="card"><div class="card-head"><h2>破价列表</h2><div class="actions"><button class="btn">全部</button><button class="btn danger">待处理 12</button></div></div><div class="filters"><div class="field"><label>SKU / 店铺</label><input placeholder="输入 SKU 或店铺名称" /></div><div class="field"><label>风险状态</label><select><option>全部状态</option><option>高风险</option><option>中风险</option><option>已处理</option></select></div><div class="field"><label>发现时间</label><select><option>最近 7 天</option><option>今天</option><option>最近 30 天</option></select></div><div class="field"><label>&nbsp;</label><button class="btn primary">查询</button><button class="btn" type="button">重置</button></div></div><div class="table-wrap"><table><thead><tr><th>风险</th><th>SKU / 商品</th><th>店铺</th><th>公开一口价</th><th>最低售价</th><th>状态</th><th>最近发现</th><th>操作</th></tr></thead><tbody><tr><td><span class="tag red">⚠ 高风险</span></td><td><strong>ZIPPO-193</strong><br><small>哑光黑经典款</small></td><td>经销商 A · 京东店</td><td class="num">¥199.00</td><td class="num">¥229.00</td><td><span class="tag red">待处理</span></td><td>今天 08:52</td><td><button class="btn text">详情</button><button class="btn text">通知</button></td></tr><tr><td><span class="tag amber">⚠ 中风险</span></td><td><strong>ZIPPO-218</strong><br><small>黑冰经典打火机</small></td><td>零售商 B · 天猫店</td><td class="num">¥279.00</td><td class="num">¥289.00</td><td><span class="tag amber">待处理</span></td><td>今天 08:50</td><td><button class="btn text">详情</button><button class="btn text">通知</button></td></tr><tr><td><span class="tag green">✓ 正常</span></td><td><strong>ZIPPO-193</strong><br><small>哑光黑经典款</small></td><td>经销商 C · 拼多多店</td><td class="num">¥229.00</td><td class="num">¥229.00</td><td><span class="tag green">已恢复</span></td><td>昨天 18:22</td><td><button class="btn text">详情</button></td></tr></tbody></table></div><div class="pager"><span>共 40 条事件</span><div class="pages"><button class="page-btn active">1</button><button class="page-btn">2</button><button class="page-btn">›</button></div></div></section>
+        <section class="view" id="view-current"><div class="page-head"><div><h1>品牌商品价格总表</h1><div class="subhead">按 SKU 汇总查看品牌商品在各运营组、平台和店铺的全部生效价格。</div></div><div class="actions"><button class="btn">导出价格总表</button></div></div><div class="card"><div class="card-head"><h2>品牌商品价格明细</h2><div class="actions"><span class="tag gray">当前页 50 个 SKU</span><button class="btn" id="openColumns">列设置</button></div></div><div class="filters"><div class="field"><label>SKU</label><input placeholder="输入 SKU" /></div><div class="field"><label>运营组</label><select><option>全部运营组</option><option>A经商</option><option>B经商</option><option>C经商</option><option>官方直营</option></select></div><div class="field"><label>平台</label><select><option>全部平台</option><option>天猫</option><option>JD</option><option>PDD</option><option>抖音</option></select></div><div class="field"><label>商品编码</label><input placeholder="输入商品编码" /></div><div class="field"><label>SKU商品编码</label><input placeholder="输入 SKU 商品编码" /></div><div class="field"><label>价格类型</label><select><option>全部价格类型</option><option>平台一口价</option><option>建议零售价</option><option>最低零售价</option></select></div><div class="field"><label>&nbsp;</label><button class="btn primary" id="priceSearch">筛选</button></div></div><div class="table-wrap price-list-wrap"><table><thead><tr id="priceHead"><th><input class="row-check" type="checkbox" id="selectAllPrices" aria-label="选择当前页全部商品"></th><th>SKU</th><th>运营组</th><th>平台</th><th>渠道名称</th><th>商品编码</th><th>SKU商品编码</th><th>创建时间</th><th>更新时间</th></tr></thead><tbody id="priceRows"></tbody></table></div><div class="pager"><span>共 2,486 个品牌 SKU，当前显示第 1 页</span><div class="pages"><button class="page-btn active">1</button><button class="page-btn">2</button><button class="page-btn">3</button><button class="page-btn">…</button><button class="page-btn">›</button></div></div></div></section>
 
-        <section class="view" id="view-exemption"><div class="page-head"><div><h1>豁免管理</h1><div class="subhead">处理店铺提交的限时豁免申请，到期后自动恢复监控。</div></div><div class="actions"><button class="btn">导出记录</button></div></div><div class="card"><div class="card-head"><h2>豁免申请</h2><span class="tag amber">待审核 4</span></div><div class="filters"><div class="field"><label>申请编号 / SKU</label><input placeholder="输入申请编号或 SKU" /></div><div class="field"><label>状态</label><select><option>全部状态</option><option>待审核</option><option>生效中</option><option>已失效</option><option>已驳回</option></select></div><div class="field"><label>申请组织</label><select><option>全部组织</option><option>经销商 A</option><option>零售商 B</option></select></div><div class="field"><label>时间范围</label><select><option>最近 30 天</option><option>最近 7 天</option></select></div><div class="field"><label>&nbsp;</label><button class="btn primary">查询</button><button class="btn" type="button">重置</button></div></div><div class="table-wrap"><table><thead><tr><th>申请编号</th><th>SKU / 店铺</th><th>申请原因</th><th>有效期</th><th>申请人</th><th>状态</th><th>提交时间</th><th>操作</th></tr></thead><tbody><tr><td><strong>EX-20260803-004</strong></td><td>ZIPPO-193<br><small>经销商 A · 京东店</small></td><td>授权经营安排</td><td>08-03 至 08-10</td><td>李明</td><td><span class="tag amber">待审核</span></td><td>今天 08:58</td><td><button class="btn text">审核</button><button class="btn text">详情</button></td></tr><tr><td><strong>EX-20260802-011</strong></td><td>ZIPPO-218<br><small>零售商 B · 天猫店</small></td><td>门店整改期</td><td>08-02 至 08-05</td><td>王芳</td><td><span class="tag green">生效中</span></td><td>昨天 15:22</td><td><button class="btn text">详情</button><button class="btn text">终止</button></td></tr><tr><td><strong>EX-20260728-006</strong></td><td>ZIPPO-193<br><small>经销商 C · 拼多多店</small></td><td>证明材料不足</td><td>07-28 至 07-30</td><td>周凯</td><td><span class="tag gray">已失效</span></td><td>07-28 11:04</td><td><button class="btn text">详情</button></td></tr></tbody></table></div></div></section>
+        <section class="view" id="view-minimum"><div class="page-head"><div><h1>最低售价</h1><div class="subhead">维护固定金额、折扣比例和商品类目规则引用。</div></div><div class="actions"><button class="btn">导入</button><button class="btn">导出</button><button class="btn primary">＋ 新建最低售价规则</button></div></div><div class="card"><div class="card-head"><h2>最低售价规则</h2><span class="tag green">启用 36 条</span></div><div class="filters"><div class="field"><label>商品范围</label><input placeholder="SKU、品牌或类目" /></div><div class="field"><label>规则来源</label><select><option>全部来源</option><option>固定金额</option><option>折扣比例</option><option>商品中心类目规则</option></select></div><div class="field"><label>状态</label><select><option>全部状态</option><option>启用</option><option>停用</option></select></div><div class="field"><label>有效期</label><select><option>全部</option><option>当前有效</option><option>即将生效</option></select></div><div class="field"><label>&nbsp;</label><button class="btn primary">查询</button></div></div><div class="table-wrap"><table><thead><tr><th>适用范围</th><th>规则类型</th><th>最低售价</th><th>来源</th><th>有效期</th><th>状态</th><th>更新时间</th><th>操作</th></tr></thead><tbody><tr><td><strong>黑冰系列</strong></td><td>折扣比例</td><td class="num">建议零售价 × 85%</td><td>价格管理中心</td><td>2026-07-01 至长期</td><td><span class="tag green">● 启用</span></td><td>2026-07-28</td><td><button class="btn text">编辑</button><button class="btn text">停用</button></td></tr><tr><td><strong>ZIPPO-193</strong></td><td>固定金额</td><td class="num">¥229.00</td><td>价格管理中心</td><td>2026-08-01 至 2026-09-30</td><td><span class="tag green">● 启用</span></td><td>2026-07-30</td><td><button class="btn text">编辑</button><button class="btn text">停用</button></td></tr><tr><td><strong>联名系列</strong></td><td>类目规则引用</td><td class="num">商品中心规则</td><td>商品中心</td><td>当前有效</td><td><span class="tag amber">● 待确认</span></td><td>2026-07-27</td><td><button class="btn text">查看引用</button></td></tr></tbody></table></div></div></section>
 
-        <section class="view" id="view-org"><div class="page-head"><div><h1>组织价格属性</h1><div class="subhead">引用组织中心数据，维护经销商等级、官方店和纳入价格管理范围。</div></div><div class="actions"><button class="btn">导出</button><button class="btn primary">同步组织数据</button></div></div><div class="card"><div class="card-head"><h2>组织属性列表</h2><span class="tag gray">来源：组织中心</span></div><div class="filters"><div class="field"><label>组织编码 / 名称</label><input placeholder="输入组织编码或名称" /></div><div class="field"><label>组织类型</label><select><option>全部类型</option><option>经销商</option><option>店铺</option><option>官方直营</option></select></div><div class="field"><label>经销商等级</label><select><option>全部等级</option><option>一级经销商</option><option>二级经销商</option><option>不适用</option></select></div><div class="field"><label>纳入管理</label><select><option>全部</option><option>是</option><option>否</option></select></div><div class="field"><label>&nbsp;</label><button class="btn primary">查询</button><button class="btn" type="button">重置</button></div></div><div class="table-wrap"><table><thead><tr><th>组织编码</th><th>组织名称</th><th>组织类型</th><th>经销商等级</th><th>官方店</th><th>纳入管理</th><th>最后同步</th><th>操作</th></tr></thead><tbody><tr><td><strong>ORG-1001</strong></td><td>上海经销商 A</td><td>经销商</td><td>一级经销商</td><td><span class="tag gray">否</span></td><td><span class="tag green">是</span></td><td>今天 09:00</td><td><button class="btn text">编辑</button></td></tr><tr><td><strong>ORG-2008</strong></td><td>ZIPPO 官方旗舰店</td><td>店铺</td><td>不适用</td><td><span class="tag gray">是</span></td><td><span class="tag green">是</span></td><td>今天 09:00</td><td><button class="btn text">编辑</button></td></tr><tr><td><strong>ORG-3012</strong></td><td>零售商 B 京东店</td><td>店铺</td><td>不适用</td><td><span class="tag gray">否</span></td><td><span class="tag gray">否</span></td><td>今天 09:00</td><td><button class="btn text">编辑</button></td></tr></tbody></table></div></div></section>
+        <section class="view" id="view-monitor"><div class="page-head"><div><h1>价格监控</h1><div class="subhead">每日检查店铺公开一口价，记录破价事件并跟进处理。</div></div><div class="actions"><button class="btn">导出</button><button class="btn primary">监控规则</button></div></div><div class="stats"><div class="stat"><div class="label">待处理破价</div><div class="value" style="color:var(--red)">12</div><div class="hint warn">较昨日 +3</div></div><div class="stat"><div class="label">今日已处理</div><div class="value">28</div><div class="hint up">处理完成率 70%</div></div><div class="stat"><div class="label">有效豁免</div><div class="value">7</div><div class="hint">均在有效期内</div></div><div class="stat"><div class="label">最近监控</div><div class="value" style="font-size:20px">09:00</div><div class="hint">每日任务已完成</div></div></div><div class="split"><div class="card"><div class="card-head"><h2>破价列表</h2><div class="actions"><button class="btn">全部</button><button class="btn danger">待处理 12</button></div></div><div class="filters"><div class="field"><label>SKU / 店铺</label><input placeholder="输入 SKU 或店铺名称" /></div><div class="field"><label>风险状态</label><select><option>全部状态</option><option>高风险</option><option>中风险</option><option>已处理</option></select></div><div class="field"><label>发现时间</label><select><option>最近 7 天</option><option>今天</option><option>最近 30 天</option></select></div><div class="field"><label>&nbsp;</label><button class="btn primary">查询</button></div></div><div class="table-wrap"><table><thead><tr><th>风险</th><th>SKU / 商品</th><th>店铺</th><th>公开一口价</th><th>最低售价</th><th>状态</th><th>最近发现</th><th>操作</th></tr></thead><tbody><tr><td><span class="tag red">⚠ 高风险</span></td><td><strong>ZIPPO-193</strong><br><small>哑光黑经典款</small></td><td>经销商 A · 京东店</td><td class="num">¥199.00</td><td class="num">¥229.00</td><td><span class="tag red">待处理</span></td><td>今天 08:52</td><td><button class="btn text">详情</button><button class="btn text">通知</button></td></tr><tr><td><span class="tag amber">⚠ 中风险</span></td><td><strong>ZIPPO-218</strong><br><small>黑冰经典打火机</small></td><td>零售商 B · 天猫店</td><td class="num">¥279.00</td><td class="num">¥289.00</td><td><span class="tag amber">待处理</span></td><td>今天 08:50</td><td><button class="btn text">详情</button><button class="btn text">通知</button></td></tr><tr><td><span class="tag green">✓ 正常</span></td><td><strong>ZIPPO-193</strong><br><small>哑光黑经典款</small></td><td>经销商 C · 拼多多店</td><td class="num">¥229.00</td><td class="num">¥229.00</td><td><span class="tag green">已恢复</span></td><td>昨天 18:22</td><td><button class="btn text">详情</button></td></tr></tbody></table></div><div class="pager"><span>共 40 条事件</span><div class="pages"><button class="page-btn active">1</button><button class="page-btn">2</button><button class="page-btn">›</button></div></div></div><div class="card risk-card"><div class="card-head" style="padding:0 0 14px;border:0"><h2>处理概览</h2><span class="tag gray">今日</span></div><div class="risk-row"><div><div class="risk-name"><span class="risk-dot"></span><strong>高风险</strong></div><div class="bar"><i style="width:78%"></i></div></div><strong>6</strong></div><div class="risk-row"><div><div class="risk-name"><span class="risk-dot amber"></span><strong>中风险</strong></div><div class="bar"><i style="width:46%;background:#d99216"></i></div></div><strong>6</strong></div><div class="risk-row"><div><div class="risk-name"><span class="risk-dot green"></span><strong>已恢复</strong></div><div class="bar"><i style="width:88%;background:var(--green)"></i></div></div><strong>28</strong></div><div style="margin-top:20px;padding:14px;background:var(--red-soft);border-radius:6px;color:var(--red);font-size:13px;line-height:1.6"><strong>处理提醒</strong><br/>有 3 条事件将在今日 18:00 前需要反馈。</div></div></div></section>
+
+        <section class="view" id="view-exemption"><div class="page-head"><div><h1>豁免管理</h1><div class="subhead">处理店铺提交的限时豁免申请，到期后自动恢复监控。</div></div><div class="actions"><button class="btn" id="openExemptionApply">＋ 申请豁免</button><button class="btn">导出记录</button></div></div><div class="card"><div class="card-head"><h2>我的豁免申请</h2><span class="tag amber">待审核 4</span></div><div class="filters"><div class="field"><label>申请编号 / SKU</label><input placeholder="输入申请编号或 SKU" /></div><div class="field"><label>状态</label><select><option>全部状态</option><option>待审核</option><option>生效中</option><option>已失效</option><option>已驳回</option></select></div><div class="field"><label>申请组织</label><select><option>当前店铺</option><option>经销商 A</option><option>零售商 B</option></select></div><div class="field"><label>时间范围</label><select><option>最近 30 天</option><option>最近 7 天</option></select></div><div class="field"><label>&nbsp;</label><button class="btn primary">查询</button></div></div><div class="table-wrap"><table><thead><tr><th>申请编号</th><th>SKU / 店铺</th><th>申请原因</th><th>有效期</th><th>申请人</th><th>状态</th><th>提交时间</th><th>操作</th></tr></thead><tbody><tr><td><strong>EX-20260803-004</strong></td><td>ZIPPO-193<br><small>经销商 A · 京东店</small></td><td>授权经营安排</td><td>08-03 至 08-10</td><td>李明</td><td><span class="tag amber">待审核</span></td><td>今天 08:58</td><td><button class="btn text">详情</button><button class="btn text">撤回</button></td></tr><tr><td><strong>EX-20260802-011</strong></td><td>ZIPPO-218<br><small>零售商 B · 天猫店</small></td><td>门店整改期</td><td>08-02 至 08-05</td><td>王芳</td><td><span class="tag green">生效中</span></td><td>昨天 15:22</td><td><button class="btn text">详情</button><button class="btn text">申请延期</button></td></tr><tr><td><strong>EX-20260728-006</strong></td><td>ZIPPO-193<br><small>经销商 C · 拼多多店</small></td><td>证明材料不足</td><td>07-28 至 07-30</td><td>周凯</td><td><span class="tag gray">已失效</span></td><td>07-28 11:04</td><td><button class="btn text">详情</button></td></tr></tbody></table></div></div><div class="card" style="margin-top:18px"><div class="card-head"><h2>审核处理</h2><span class="tag red">待处理 2</span></div><div class="muted" style="margin-bottom:14px">品牌审核人员仅处理授权范围内的申请；审核通过后，从下一次价格监控任务开始停止告警。</div><div class="table-wrap"><table><thead><tr><th>申请编号</th><th>SKU / 店铺</th><th>当前价格 / 最低售价</th><th>申请原因</th><th>豁免有效期</th><th>申请人</th><th>操作</th></tr></thead><tbody><tr><td><strong>EX-20260803-004</strong></td><td>ZIPPO-193<br><small>经销商 A · 京东店</small></td><td class="num">¥199 / ¥229</td><td>授权经营安排</td><td>08-03 至 08-10</td><td>李明</td><td><button class="btn text">查看材料</button><button class="btn text">通过</button><button class="btn text">驳回</button></td></tr><tr><td><strong>EX-20260803-006</strong></td><td>ZIPPO-218<br><small>零售商 B · 天猫店</small></td><td class="num">¥279 / ¥289</td><td>门店整改期</td><td>08-04 至 08-08</td><td>王芳</td><td><button class="btn text">查看材料</button><button class="btn text">通过</button><button class="btn text">驳回</button></td></tr></tbody></table></div></div></section>
+
+        <section class="view" id="view-org"><div class="page-head"><div><h1>组织价格属性</h1><div class="subhead">引用组织中心数据，维护经销商等级、官方店和纳入价格管理范围。</div></div><div class="actions"><button class="btn">导出</button><button class="btn primary">同步组织数据</button></div></div><div class="card"><div class="card-head"><h2>组织属性列表</h2><span class="tag gray">来源：组织中心</span></div><div class="filters"><div class="field"><label>组织编码 / 名称</label><input placeholder="输入组织编码或名称" /></div><div class="field"><label>组织类型</label><select><option>全部类型</option><option>经销商</option><option>店铺</option><option>官方直营</option></select></div><div class="field"><label>经销商等级</label><select><option>全部等级</option><option>一级经销商</option><option>二级经销商</option><option>不适用</option></select></div><div class="field"><label>纳入管理</label><select><option>全部</option><option>是</option><option>否</option></select></div><div class="field"><label>&nbsp;</label><button class="btn primary">查询</button></div></div><div class="table-wrap"><table><thead><tr><th>组织编码</th><th>组织名称</th><th>组织类型</th><th>经销商等级</th><th>官方店</th><th>纳入管理</th><th>最后同步</th><th>操作</th></tr></thead><tbody><tr><td><strong>ORG-1001</strong></td><td>上海经销商 A</td><td>经销商</td><td>一级经销商</td><td><span class="tag gray">否</span></td><td><span class="tag green">是</span></td><td>今天 09:00</td><td><button class="btn text">编辑属性</button></td></tr><tr><td><strong>ORG-2008</strong></td><td>ZIPPO 官方旗舰店</td><td>店铺</td><td>不适用</td><td><span class="tag blue">是</span></td><td><span class="tag green">是</span></td><td>今天 09:00</td><td><button class="btn text">编辑属性</button></td></tr><tr><td><strong>ORG-3012</strong></td><td>零售商 B 京东店</td><td>店铺</td><td>不适用</td><td><span class="tag gray">否</span></td><td><span class="tag gray">否</span></td><td>今天 09:00</td><td><button class="btn text">编辑属性</button></td></tr></tbody></table></div></div></section>
+        <section class="view" id="view-downstream"><div class="page-head"><div><h1>价格列表</h1><div class="subhead">面向下游渠道查看已发布的执行价格与店铺价格。</div></div><div class="actions"><button class="btn">导出价格列表</button></div></div><div class="card"><div class="card-head"><h2>下游执行价格</h2><span class="tag gray">当前页 50 条</span></div><div class="table-wrap"><table><thead><tr><th>价格类型</th><th>SKU</th><th>最低零售价</th><th>运营组</th><th>平台</th><th>渠道名称</th><th>商品编码</th><th>SKU商品编码</th><th>一口价</th><th>创建时间</th><th>更新时间</th></tr></thead><tbody><tr><td>平台一口价</td><td>zlot00001-c01</td><td class="num">179</td><td>A经商</td><td>天猫</td><td>上海天猫1店</td><td>emj-502-BI</td><td>69123456789</td><td class="num"><strong>199</strong></td><td>2026-07-18 10:08</td><td>2026-08-26 09:00</td></tr><tr><td>建议零售价</td><td>zlot00001-c02</td><td class="num">189</td><td>B经商</td><td>JD</td><td>zippo上海专营店</td><td>emj1-502-BI</td><td>50220260835</td><td class="num"><strong>212</strong></td><td>2026-07-19 10:09</td><td>2026-08-26 09:00</td></tr></tbody></table></div></div></section>
+        <section class="view active" id="view-definition"><div class="page-head"><div><h1>价格定义</h1><div class="subhead">维护品牌价格主档的价格类型、适用范围和生效规则。</div></div><div class="actions"><button class="btn">导出价格定义</button><button class="btn primary" id="openDefinition">＋ 新建价格定义</button></div></div><div class="card"><div class="card-head"><h2>价格类型</h2><span class="tag green">启用 5 类</span></div><div class="filters"><div class="field"><label>价格名称</label><input placeholder="输入价格名称或编码" /></div><div class="field"><label>价格类型</label><select><option>全部类型</option><option>WSP 贸易价格</option><option>MASP 建议零售价</option><option>常规价</option><option>促销价</option></select></div><div class="field"><label>状态</label><select><option>全部状态</option><option>启用</option><option>停用</option></select></div><div class="field"><label>&nbsp;</label><button class="btn primary">查询</button></div></div><div class="table-wrap"><table><thead><tr><th>价格名称</th><th>价格类型</th><th>适用范围</th><th>维护维度</th><th>审批要求</th><th>状态</th><th>更新时间</th><th>操作</th></tr></thead><tbody><tr><td><strong>一级经销商贸易价格</strong><br><small class="muted">WSP-L1</small></td><td><span class="tag blue">WSP</span></td><td>一级经销商</td><td>SKU + 经销商层级</td><td>需要审批</td><td><span class="tag green">启用</span></td><td>2026-08-26 16:20</td><td><button class="btn text">查看</button><button class="btn text">编辑</button></td></tr><tr><td><strong>二级经销商贸易价格</strong><br><small class="muted">WSP-L2</small></td><td><span class="tag blue">WSP</span></td><td>二级经销商</td><td>SKU + 经销商层级</td><td>需要审批</td><td><span class="tag green">启用</span></td><td>2026-08-26 16:20</td><td><button class="btn text">查看</button><button class="btn text">编辑</button></td></tr><tr><td><strong>品牌建议零售价</strong><br><small class="muted">MASP</small></td><td><span class="tag red">MASP</span></td><td>全品牌 SKU</td><td>SKU（每个 SKU 唯一）</td><td>需要审批</td><td><span class="tag green">启用</span></td><td>2026-08-26 15:08</td><td><button class="btn text">查看</button><button class="btn text">编辑</button></td></tr><tr><td><strong>经销商店铺常规价格</strong><br><small class="muted">REGULAR</small></td><td><span class="tag red">常规价</span></td><td>经销商层级 + 平台 + 店铺</td><td>SKU + 层级 + 平台 + 店铺 + 有效期</td><td>需要审批</td><td><span class="tag green">启用</span></td><td>2026-08-26 14:42</td><td><button class="btn text">查看</button><button class="btn text">编辑</button></td></tr><tr><td><strong>限时店铺促销底价</strong><br><small class="muted">PROMO</small></td><td><span class="tag amber">促销价</span></td><td>经销商层级 + 平台 + 店铺</td><td>SKU + 层级 + 平台 + 店铺 + 起止时间</td><td>需要审批</td><td><span class="tag green">启用</span></td><td>2026-08-26 13:15</td><td><button class="btn text">查看</button><button class="btn text">编辑</button></td></tr></tbody></table></div><div class="pager"><span>共 5 类价格定义</span><div class="pages"><button class="page-btn active">1</button></div></div></div><div class="card" style="margin-top:18px"><div class="card-head"><h2>价格规则说明</h2><span class="tag gray">品牌规则</span></div><div class="detail-grid"><div><small class="muted">破价判断顺序</small><strong>促销价 → 常规价 → MASP</strong></div><div><small class="muted">促销价要求</small><strong>必须填写开始和结束时间</strong></div><div><small class="muted">MASP 约束</small><strong>每个 SKU 仅一个当前有效值</strong></div><div><small class="muted">审批方式</small><strong>接入统一审批服务</strong></div></div></div></section>
       </div>
     </main>
   </div>
   <div class="modal-backdrop" id="modal"><div class="modal"><div class="modal-head"><h3 id="modalTitle">新建价格政策</h3><button class="icon-btn" id="closeModal">×</button></div><div class="modal-body"><div class="modal-grid"><div class="field"><label>政策名称</label><input placeholder="例如：一级经销商标准供货政策" /></div><div class="field"><label>价格类型</label><select><option>请选择价格类型</option><option>一级经销商供货价</option><option>二级经销商供货价</option><option>官方零售价</option></select></div><div class="field"><label>适用对象</label><select><option>请选择适用对象</option><option>一级经销商</option><option>二级经销商</option><option>指定经销商</option><option>指定店铺</option></select></div><div class="field"><label>价格优先级</label><input type="number" placeholder="数字越小优先级越高" /></div></div><div class="field"><label>备注</label><input placeholder="补充该政策的业务说明" /></div></div><div class="modal-foot"><button class="btn" id="cancelModal">取消</button><button class="btn primary" id="saveModal">保存草稿</button></div></div></div>
+  <div class="modal-backdrop" id="columnModal"><div class="modal"><div class="modal-head"><h3>列设置</h3><button class="icon-btn" id="closeColumns">×</button></div><div class="modal-body"><div class="muted">选择要在价格明细中展示的当前生效价格类型，确认后会在列表中增加对应价格列。</div><div class="column-options" id="columnOptions"></div></div><div class="modal-foot"><button class="btn" id="cancelColumns">取消</button><button class="btn primary" id="applyColumns">应用列设置</button></div></div></div>
+  <div class="modal-backdrop" id="exemptionApplyModal"><div class="modal"><div class="modal-head"><h3>申请豁免</h3><button class="icon-btn" id="closeExemptionApply">×</button></div><div class="modal-body"><div class="modal-grid"><div class="field"><label>关联破价记录</label><select><option>请选择本店铺破价记录</option><option>ZIPPO-193 · 京东店 · ¥199 / ¥229</option><option>ZIPPO-218 · 天猫店 · ¥279 / ¥289</option></select></div><div class="field"><label>店铺</label><input value="当前登录店铺" disabled /></div><div class="field"><label>豁免开始时间</label><input type="date" value="2026-08-03" /></div><div class="field"><label>豁免结束时间</label><input type="date" value="2026-08-10" /></div></div><div class="field"><label>申请原因</label><input placeholder="请填写授权经营、整改期等原因" /></div><div class="field"><label>证明材料</label><input type="file" /></div><div class="field"><label>申请说明</label><textarea placeholder="补充说明申请背景和处理安排" style="min-height:84px"></textarea></div><div class="muted">提交后将进入统一审批服务；审核通过后，从下一次价格监控任务开始停止告警。结束时间不可为空。</div></div><div class="modal-foot"><button class="btn" id="cancelExemptionApply">取消</button><button class="btn primary" id="submitExemptionApply">提交审批</button></div></div></div>
+  <div class="modal-backdrop" id="typeDefinitionModal"><div class="modal"><div class="modal-head"><h3>新建自定义价格类型</h3><button class="icon-btn" id="closeTypeDefinition">×</button></div><div class="modal-body"><div class="modal-grid"><div class="field"><label>价格类型名称</label><input id="customTypeName" placeholder="例如：重点客户专属价" /></div><div class="field"><label>价格类型编码</label><input id="customTypeCode" placeholder="例如：VIP_PRICE" /></div><div class="field"><label>适用范围</label><select id="customTypeScope"><option>SKU</option><option>SKU + 经销商层级</option><option>SKU + 经销商层级 + 平台 + 店铺</option></select></div><div class="field"><label>有效期设置</label><select id="customTypeValidity"><option>无固定期限</option><option>需要开始时间</option><option>需要开始和结束时间</option></select></div><div class="field"><label>是否需要审批</label><select id="customTypeApproval"><option>需要审批</option><option>无需审批</option></select></div></div><div class="field"><label>价格类型说明</label><textarea id="customTypeRemark" placeholder="说明该价格类型的业务用途和使用规则" style="min-height:84px"></textarea></div><div class="muted">促销类价格建议选择“需要开始和结束时间”；已被使用的类型不能直接删除，只能停用。</div></div><div class="modal-foot"><button class="btn" id="cancelTypeDefinition">取消</button><button class="btn primary" id="saveTypeDefinition">保存价格类型</button></div></div></div>
   <div class="toast" id="toast">已保存为草稿</div>
   <script>
     if (new URLSearchParams(location.search).get('capture') === '1') document.body.classList.add('capture');
-    const names = { policy: '价格政策', lists: '价目表', current: '当前价格', minimum: '最低售价', monitor: '价格监控', exemption: '豁免管理', org: '组织价格属性' };
+    const names = { policy: '价格政策', definition: '价格定义', lists: '价目表', trade: '品牌贸易协议价', asp: '品牌 ASP 价格', current: '品牌商品价格总表', downstream: '价格列表', minimum: '最低售价', monitor: '价格监测列表', exemption: '豁免管理', org: '组织价格属性', audit: '价格审计记录' };
+    const terminologyWalker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+    const terminologyNodes = []; while (terminologyWalker.nextNode()) terminologyNodes.push(terminologyWalker.currentNode);
+    terminologyNodes.forEach(node => { node.nodeValue = node.nodeValue.replaceAll('A经商', 'A级经销商').replaceAll('B经商', 'B级经销商').replaceAll('C经商', 'A级经销商').replaceAll('官方直营', 'B级经销商'); });
+    const priceTypes = ['WSP', 'ASP', 'MSRP'];
+    const groups = ['A级经销商', 'B级经销商'];
+    document.querySelectorAll('#view-current .filters .field label').forEach(label => { if (label.textContent.trim() === '运营组') label.textContent = '经销商层级'; });
+    document.querySelectorAll('#view-current .filters select option').forEach(option => { option.textContent = option.textContent.replace('全部运营组', '全部经销商层级').replace('A经商', 'A级经销商').replace('B经商', 'B级经销商').replace('C经商', 'A级经销商').replace('官方直营', 'B级经销商'); });
+    const platforms = ['天猫', 'JD', 'PDD', '抖音'];
+    const stores = ['上海天猫1店', 'zippo上海专营店', '天马专卖店', '马航淘宝店', 'ZIPPO官方旗舰店'];
+    const priceRows = document.getElementById('priceRows');
+    let priceData = Array.from({length: 50}, (_, i) => {
+      const sku = 'zlot' + String(1 + Math.floor(i / 5)).padStart(5, '0') + '-c' + String(1 + (i % 5)).padStart(2, '0');
+      const platform = platforms[i % platforms.length];
+      const group = groups[i % groups.length];
+      const base = 179 + (i % 7) * 10;
+      return { type: priceTypes[i % priceTypes.length], sku, min: base, group, platform, store: stores[i % stores.length], product: ['emj-502-BI', 'emj1-502-BI', 'HV-001', 'HV-002'][i % 4], code: ['69123456789', '50220260835', '69710024568'][i % 3], one: base + 20 + (i % 6) * 3, created: `2026-07-${String(18 + (i % 12)).padStart(2, '0')} 10:${String(8 + (i % 50)).padStart(2, '0')}`, updated: `2026-08-${String(1 + (i % 5)).padStart(2, '0')} 09:00` };
+    });
+    try { const savedPriceData = JSON.parse(localStorage.getItem('zippo-price-data-v1') || '[]'); if (Array.isArray(savedPriceData) && savedPriceData.length) priceData = [...savedPriceData, ...priceData]; } catch (e) { /* 本地存储不可用时继续使用页面示例数据 */ }
+    const persistPriceData = () => { try { localStorage.setItem('zippo-price-data-v1', JSON.stringify(priceData)); } catch (e) {} };
+    const tradeRows = document.getElementById('tradeRows');
+    const tradeData = Array.from({length: 50}, (_, i) => ({
+      sku: 'zlot' + String(1 + Math.floor(i / 5)).padStart(5, '0') + '-c01',
+      group: i % 5 < 3 ? 'A级经销商' : 'B级经销商',
+      level: i % 5 < 3 ? 'A级经销商' : 'B级经销商',
+      wsp: i % 2 === 0 ? 120 + (i % 7) * 3 : 150 + (i % 7) * 3,
+      masp: 299 + (Math.floor(i / 5) % 6) * 20,
+      created: `2026-07-${String(1 + (i % 20)).padStart(2, '0')} 09:00:00`,
+      start: ['2026-07-01 00:00:00', '2026-08-16 00:00:00', '2026-09-02 00:00:00', '2026-10-01 00:00:00', '2026-11-01 00:00:00'][i % 5],
+      end: ['2026-08-15 23:59:59', '2026-09-01 23:59:59', '2026-09-30 23:59:59', '2026-10-31 23:59:59', '9999-12-31 23:59:59'][i % 5]
+    }));
+    tradeData.forEach(r => { r.updated = r.created; r.operator = '价格运营员'; });
+    document.body.insertAdjacentHTML('beforeend', `<div class="modal-backdrop" id="tradeEntryModal"><div class="modal"><div class="modal-head"><h3>新增品牌贸易协议价</h3><button class="icon-btn" id="closeTradeEntry">×</button></div><div class="modal-body"><div class="modal-grid"><div class="field"><label>价格类型</label><select id="tradeEntryType"><option>WSP 贸易价</option><option>MASP 统一建议零售价</option></select></div><div class="field"><label>SKU</label><input id="tradeEntrySku" placeholder="例如：zlot00010-c01" /></div><div class="field"><label>运营组</label><select id="tradeEntryGroup"><option>A级经销商</option><option>B级经销商</option></select></div><div class="field"><label>经销商层级</label><select id="tradeEntryLevel"><option>A级经销商</option><option>B级经销商</option></select></div><div class="field"><label>价格</label><input id="tradeEntryPrice" type="number" min="0.01" step="0.01" placeholder="请输入价格" /></div><div class="field"><label>生效开始时间</label><input id="tradeEntryStart" type="datetime-local" /></div><div class="field"><label>生效结束时间</label><input id="tradeEntryEnd" type="datetime-local" value="9999-12-31T23:59" /></div></div><div class="muted">WSP 按 SKU＋运营组维护；MASP 按 SKU 维护。同一价格维度的生效区间不得重叠。</div></div><div class="modal-foot"><button class="btn" id="cancelTradeEntry">取消</button><button class="btn primary" id="saveTradeEntry">保存协议价</button></div></div></div>`);
+    const tradeEntryModal = document.getElementById('tradeEntryModal');
+    document.getElementById('openTradeEntry')?.addEventListener('click', () => { document.getElementById('tradeEntryStart').value = new Date().toISOString().slice(0,16); tradeEntryModal.classList.add('open'); });
+    document.getElementById('closeTradeEntry')?.addEventListener('click', () => tradeEntryModal.classList.remove('open'));
+    document.getElementById('cancelTradeEntry')?.addEventListener('click', () => tradeEntryModal.classList.remove('open'));
+    const truncateTradeIntervals = (sku, group, start) => {
+      const boundary = new Date(start).getTime() - 1000; let changed = 0;
+      tradeData.forEach(r => { if (r.sku === sku && (group === '品牌统一' || r.group === group) && new Date(r.start).getTime() < new Date(start).getTime() && new Date(r.end).getTime() >= new Date(start).getTime()) { r.end = new Date(boundary).toISOString().replace('T',' ').slice(0,19); changed++; } });
+      return changed;
+    };
+    document.getElementById('saveTradeEntry')?.addEventListener('click', () => {
+      const type = document.getElementById('tradeEntryType').value, sku = document.getElementById('tradeEntrySku').value.trim(), group = document.getElementById('tradeEntryGroup').value, level = document.getElementById('tradeEntryLevel').value, amount = Number(document.getElementById('tradeEntryPrice').value), start = document.getElementById('tradeEntryStart').value, end = document.getElementById('tradeEntryEnd').value;
+      if (!sku || !amount || amount <= 0 || !start || !end || new Date(end) < new Date(start)) { alert('请完整填写 SKU、价格和有效时间，且结束时间不能早于开始时间'); return; }
+      const isMasp = type.startsWith('MASP') || type.startsWith('MSRP');
+      const conflict = tradeData.find(r => r.sku === sku && (isMasp || r.group === group) && new Date(start) > new Date(r.start) && new Date(start) <= new Date(r.end));
+      if (conflict && !confirm(`检测到当前生效价格（${conflict.start} 至 ${conflict.end}）。保存后将把该价格自动截断至 ${new Date(new Date(start).getTime() - 1000).toISOString().replace('T',' ').slice(0,19)}，新价格从 ${start.replace('T',' ')} 生效。是否继续？`)) return;
+      truncateTradeIntervals(sku, isMasp ? '品牌统一' : group, start);
+      const now = new Date().toISOString().replace('T',' ').slice(0,19);
+      tradeData.unshift({ sku, group: isMasp ? '品牌统一' : group, level: isMasp ? '不适用' : level, wsp: isMasp ? 0 : amount, masp: isMasp ? amount : (tradeData.find(r => r.sku === sku)?.masp || 0), created: now, updated: now, operator: '价格运营员', start: start.replace('T',' '), end: end.replace('T',' ') });
+      renderTradeRows(tradeData); tradeEntryModal.classList.remove('open'); priceToast('协议价已新增');
+    });
+    document.body.insertAdjacentHTML('beforeend', `<div class="modal-backdrop" id="tradeBulkModal"><div class="modal" style="max-width:900px"><div class="modal-head"><h3>批量调价</h3><button class="icon-btn" id="closeTradeBulk">×</button></div><div class="modal-body"><div class="field"><label>SKU（支持粘贴多个，换行或逗号分隔）</label><textarea id="bulkSkuInput" placeholder="zlot00001-c01\nzlot00001-c02\nzlot00002-c01" style="min-height:86px"></textarea></div><div class="modal-grid"><div class="field"><label>价格类型</label><select id="bulkType"><option>WSP 贸易价</option><option>MASP 统一建议零售价</option></select></div><div class="field"><label>运营组</label><select id="bulkGroup"><option>A级经销商</option><option>B级经销商</option></select></div><div class="field"><label>调价方式</label><select id="bulkMethod"><option value="discount">按 MASP 折扣</option><option value="direct">直接输入价格</option></select></div><div class="field"><label id="bulkValueLabel">折扣（%）</label><input id="bulkValue" type="number" min="0.01" step="0.01" placeholder="例如 80" /></div><div class="field"><label>生效开始时间</label><input id="bulkStart" type="datetime-local" /></div><div class="field"><label>生效结束时间</label><input id="bulkEnd" type="datetime-local" value="9999-12-31T23:59" /></div></div><button class="btn" id="previewTradeBulk">生成计算结果</button><div class="table-wrap" style="margin-top:14px;max-height:260px;overflow:auto"><table><thead><tr><th>SKU</th><th>原 MASP</th><th>调价方式</th><th>计算后价格</th><th>校验结果</th></tr></thead><tbody id="bulkPreviewRows"><tr><td colspan="5" class="muted">填写 SKU 和调价参数后生成预览</td></tr></tbody></table></div></div><div class="modal-foot"><button class="btn" id="cancelTradeBulk">取消</button><button class="btn primary" id="saveTradeBulk">确认批量调价</button></div></div></div>`);
+    const tradeBulkModal = document.getElementById('tradeBulkModal');
+    document.getElementById('openTradeBulk')?.addEventListener('click', () => { document.getElementById('bulkStart').value = new Date().toISOString().slice(0,16); tradeBulkModal.classList.add('open'); });
+    document.getElementById('closeTradeBulk')?.addEventListener('click', () => tradeBulkModal.classList.remove('open'));
+    document.getElementById('cancelTradeBulk')?.addEventListener('click', () => tradeBulkModal.classList.remove('open'));
+    document.getElementById('bulkMethod')?.addEventListener('change', e => { document.getElementById('bulkValueLabel').textContent = e.target.value === 'discount' ? '折扣（%）' : '价格（元）'; });
+    const getBulkSkus = () => [...new Set((document.getElementById('bulkSkuInput').value || '').replaceAll('\\n', '\n').split(/[\n,，\s]+/).map(s => s.trim()).filter(Boolean))];
+    const tradeOverlap = (sku, group, start, end) => tradeData.find(r => r.sku === sku && (group === '品牌统一' || r.group === group) && new Date(start) <= new Date(r.end) && new Date(end) >= new Date(r.start));
+    document.getElementById('previewTradeBulk')?.addEventListener('click', () => { const skus = getBulkSkus(), method = document.getElementById('bulkMethod').value, value = Number(document.getElementById('bulkValue').value), start = document.getElementById('bulkStart').value, end = document.getElementById('bulkEnd').value, group = document.getElementById('bulkGroup').value, type = document.getElementById('bulkType').value; if (!skus.length || !value || value <= 0 || !start || !end || new Date(end) < new Date(start)) { alert('请填写 SKU、调价参数和有效时间'); return; } const isMasp = type.startsWith('MASP') || type.startsWith('MSRP'); document.getElementById('bulkPreviewRows').innerHTML = skus.map(sku => { const base = tradeData.find(r => r.sku === sku)?.masp || 299; const result = method === 'discount' ? base * value / 100 : value; const conflict = tradeOverlap(sku, isMasp ? '品牌统一' : group, start, end); return `<tr><td>${sku}</td><td>¥${base.toFixed(2)}</td><td>${method === 'discount' ? `MSRP × ${value}%` : '直接输入'}</td><td class="num"><strong>¥${result.toFixed(2)}</strong></td><td><span class="tag ${conflict ? 'red' : 'green'}">${conflict ? `区间冲突：${conflict.start} 至 ${conflict.end}` : '可提交'}</span></td></tr>`; }).join(''); });
+    document.getElementById('saveTradeBulk')?.addEventListener('click', () => { const skus = getBulkSkus(), method = document.getElementById('bulkMethod').value, value = Number(document.getElementById('bulkValue').value), start = document.getElementById('bulkStart').value, end = document.getElementById('bulkEnd').value; if (!skus.length || !value || value <= 0 || !start || !end || new Date(end) < new Date(start)) { alert('请先填写 SKU、调价参数和有效时间'); return; } const group = document.getElementById('bulkGroup').value, type = document.getElementById('bulkType').value, isMasp = type.startsWith('MASP') || type.startsWith('MSRP'), conflicts = skus.map(sku => tradeOverlap(sku, isMasp ? '品牌统一' : group, start, end)).filter(Boolean); if (conflicts.length && !confirm(`有 ${conflicts.length} 个 SKU 当前已有生效价格。系统将把旧价格截断至 ${new Date(new Date(start).getTime() - 1000).toISOString().replace('T',' ').slice(0,19)}，新价格从 ${start.replace('T',' ')} 生效。是否继续？`)) return; skus.forEach(sku => truncateTradeIntervals(sku, isMasp ? '品牌统一' : group, start)); const now = new Date().toISOString().replace('T',' ').slice(0,19); skus.forEach(sku => { const base = tradeData.find(r => r.sku === sku)?.masp || 299, amount = method === 'discount' ? base * value / 100 : value; tradeData.unshift({ sku, group: isMasp ? '品牌统一' : group, level: isMasp ? '不适用' : group, wsp: isMasp ? 0 : amount, masp: isMasp ? amount : base, created: now, start: start.replace('T',' '), end: end.replace('T',' ') }); }); renderTradeRows(tradeData); tradeBulkModal.classList.remove('open'); priceToast(`已生成 ${skus.length} 条批量调价记录`); });
+    let visibleTradeRows = [];
+    const renderTradeRows = (rows) => {
+      if (!tradeRows) return;
+      const historyText = (r, field) => {
+        const history = tradeData.filter(x => x.sku === r.sku && (field === 'wsp' ? x.level === r.level : true)).sort((a, b) => new Date(a.start) - new Date(b.start));
+        return ['开始时间 | 结束时间 | 价格 | 变更时间', ...history.map(x => `${x.start} | ${x.end} | ¥${Number(x[field]).toFixed(2)} | ${x.created}`)].join('\\n');
+      };
+      const now = Date.now();
+      const currentMap = new Map();
+      rows.forEach(r => {
+        const key = `${r.sku}|${r.group}|${r.level}`;
+        const active = new Date(r.start).getTime() <= now && now <= new Date(r.end).getTime();
+        const existing = currentMap.get(key);
+        const existingActive = existing && new Date(existing.start).getTime() <= now && now <= new Date(existing.end).getTime();
+        if (!existing || (active && !existingActive) || (active === existingActive && new Date(r.start) > new Date(existing.start))) currentMap.set(key, r);
+      });
+      const currentRows = [...currentMap.values()];
+      visibleTradeRows = currentRows;
+      tradeRows.innerHTML = currentRows.map(r => `<tr><td><strong>${r.sku}</strong></td><td>${r.group}</td><td>${r.level}</td><td class="num trade-price-cell" data-history="${historyText(r, 'wsp')}">¥${r.wsp.toFixed(2)}</td><td class="num trade-price-cell" data-history="${historyText(r, 'masp')}">¥${r.masp.toFixed(2)}</td><td>${r.created}</td><td>${r.updated || r.created}</td></tr>`).join('');
+      document.querySelectorAll('.trade-tooltip').forEach(el => el.remove());
+      const tooltip = document.createElement('div'); tooltip.className = 'trade-tooltip'; document.body.appendChild(tooltip);
+      tradeRows.querySelectorAll('.trade-price-cell').forEach(cell => {
+        cell.addEventListener('mouseenter', () => {
+          const lines = (cell.dataset.history || '').split('\\n');
+          const body = lines.slice(1).map(line => { const p = line.split(' | '); return `<tr><td>${p[0] || ''}</td><td>${p[1] || ''}</td><td>${p[2] || ''}</td><td>${p[3] || ''}</td></tr>`; }).join('');
+          tooltip.innerHTML = `<table><thead><tr><th>开始时间</th><th>结束时间</th><th>价格</th><th>变更时间</th></tr></thead><tbody>${body}</tbody></table>`;
+          const rect = cell.getBoundingClientRect(); tooltip.style.display = 'block'; const left = Math.max(10, Math.min(window.innerWidth - 450, rect.left - 140)); const above = rect.top - tooltip.offsetHeight - 8; tooltip.style.left = `${left}px`; tooltip.style.top = `${above > 10 ? above : Math.min(window.innerHeight - tooltip.offsetHeight - 10, rect.bottom + 8)}px`;
+        });
+        cell.addEventListener('mouseleave', () => { tooltip.style.display = 'none'; });
+      });
+      const tradeScrollWrap = tradeRows.closest('.table-wrap');
+      if (tradeScrollWrap) {
+        tradeScrollWrap.onscroll = () => { tooltip.style.display = 'none'; };
+        tradeScrollWrap.onmousemove = event => { const rect = tradeScrollWrap.getBoundingClientRect(); if (event.clientY > rect.bottom - 34) tooltip.style.display = 'none'; };
+      }
+      const count = document.getElementById('tradeCount'); if (count) count.textContent = `共 ${currentRows.length} 条当前协议价`;
+    };
+    renderTradeRows(tradeData);
+    /* 品牌 ASP 底价独立页面：只维护品牌设定值，不混入 RPA 实际售价。 */
+    const aspRows = document.getElementById('aspRows');
+    const aspPlatforms = ['天猫', '京东', '拼多多', '抖音'];
+    const aspStores = ['上海天猫1店', 'ZIPPO京东旗舰店', '天马拼多多店', '马航抖音店'];
+    let aspData = Array.from({length: 50}, (_, i) => ({
+      /* 每个 SKU 重复出现在多个平台，用于验证跨平台查询和批量调价。 */
+      sku: 'zlot' + String(1 + Math.floor(i / 5)).padStart(5, '0') + '-c01',
+      /* 同一 SKU 的第 5 条再次进入天猫时切换为 B 级经销商，避免完全重复的组合。 */
+      group: groups[i % 5 === 4 ? 1 : 0], platform: aspPlatforms[i % aspPlatforms.length], store: aspStores[i % aspStores.length],
+      floor: 78 + (i % 8) * 4, start: ['2026-08-01 00:00:00','2026-09-01 00:00:00','2026-10-01 00:00:00'][i % 3],
+      end: ['2026-08-31 23:59:59','2026-09-30 23:59:59','9999-12-31 23:59:59'][i % 3], created: `2026-07-${String(18 + (i % 12)).padStart(2, '0')} 10:${String(8 + (i % 50)).padStart(2, '0')}:00`, operator: i % 2 ? '价格运营员' : '品牌管理员'
+    }));
+    const aspKeyMatch = (r, scope) => r.sku === scope.sku && r.platform === scope.platform && (!scope.group || r.group === scope.group) && (!scope.store || r.store === scope.store);
+    const aspOverlap = scope => aspData.find(r => aspKeyMatch(r, scope) && new Date(scope.start) <= new Date(r.end) && new Date(scope.end) >= new Date(r.start));
+    const aspBoundary = start => new Date(new Date(start).getTime() - 1000).toISOString().replace('T',' ').slice(0,19);
+    const truncateAsp = scope => aspData.forEach(r => { if (aspKeyMatch(r, scope) && new Date(r.start) < new Date(scope.start) && new Date(r.end) >= new Date(scope.start)) r.end = aspBoundary(scope.start); });
+    let visibleAspRows = [];
+    const renderAspRows = rows => {
+      if (!aspRows) return;
+      const keyOf = r => `${r.sku}|${r.group}|${r.platform}|${r.store}`;
+      const currentMap = new Map(); rows.filter(r => r.group && r.store).forEach(r => { if (!currentMap.has(keyOf(r))) currentMap.set(keyOf(r), r); });
+      const currentRows = [...currentMap.values()];
+      visibleAspRows = currentRows;
+      const historyText = (r) => aspData.filter(x => keyOf(x) === keyOf(r)).sort((a,b) => new Date(a.start) - new Date(b.start)).map(x => `${x.start} | ${x.end} | ¥${Number(x.floor).toFixed(2)} | ${x.created} | ${x.operator || '价格运营员'}`).join('\\n');
+      const formatAspTime = value => { const text = String(value || '').replace('T',' '); return /:\d{2}$/.test(text) ? text : `${text}:00`; };
+      aspRows.innerHTML = currentRows.map(r => `<tr><td><input type="checkbox" class="asp-row-check" data-sku="${r.sku}" data-group="${r.group}" data-platform="${r.platform}" data-store="${r.store}" aria-label="选择 ${r.sku}"></td><td><strong>${r.sku}</strong></td><td>${r.group || '全部运营组'}</td><td>${r.platform}</td><td>${r.store || '全部店铺'}</td><td class="num asp-price-cell" data-history="${historyText(r)}"><strong>¥${Number(r.floor).toFixed(2)}</strong></td><td>${formatAspTime(r.start)}</td><td>${formatAspTime(r.end)}</td><td>${formatAspTime(r.created)}</td><td><button class="btn text asp-view" data-sku="${r.sku}" data-group="${r.group}" data-platform="${r.platform}" data-store="${r.store}">查看</button><button class="btn text asp-history" data-sku="${r.sku}" data-group="${r.group}" data-platform="${r.platform}" data-store="${r.store}">历史</button></td></tr>`).join('');
+      const count = document.getElementById('aspCount'); if (count) count.textContent = `共 ${currentRows.length} 条 ASP 记录`;
+      document.getElementById('selectAllAsp')?.addEventListener('change', e => aspRows.querySelectorAll('.asp-row-check').forEach(box => { box.checked = e.target.checked; }));
+      document.querySelectorAll('.asp-history-tooltip').forEach(el => el.remove());
+      const tooltip = document.createElement('div'); tooltip.className = 'trade-tooltip asp-history-tooltip'; document.body.appendChild(tooltip);
+      aspRows.querySelectorAll('.asp-price-cell').forEach(cell => { cell.addEventListener('mouseenter', () => { const body = (cell.dataset.history || '').split('\\n').map(line => { const p = line.split(' | '); return `<tr><td>${p[0] || ''}</td><td>${p[1] || ''}</td><td>${p[2] || ''}</td><td>${p[3] || ''}</td><td>${p[4] || ''}</td></tr>`; }).join(''); tooltip.innerHTML = `<table><thead><tr><th>开始时间</th><th>结束时间</th><th>价格</th><th>变更时间</th><th>操作人</th></tr></thead><tbody>${body}</tbody></table>`; const rect = cell.getBoundingClientRect(); tooltip.style.display = 'block'; const left = Math.max(10, Math.min(window.innerWidth - 590, rect.left - 200)); const above = rect.top - tooltip.offsetHeight - 8; tooltip.style.left = `${left}px`; tooltip.style.top = `${above > 10 ? above : Math.min(window.innerHeight - tooltip.offsetHeight - 10, rect.bottom + 8)}px`; }); cell.addEventListener('mouseleave', () => { tooltip.style.display = 'none'; }); });
+      aspRows.querySelectorAll('.asp-view').forEach(btn => btn.addEventListener('click', () => { const r = rows.find(x => x.sku === btn.dataset.sku && x.group === btn.dataset.group && x.platform === btn.dataset.platform && x.store === btn.dataset.store); if (r) alert(`ASP 详情\n\nSKU：${r.sku}\n运营组：${r.group}\n平台：${r.platform}\n店铺：${r.store}\n品牌 ASP 底价：¥${Number(r.floor).toFixed(2)}\n生效时间：${r.start} 至 ${r.end}\n最近变更：${r.created}`); }));
+      aspRows.querySelectorAll('.asp-history').forEach(btn => btn.addEventListener('click', () => { const list = aspData.filter(x => x.sku === btn.dataset.sku && x.group === btn.dataset.group && x.platform === btn.dataset.platform && x.store === btn.dataset.store); alert('ASP 变更历史\n\n' + list.map(x => `${x.start} 至 ${x.end}  ¥${Number(x.floor).toFixed(2)}  变更时间：${x.created}  操作人：${x.operator || '价格运营员'}`).join('\n')); }));
+    };
+    renderAspRows(aspData);
+    document.getElementById('exportAsp')?.addEventListener('click', () => { const headers = ['SKU','运营组','平台','店铺名称','品牌 ASP 底价','生效开始时间','生效结束时间','最近变更时间']; const csv = [headers, ...visibleAspRows.map(r => [r.sku,r.group,r.platform,r.store,r.floor,r.start,r.end,r.created])].map(row => row.map(csvEscape).join(',')).join('\\r\\n'); const url = URL.createObjectURL(new Blob(['\\ufeff' + csv], {type:'text/csv;charset=utf-8'})); const a = document.createElement('a'); a.href = url; a.download = `品牌ASP价格_${new Date().toISOString().slice(0,10)}.csv`; a.click(); URL.revokeObjectURL(url); priceToast(`已导出 ${visibleAspRows.length} 条品牌 ASP 记录`); });
+    document.getElementById('aspSearch')?.addEventListener('click', () => { const sku = (document.getElementById('aspSkuFilter')?.value || '').trim().toLowerCase(), platform = document.getElementById('aspPlatformFilter')?.value || '全部平台', group = document.getElementById('aspGroupFilter')?.value || '全部运营组', store = (document.getElementById('aspStoreFilter')?.value || '').trim().toLowerCase(); renderAspRows(aspData.filter(r => (!sku || r.sku.toLowerCase().includes(sku)) && (platform === '全部平台' || r.platform === platform) && (group === '全部运营组' || r.group === group) && (!store || r.store.toLowerCase().includes(store)))); });
+    document.body.insertAdjacentHTML('beforeend', `<div class="modal-backdrop" id="aspEntryModal"><div class="modal" style="max-width:900px"><div class="modal-head"><h3 id="aspModalTitle">新增品牌 ASP</h3><button class="icon-btn" id="closeAspModal">×</button></div><div class="modal-body"><div class="field"><label>SKU（支持粘贴多个，换行或逗号分隔；留空表示全部 SKU）</label><textarea id="aspSkuInput" placeholder="zlot00001-c01\nzlot00001-c02" style="min-height:72px"></textarea></div><div class="modal-grid"><div class="field"><label>平台</label><select id="aspEntryPlatform"><option>天猫</option><option>京东</option><option>拼多多</option><option>抖音</option></select></div><div class="field"><label>运营组（可选）</label><select id="aspEntryGroup"><option value="">全部运营组</option><option>A级经销商</option><option>B级经销商</option></select></div><div class="field"><label>店铺（可选）</label><select id="aspEntryStore"><option value="">全部店铺</option>${aspStores.map(s => `<option>${s}</option>`).join('')}</select></div><div class="field"><label>调价方式</label><select id="aspMethod"><option value="discount">按 MASP 折扣</option><option value="direct">直接输入底价</option></select></div><div class="field"><label id="aspValueLabel">折扣（%）</label><input id="aspValue" type="number" min="0.01" step="0.01" placeholder="例如 80" /></div><div class="field"><label>生效开始时间</label><input id="aspStart" type="datetime-local" /></div><div class="field"><label>生效结束时间</label><input id="aspEnd" type="datetime-local" value="9999-12-31T23:59" /></div></div><div class="muted">平台必填；运营组和店铺均可不选，分别表示覆盖该平台全部运营组或全部店铺。已有相同范围和重叠时间时，系统提示并可将旧价格截断至新价格开始前 1 秒。</div><button class="btn" id="previewAsp">生成计算结果</button><div class="table-wrap" style="margin-top:14px;max-height:220px;overflow:auto"><table><thead><tr><th>SKU</th><th>运营组</th><th>平台</th><th>店铺</th><th>新 ASP 底价</th><th>校验</th></tr></thead><tbody id="aspPreviewRows"><tr><td colspan="6" class="muted">填写参数后生成预览</td></tr></tbody></table></div></div><div class="modal-foot"><button class="btn" id="cancelAspModal">取消</button><button class="btn primary" id="saveAsp">确认保存 ASP</button></div></div></div>`);
+    const allPlatformOption = document.createElement('option'); allPlatformOption.textContent = '全部平台'; document.getElementById('aspEntryPlatform')?.prepend(allPlatformOption);
+    const aspEntryModal = document.getElementById('aspEntryModal');
+    const allAspSkus = () => [...new Set(aspData.map(r => r.sku))];
+    const getAspSkus = () => { const raw = document.getElementById('aspSkuInput').value.trim(); return raw ? [...new Set(raw.replaceAll('\\n','\n').split(/[\n,，\s]+/).filter(Boolean))] : allAspSkus(); };
+    const getAspScope = () => ({ platform: document.getElementById('aspEntryPlatform').value, group: document.getElementById('aspEntryGroup').value, store: document.getElementById('aspEntryStore').value, start: document.getElementById('aspStart').value, end: document.getElementById('aspEnd').value });
+    /* 平台/运营组范围只作为选择条件，保存时展开为实际店铺行，主表不产生汇总行。 */
+    const expandAspTargets = (sku, scope) => {
+      const targetPlatforms = scope.platform === '全部平台' ? aspPlatforms : [scope.platform];
+      const existing = aspData.filter(r => r.sku === sku && targetPlatforms.includes(r.platform) && r.group && r.store);
+      let targets = existing.filter(r => (!scope.group || r.group === scope.group) && (!scope.store || r.store === scope.store)).map(r => ({ sku, platform: r.platform, group: r.group, store: r.store }));
+      if (!targets.length) {
+        const targetGroups = scope.group ? [scope.group] : groups;
+        const targetStores = scope.store ? [scope.store] : aspStores;
+        targets = targetPlatforms.flatMap(platform => targetGroups.flatMap(group => targetStores.map(store => ({ sku, platform, group, store }))));
+      }
+      return [...new Map(targets.map(t => [`${t.sku}|${t.group}|${t.platform}|${t.store}`, t])).values()];
+    };
+    const resetAspEntry = () => { document.getElementById('aspSkuInput').value = ''; document.getElementById('aspEntryGroup').value = ''; document.getElementById('aspEntryStore').value = ''; document.getElementById('aspValue').value = ''; };
+    const prefillAspFromSelection = () => { const selected = [...document.querySelectorAll('.asp-row-check:checked')]; if (!selected.length) return false; const same = key => selected.every(x => x.dataset[key] === selected[0].dataset[key]); document.getElementById('aspSkuInput').value = [...new Set(selected.map(x => x.dataset.sku))].join('\n'); document.getElementById('aspEntryPlatform').value = same('platform') ? selected[0].dataset.platform : '全部平台'; document.getElementById('aspEntryGroup').value = same('group') ? selected[0].dataset.group : ''; document.getElementById('aspEntryStore').value = same('store') ? selected[0].dataset.store : ''; return true; };
+    document.getElementById('openAspEntry')?.addEventListener('click', () => { resetAspEntry(); document.getElementById('aspModalTitle').textContent = '新增品牌 ASP'; document.getElementById('aspStart').value = new Date().toISOString().slice(0,16); aspEntryModal.classList.add('open'); });
+    document.getElementById('openAspBulk')?.addEventListener('click', () => { resetAspEntry(); prefillAspFromSelection(); document.getElementById('aspModalTitle').textContent = '批量调价 · 品牌 ASP'; document.getElementById('aspStart').value = new Date().toISOString().slice(0,16); aspEntryModal.classList.add('open'); });
+    document.getElementById('closeAspModal')?.addEventListener('click', () => aspEntryModal.classList.remove('open')); document.getElementById('cancelAspModal')?.addEventListener('click', () => aspEntryModal.classList.remove('open'));
+    document.getElementById('aspMethod')?.addEventListener('change', e => { document.getElementById('aspValueLabel').textContent = e.target.value === 'discount' ? '折扣（%）' : '底价（元）'; });
+    document.getElementById('previewAsp')?.addEventListener('click', () => { const skus = getAspSkus(), scope = getAspScope(), value = Number(document.getElementById('aspValue').value); if (!value || value <= 0 || !scope.start || !scope.end || new Date(scope.end) < new Date(scope.start)) { alert('请填写调价参数和有效时间'); return; } const method = document.getElementById('aspMethod').value, targets = skus.flatMap(sku => expandAspTargets(sku, scope)), amount = method === 'discount' ? 299 * value / 100 : value; document.getElementById('aspPreviewRows').innerHTML = targets.slice(0,100).map(target => { const conflict = aspOverlap({...target, start: scope.start, end: scope.end}); return `<tr><td>${target.sku}</td><td>${target.group}</td><td>${target.platform}</td><td>${target.store}</td><td class="num">¥${amount.toFixed(2)}</td><td><span class="tag ${conflict ? 'amber' : 'green'}">${conflict ? '存在重叠，确认后截断' : '可保存'}</span></td></tr>`; }).join('') || '<tr><td colspan="6" class="muted">没有匹配到可调整的店铺记录</td></tr>'; });
+    document.getElementById('saveAsp')?.addEventListener('click', () => { const skus = getAspSkus(), scope = getAspScope(), value = Number(document.getElementById('aspValue').value), method = document.getElementById('aspMethod').value; if (!skus.length || !value || value <= 0 || !scope.start || !scope.end || new Date(scope.end) < new Date(scope.start)) { alert('请填写 SKU、价格和有效时间'); return; } const targets = skus.flatMap(sku => expandAspTargets(sku, scope)), conflicts = targets.map(target => aspOverlap({...target, start: scope.start, end: scope.end})).filter(Boolean); if (conflicts.length && !confirm(`检测到 ${conflicts.length} 条店铺 ASP 价格生效区间重叠。系统将把旧价格截断至 ${aspBoundary(scope.start)}，新价格从 ${scope.start.replace('T',' ')} 生效；下一次监控任务将使用新规则。是否继续？`)) return; const now = new Date().toISOString().replace('T',' ').slice(0,19); targets.slice(0,200).forEach(target => { const item = {...target, start: scope.start, end: scope.end}; truncateAsp(item); const floor = method === 'discount' ? 299 * value / 100 : value; aspData.unshift({ ...item, floor, created: now, operator: '价格运营员' }); }); renderAspRows(aspData); aspEntryModal.classList.remove('open'); priceToast(`已保存 ${Math.min(targets.length,200)} 条品牌 ASP 记录`); });
+    document.getElementById('tradeSearch')?.addEventListener('click', () => {
+      const sku = (document.getElementById('tradeSkuFilter')?.value || '').trim().toLowerCase();
+      const level = document.getElementById('tradeLevelFilter')?.value || '全部层级';
+      renderTradeRows(tradeData.filter(r => (!sku || r.sku.toLowerCase().includes(sku)) && (level === '全部层级' || r.level === level)));
+    });
+    const monitorView = document.getElementById('view-monitor');
+    if (monitorView) {
+      monitorView.querySelector('h1').textContent = '价格监测列表';
+      monitorView.querySelector('.subhead').textContent = '每日读取品牌 RPA 数据库中的店铺销售数据，计算 SKU 平均实际售价并与品牌 ASP 底价比对。';
+      const monitorCard = monitorView.querySelector('.split .card');
+      if (monitorCard) {
+        monitorCard.querySelector('h2').textContent = '品牌 ASP 底价与店铺实际售价对比';
+        monitorCard.insertAdjacentHTML('afterbegin', '<div class="muted" style="padding:10px 14px;background:#f7f7f7;border-radius:6px;margin-bottom:14px;line-height:1.6">数据来源：品牌 RPA 数据库。系统每日读取前一天有销售记录的店铺 SKU，按“销售总价 ÷ 销售数量”计算平均实际售价；当店铺实际售价低于品牌 ASP 底价时，判定为破价并生成告警。</div>');
+        const filters = monitorCard.querySelector('.filters');
+        if (filters) filters.innerHTML = `<div class="field"><label>SKU Code</label><input id="monitorSkuFilter" placeholder="多个值用换行或逗号分隔" /></div><div class="field"><label>平台 SKUID</label><input id="monitorPlatformSkuFilter" placeholder="多个值用换行或逗号分隔" /></div><div class="field"><label>平台 SPUID</label><input id="monitorPlatformSpuFilter" placeholder="多个值用换行或逗号分隔" /></div><div class="field"><label>平台</label><select id="monitorPlatformFilter"><option>全部平台</option><option>天猫</option><option>京东</option><option>拼多多</option><option>抖音</option></select></div><div class="field"><label>更新时间起</label><input id="monitorUpdatedFrom" type="datetime-local" /></div><div class="field"><label>更新时间止</label><input id="monitorUpdatedTo" type="datetime-local" /></div><div class="field"><label>是否破价</label><select id="monitorBreakFilter"><option>全部</option><option>是</option><option>否</option></select></div><div class="field"><label>&nbsp;</label><button class="btn primary" id="monitorSearch">筛选</button></div>`;
+        const table = monitorCard.querySelector('table');
+        const monitorData = Array.from({length: 50}, (_, i) => {
+          const platform = ['天猫', '京东', '拼多多', '抖音'][i % 4];
+          const group = i % 2 === 0 ? 'A级经销商' : 'B级经销商';
+          const floor = 78 + (i % 6) * 4;
+          const actual = i % 5 === 0 ? floor - 8 : floor + (i % 4) * 3;
+          return { sku: 'zlot' + String(1 + Math.floor(i / 5)).padStart(5, '0') + '-c' + String(1 + (i % 5)).padStart(2, '0'), platformSku: 'P' + String(20260001 + i), platformSpu: 'SPU' + String(8001 + Math.floor(i / 2)), productName: ['黑冰经典款','哑光黑款','复古银款','联名限定款'][i % 4], platform, platformStore: ['上海天猫1店', 'ZIPPO京东旗舰店', '天马拼多多店', '马航抖音店'][i % 4], group, channel: ['上海天猫1店', 'zippo上海专营店', '天马专卖店', '马航淘宝店'][i % 4], floor, actual, created: `2026-07-${String(18 + (i % 10)).padStart(2,'0')} 09:00:00`, updated: `2026-08-${String(20 + (i % 10)).padStart(2,'0')} 09:00:00` };
+        });
+        let visibleMonitorRows = [];
+        const renderMonitorRows = rows => {
+          if (!table) return;
+          visibleMonitorRows = rows;
+          table.querySelector('thead').innerHTML = '<tr><th><input type="checkbox" id="selectAllMonitor" aria-label="选择全部监测记录"></th><th>SKU Code</th><th>平台SKUID</th><th>商品名称</th><th>平台</th><th>平台店铺名称</th><th>运营组</th><th>渠道名称</th><th>品牌当前活动价</th><th>店铺平均在售价格</th><th>是否破价</th><th>创建时间</th><th>更新时间</th></tr>';
+          table.querySelector('tbody').innerHTML = rows.map((r, i) => `<tr><td><input type="checkbox" class="monitor-row-check" aria-label="选择 ${r.sku}"></td><td><strong>${r.sku}</strong></td><td>${r.platformSku}</td><td>${r.productName}</td><td>${r.platform}</td><td>${r.platformStore}</td><td>${r.group}</td><td>${r.channel}</td><td class="num">¥${r.floor.toFixed(2)}</td><td class="num" style="color:${r.actual < r.floor ? 'var(--red)' : 'inherit'};font-weight:700">¥${r.actual.toFixed(2)}</td><td><button type="button" class="tag ${r.actual < r.floor ? 'red' : 'green'} monitor-reason" data-index="${i}" title="查看本次比对详情">${r.actual < r.floor ? '是' : '否'}</button></td><td>${r.created}</td><td>${r.updated}</td></tr>`).join('');
+          table.querySelector('#selectAllMonitor')?.addEventListener('change', e => table.querySelectorAll('.monitor-row-check').forEach(box => { box.checked = e.target.checked; }));
+          table.querySelectorAll('.monitor-reason').forEach(button => button.addEventListener('click', () => { const r = visibleMonitorRows[Number(button.dataset.index)]; if (!r) return; const diff = r.actual - r.floor; alert(`监测比对详情\\n\\nSKU：${r.sku}\\n平台：${r.platform}\\n店铺：${r.platformStore}\\nRPA平均在售价：¥${r.actual.toFixed(2)}\\n当时品牌ASP底价：¥${r.floor.toFixed(2)}\\n价格差额：${diff >= 0 ? '+' : ''}¥${diff.toFixed(2)}\\nRPA更新时间：${r.updated}\\n结果：${r.actual < r.floor ? '破价' : '未破价'}`); }));
+          const pager = monitorCard.querySelector('.pager span'); if (pager) pager.textContent = `共 ${rows.length} 条监测记录`;
+        };
+        renderMonitorRows(monitorData);
+        document.getElementById('monitorSearch')?.addEventListener('click', () => {
+          const multi = value => (value || '').replaceAll('\\n','\n').split(/[\n,，\s]+/).map(v => v.trim().toLowerCase()).filter(Boolean);
+          const includesAny = (value, list) => !list.length || list.some(v => String(value).toLowerCase().includes(v));
+          const sku = multi(document.getElementById('monitorSkuFilter')?.value);
+          const platformSku = multi(document.getElementById('monitorPlatformSkuFilter')?.value);
+          const platformSpu = multi(document.getElementById('monitorPlatformSpuFilter')?.value);
+          const platform = document.getElementById('monitorPlatformFilter')?.value || '全部平台';
+          const from = document.getElementById('monitorUpdatedFrom')?.value, to = document.getElementById('monitorUpdatedTo')?.value, breakValue = document.getElementById('monitorBreakFilter')?.value || '全部';
+          renderMonitorRows(monitorData.filter(r => includesAny(r.sku, sku) && includesAny(r.platformSku, platformSku) && includesAny(r.platformSpu, platformSpu) && (platform === '全部平台' || r.platform === platform) && (!from || new Date(r.updated.replace(' ','T')) >= new Date(from)) && (!to || new Date(r.updated.replace(' ','T')) <= new Date(to)) && (breakValue === '全部' || (breakValue === '是') === (r.actual < r.floor))));
+        });
+        const monitorExport = monitorView.querySelector('.page-head .actions button:first-child'); if (monitorExport) { monitorExport.id = 'exportMonitor'; monitorExport.addEventListener('click', () => { const headers = ['SKU Code','平台SKUID','商品名称','平台','平台店铺名称','运营组','渠道名称','品牌当前活动价','店铺平均在售价格','是否破价','创建时间','更新时间']; const csv = [headers, ...visibleMonitorRows.map(r => [r.sku,r.platformSku,r.productName,r.platform,r.platformStore,r.group,r.channel,r.floor,r.actual,r.actual < r.floor ? '是' : '否',r.created,r.updated])].map(row => row.map(csvEscape).join(',')).join('\\r\\n'); const url = URL.createObjectURL(new Blob(['\\ufeff' + csv], {type:'text/csv;charset=utf-8'})); const a = document.createElement('a'); a.href=url; a.download=`价格监测列表_${new Date().toISOString().slice(0,10)}.csv`; a.click(); URL.revokeObjectURL(url); priceToast(`已导出 ${visibleMonitorRows.length} 条监测记录`); }); }
+      }
+    }
+    const activePriceColumns = [...priceTypes];
+    const priceColumnValues = (r, type) => ({
+      '一级经销零售价': r.min + 22,
+      '二级经销零售价': r.min + 10,
+      '建议零售价': r.min + 88,
+      '最低零售价': r.min,
+      '成本参考价': Math.max(99, r.min - 34),
+      '平台一口价': r.one
+    }[type]);
+    const priceHistoryText = (r, type) => {
+      const current = priceColumnValues(r, type), past = Math.max(1, Number(current) - 8), future = Number(current) + 8;
+      return `历史价格  2026-08-01：¥${past}\n当前执行  2026-08-27：¥${current}\n未来生效  2026-09-01：¥${future}`;
+    };
+    const normalizeTimestamps = () => document.querySelectorAll('td').forEach(cell => { cell.innerHTML = cell.innerHTML.replace(/(20\d{2}-\d{2}-\d{2} \d{2}:\d{2})(?!:)/g, '$1:00'); });
+    const renderPriceTable = rows => {
+      const head = document.getElementById('priceHead');
+      head.innerHTML = '<th><input class="row-check" type="checkbox" id="selectAllPrices" aria-label="选择当前页全部商品"></th><th>SKU</th><th>商品编码</th><th>SKU商品编码</th><th>创建时间</th><th>更新时间</th>' + activePriceColumns.map(t => `<th data-price-column="${t}">${t}</th>`).join('');
+      const masterRows = Array.from(new Map(rows.map(r => [r.sku, r])).values());
+      priceRows.innerHTML = masterRows.map(r => `<tr><td><input class="row-check price-row-check" type="checkbox" aria-label="选择 ${r.sku}"></td><td><strong>${r.sku}</strong></td><td>${r.product}</td><td class="num">${r.code}</td><td>${r.created}</td><td>${r.updated}</td>${activePriceColumns.map(t => `<td class="num price-cell" data-history="${priceHistoryText(r, t)}"><strong>${priceColumnValues(r, t)}</strong></td>`).join('')}</tr>`).join('');
+      const selectAll = document.getElementById('selectAllPrices');
+      if (selectAll) selectAll.addEventListener('change', () => document.querySelectorAll('.price-row-check').forEach(box => { box.checked = selectAll.checked; }));
+      normalizeTimestamps();
+    };
+    renderPriceTable(priceData);
+    const priceTools = document.querySelector('#view-current .page-head .actions');
+    if (priceTools) {
+      priceTools.innerHTML = '<button class="btn" id="downloadPriceTemplate">下载导入模板</button><button class="btn" id="openImportGuide">填写说明</button><button class="btn" id="importPrices">导入价格</button><button class="btn" id="exportPrices">导出价格总表</button><button class="btn primary" id="addPrice">＋ 新增价格</button><input id="priceFileInput" type="file" accept=".csv,.txt" hidden />';
+    }
+    document.body.insertAdjacentHTML('beforeend', `<div class="modal-backdrop" id="importGuideModal"><div class="modal"><div class="modal-head"><h3>价格导入填写说明</h3><button class="icon-btn" id="closeImportGuide">×</button></div><div class="modal-body"><div class="muted">请先下载模板，按一行一条价格记录填写。导入时系统会校验必填项、价格格式、有效时间和重复范围。</div><div class="table-wrap"><table style="min-width:0"><thead><tr><th>列名</th><th>是否必填</th><th>填写说明</th><th>示例</th></tr></thead><tbody><tr><td>价格类型</td><td>是</td><td>填写已启用的价格类型</td><td>平台一口价</td></tr><tr><td>SKU</td><td>是</td><td>填写商品SKU，必须存在且为启用状态</td><td>zlot00010-c01</td></tr><tr><td>运营组</td><td>是</td><td>填写经销商运营组</td><td>A经商</td></tr><tr><td>平台</td><td>是</td><td>填写平台名称</td><td>天猫</td></tr><tr><td>渠道名称</td><td>是</td><td>填写具体店铺名称</td><td>上海天猫1店</td></tr><tr><td>商品编码 / SKU商品编码</td><td>否</td><td>按商品中心已有编码填写</td><td>emj-502-BI / 69123456789</td></tr><tr><td>价格</td><td>是</td><td>填写大于0的数字，最多两位小数</td><td>199</td></tr><tr><td>生效开始时间</td><td>是</td><td>格式：YYYY-MM-DD HH:mm:ss</td><td>2026-09-01 00:00:00</td></tr><tr><td>生效结束时间</td><td>是</td><td>长期价格填写9999-12-31 23:59:59</td><td>9999-12-31 23:59:59</td></tr></tbody></table></div><div class="muted">规则提示：WSP不填写平台和店铺；MASP同一SKU同一时间只能有一条；有效期重叠、SKU不存在、价格为空或小于等于0时，整批导入会失败并提示具体行号。</div></div><div class="modal-foot"><button class="btn" id="closeImportGuide2">关闭</button><button class="btn primary" id="downloadPriceTemplate2">下载模板</button></div></div></div>`);
+    const importGuideModal = document.getElementById('importGuideModal');
+    const closeImportGuide = () => importGuideModal.classList.remove('open');
+    document.getElementById('openImportGuide').addEventListener('click', () => importGuideModal.classList.add('open'));
+    document.getElementById('closeImportGuide').addEventListener('click', closeImportGuide);
+    document.getElementById('closeImportGuide2').addEventListener('click', closeImportGuide);
+    const downloadTemplate = () => { const rows = [['价格类型','SKU','运营组','平台','渠道名称','商品编码','SKU商品编码','价格','生效开始时间','生效结束时间'],['平台一口价','zlot00010-c01','A经商','天猫','上海天猫1店','emj-502-BI','69123456789','199','2026-09-01 00:00:00','9999-12-31 23:59:59'],['建议零售价','zlot00010-c01','品牌总部','','','','','299','2026-09-01 00:00:00','9999-12-31 23:59:59']]; const csv = rows.map(row => row.map(csvEscape).join(',')).join('\\r\\n'); const blob = new Blob(['\\ufeff' + csv], {type:'text/csv;charset=utf-8'}); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href=url; a.download='价格导入模板.csv'; a.click(); URL.revokeObjectURL(url); priceToast('导入模板已下载'); };
+    document.getElementById('downloadPriceTemplate').addEventListener('click', downloadTemplate);
+    document.getElementById('downloadPriceTemplate2').addEventListener('click', downloadTemplate);
+    document.body.insertAdjacentHTML('beforeend', `<div class="modal-backdrop" id="priceEntryModal"><div class="modal"><div class="modal-head"><h3>新增价格数据</h3><button class="icon-btn" id="closePriceEntry">×</button></div><div class="modal-body"><div class="modal-grid"><div class="field"><label>价格类型</label><select id="entryType">${priceTypes.map(t => `<option>${t}</option>`).join('')}</select></div><div class="field"><label>SKU</label><input id="entrySku" placeholder="例如：zlot00010-c01" /></div><div class="field"><label>运营组</label><select id="entryGroup">${groups.map(t => `<option>${t}</option>`).join('')}</select></div><div class="field"><label>平台</label><select id="entryPlatform">${platforms.map(t => `<option>${t}</option>`).join('')}</select></div><div class="field"><label>渠道名称</label><select id="entryStore">${stores.map(t => `<option>${t}</option>`).join('')}</select></div><div class="field"><label>商品编码</label><input id="entryProduct" placeholder="例如：emj-502-BI" /></div><div class="field"><label>SKU商品编码</label><input id="entryCode" placeholder="例如：69123456789" /></div><div class="field"><label>价格</label><input id="entryPrice" type="number" min="0.01" step="0.01" placeholder="请输入价格" /></div><div class="field"><label>生效开始时间</label><input id="entryStart" type="datetime-local" /></div><div class="field"><label>生效结束时间</label><input id="entryEnd" type="datetime-local" value="9999-12-31T23:59" /></div></div><div class="muted">新增数据会写入当前页面数据集；如价格类型要求审批，只有审批通过并到达生效时间后才参与有效价格比对。</div></div><div class="modal-foot"><button class="btn" id="cancelPriceEntry">取消</button><button class="btn primary" id="savePriceEntry">保存价格</button></div></div></div>`);
+    const priceEntryModal = document.getElementById('priceEntryModal');
+    const closePriceEntry = () => priceEntryModal.classList.remove('open');
+    document.getElementById('addPrice').addEventListener('click', () => { document.getElementById('entryStart').value = new Date().toISOString().slice(0,16); priceEntryModal.classList.add('open'); });
+    document.getElementById('closePriceEntry').addEventListener('click', closePriceEntry);
+    document.getElementById('cancelPriceEntry').addEventListener('click', closePriceEntry);
+    const priceToast = message => { const toast = document.getElementById('toast'); toast.textContent = message; toast.classList.add('show'); setTimeout(() => { toast.classList.remove('show'); toast.textContent = '已保存为草稿'; }, 2200); };
+    document.getElementById('savePriceEntry').addEventListener('click', () => {
+      const type = document.getElementById('entryType').value, sku = document.getElementById('entrySku').value.trim(), price = Number(document.getElementById('entryPrice').value), start = document.getElementById('entryStart').value, end = document.getElementById('entryEnd').value;
+      if (!sku || !price || price <= 0 || !start || !end) { alert('请完整填写SKU、价格和有效时间'); return; }
+      if (new Date(end) < new Date(start)) { alert('生效结束时间不能早于开始时间'); return; }
+      const group = document.getElementById('entryGroup').value, platform = document.getElementById('entryPlatform').value, store = document.getElementById('entryStore').value;
+      const conflict = priceData.some(r => r.type === type && r.sku === sku && r.group === group && r.platform === platform && r.store === store);
+      if (conflict && !confirm('相同价格类型、SKU和店铺已有数据，是否仍要新增？')) return;
+      const now = new Date().toISOString().replace('T',' ').slice(0,19);
+      priceData = [{ type, sku, min: price, group, platform, store, product: document.getElementById('entryProduct').value.trim() || '-', code: document.getElementById('entryCode').value.trim() || '-', one: price, created: now, updated: now }, ...priceData];
+      persistPriceData(); renderPriceTable(priceData); closePriceEntry(); priceToast('价格数据已新增');
+    });
+    const csvEscape = value => `"${String(value ?? '').replace(/"/g, '""')}"`;
+    document.getElementById('exportPrices').addEventListener('click', () => {
+      const headers = ['价格类型','SKU','运营组','平台','渠道名称','商品编码','SKU商品编码','价格','创建时间','更新时间'];
+      const lines = [headers, ...priceData.map(r => [r.type,r.sku,r.group,r.platform,r.store,r.product,r.code,r.one,r.created,r.updated])].map(row => row.map(csvEscape).join(','));
+      const blob = new Blob(['\\ufeff' + lines.join('\\r\\n')], { type: 'text/csv;charset=utf-8' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `价格数据_${new Date().toISOString().slice(0,10)}.csv`; a.click(); URL.revokeObjectURL(url); priceToast('价格数据已导出');
+    });
+    const parseCsv = text => { const rows = []; let row = [], cell = '', quoted = false; for (let i=0;i<text.length;i++) { const ch=text[i], next=text[i+1]; if (ch === '"' && quoted && next === '"') { cell += '"'; i++; } else if (ch === '"') quoted = !quoted; else if (ch === ',' && !quoted) { row.push(cell); cell=''; } else if ((ch === '\\n' || ch === '\\r') && !quoted) { if (ch === '\\r' && next === '\\n') i++; row.push(cell); if (row.some(v => v.trim())) rows.push(row); row=[]; cell=''; } else cell += ch; } if (cell || row.length) { row.push(cell); rows.push(row); } return rows; };
+    document.getElementById('importPrices').addEventListener('click', () => document.getElementById('priceFileInput').click());
+    document.getElementById('priceFileInput').addEventListener('change', event => { const file = event.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = () => { const rows = parseCsv(String(reader.result).replace(/^\\ufeff/, '')); if (rows.length < 2) { alert('导入文件没有可用数据'); return; } const header = rows[0].map(v => v.trim()); const idx = name => header.indexOf(name); const required = ['价格类型','SKU','运营组','平台','渠道名称','价格','生效开始时间','生效结束时间']; const missing = required.filter(name => idx(name) < 0); if (missing.length) { alert(`导入失败：缺少必要列：${missing.join('、')}`); return; } const errors = [], additions = []; rows.slice(1).forEach((cells, n) => { const line = n + 2, type = cells[idx('价格类型')]?.trim(), sku = cells[idx('SKU')]?.trim(), group = cells[idx('运营组')]?.trim(), platform = cells[idx('平台')]?.trim(), store = cells[idx('渠道名称')]?.trim(), amount = Number(cells[idx('价格')]), start = cells[idx('生效开始时间')]?.trim(), end = cells[idx('生效结束时间')]?.trim(); if (!type || !sku || !group || !platform || !store || !amount || amount <= 0) errors.push(`第${line}行：价格类型、SKU、范围和价格不能为空且价格必须大于0`); else if (!start || !end || new Date(end) < new Date(start)) errors.push(`第${line}行：有效时间为空或时间范围错误`); else if (additions.some(r => r.type===type && r.sku===sku && r.group===group && r.platform===platform && r.store===store) || priceData.some(r => r.type===type && r.sku===sku && r.group===group && r.platform===platform && r.store===store)) errors.push(`第${line}行：相同价格类型、SKU和店铺存在重复或时间冲突`); else additions.push({ type, sku, min: amount, group, platform, store, product: cells[idx('商品编码')]?.trim() || '-', code: cells[idx('SKU商品编码')]?.trim() || '-', one: amount, created: new Date().toISOString().replace('T',' ').slice(0,19), updated: new Date().toISOString().replace('T',' ').slice(0,19) }); }); if (errors.length) { alert(`导入失败，共${errors.length}条错误：\\n\\n${errors.slice(0,8).join('\\n')}${errors.length>8?'\\n……':''}`); return; } priceData = [...additions, ...priceData]; renderPriceTable(priceData); priceToast(`成功导入${additions.length}条价格数据`); event.target.value=''; }; reader.readAsText(file, 'UTF-8'); });
+    /* 使用可替换的文件控件承接导入，避免重复绑定旧处理器。 */
+    const originalPriceFileInput = document.getElementById('priceFileInput');
+    const fixedPriceFileInput = originalPriceFileInput.cloneNode(true);
+    originalPriceFileInput.replaceWith(fixedPriceFileInput);
+    const parseCsvSimple = text => text.replace(/^\uFEFF/, '').trim().split(/\r?\n/).filter(Boolean).map(line => line.split(',').map(cell => cell.trim().replace(/^"|"$/g, '').replace(/""/g, '"')));
+    fixedPriceFileInput.addEventListener('change', event => {
+      const file = event.target.files[0]; if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        const rows = parseCsvSimple(String(reader.result));
+        if (rows.length < 2) { alert('导入失败：文件中没有可用数据'); return; }
+        const header = rows[0], index = name => header.indexOf(name);
+        const required = ['价格类型','SKU','运营组','平台','渠道名称','价格','生效开始时间','生效结束时间'];
+        const missing = required.filter(name => index(name) < 0);
+        if (missing.length) { alert(`导入失败：缺少必要列：${missing.join('、')}`); return; }
+        const errors = [], additions = [], now = new Date().toISOString().replace('T',' ').slice(0,19);
+        rows.slice(1).forEach((cells, rowIndex) => {
+          const line = rowIndex + 2, type = cells[index('价格类型')], sku = cells[index('SKU')], group = cells[index('运营组')], platform = cells[index('平台')], store = cells[index('渠道名称')], amount = Number(cells[index('价格')]), start = cells[index('生效开始时间')], end = cells[index('生效结束时间')];
+          if (!type || !sku || !group || !platform || !store || !amount || amount <= 0) errors.push(`第${line}行：价格类型、SKU、适用范围和价格不能为空，价格必须大于0`);
+          else if (!start || !end || Number.isNaN(new Date(start).getTime()) || Number.isNaN(new Date(end).getTime()) || new Date(end) < new Date(start)) errors.push(`第${line}行：有效时间为空或时间范围错误`);
+          else if (additions.some(r => r.type===type && r.sku===sku && r.group===group && r.platform===platform && r.store===store) || priceData.some(r => r.type===type && r.sku===sku && r.group===group && r.platform===platform && r.store===store)) errors.push(`第${line}行：相同价格类型、SKU和店铺存在重复或时间冲突`);
+          else additions.push({ type, sku, min: amount, group, platform, store, product: cells[index('商品编码')] || '-', code: cells[index('SKU商品编码')] || '-', one: amount, created: now, updated: now });
+        });
+        if (errors.length) { alert(`导入失败，共${errors.length}条错误：\n\n${errors.slice(0,8).join('\n')}${errors.length>8?'\n……':''}`); return; }
+        priceData = [...additions, ...priceData]; persistPriceData(); renderPriceTable(priceData); priceToast(`成功导入${additions.length}条价格数据`); event.target.value = '';
+      };
+      reader.readAsText(file, 'UTF-8');
+    });
+    const renderColumnOptions = () => {
+      document.getElementById('columnOptions').innerHTML = priceTypes.map(type => `<label class="column-option"><input type="checkbox" value="${type}" ${activePriceColumns.includes(type) ? 'checked' : ''}><span><strong>${type}</strong><small>当前已有生效价格，可作为独立列展示</small></span></label>`).join('');
+    };
+    renderColumnOptions();
+    document.getElementById('priceSearch').addEventListener('click', () => {
+      const fields = document.querySelectorAll('#view-current .filters input');
+      const selects = document.querySelectorAll('#view-current .filters select');
+      const sku = fields[0].value.trim().toLowerCase();
+      const product = fields[1].value.trim().toLowerCase();
+      const code = fields[2].value.trim().toLowerCase();
+      const group = selects[0].value;
+      const platform = selects[1].value;
+      const type = selects[2].value;
+      const filtered = priceData.filter(r => (!sku || r.sku.toLowerCase().includes(sku)) && (!product || r.product.toLowerCase().includes(product)) && (!code || r.code.toLowerCase().includes(code)) && (group === '全部经销商层级' || r.group === group) && (platform === '全部平台' || r.platform === platform) && (type === '全部价格类型' || r.type === type));
+      renderPriceTable(filtered);
+      document.querySelector('#view-current .pager span').textContent = `筛选结果 ${filtered.length} 条，当前页最多显示 50 条`;
+    });
+    const columnModal = document.getElementById('columnModal');
+    document.getElementById('openColumns').addEventListener('click', () => { renderColumnOptions(); columnModal.classList.add('open'); });
+    document.getElementById('closeColumns').addEventListener('click', () => columnModal.classList.remove('open'));
+    document.getElementById('cancelColumns').addEventListener('click', () => columnModal.classList.remove('open'));
+    document.getElementById('applyColumns').addEventListener('click', () => {
+      activePriceColumns.splice(0, activePriceColumns.length, ...Array.from(document.querySelectorAll('#columnOptions input:checked')).map(input => input.value));
+      const fields = document.querySelectorAll('#view-current .filters input');
+      const selects = document.querySelectorAll('#view-current .filters select');
+      const sku = fields[0].value.trim().toLowerCase();
+      const product = fields[1].value.trim().toLowerCase();
+      const code = fields[2].value.trim().toLowerCase();
+      const group = selects[0].value, platform = selects[1].value, type = selects[2].value;
+      const filtered = priceData.filter(r => (!sku || r.sku.toLowerCase().includes(sku)) && (!product || r.product.toLowerCase().includes(product)) && (!code || r.code.toLowerCase().includes(code)) && (group === '全部经销商层级' || r.group === group) && (platform === '全部平台' || r.platform === platform) && (type === '全部价格类型' || r.type === type));
+      renderPriceTable(filtered);
+      columnModal.classList.remove('open');
+    });
+    const exemptionApplyModal = document.getElementById('exemptionApplyModal');
+    document.getElementById('openExemptionApply').addEventListener('click', () => exemptionApplyModal.classList.add('open'));
+    document.getElementById('closeExemptionApply').addEventListener('click', () => exemptionApplyModal.classList.remove('open'));
+    document.getElementById('cancelExemptionApply').addEventListener('click', () => exemptionApplyModal.classList.remove('open'));
+    document.getElementById('submitExemptionApply').addEventListener('click', () => { exemptionApplyModal.classList.remove('open'); const toast = document.getElementById('toast'); toast.textContent = '已提交审批，等待品牌方审核'; toast.classList.add('show'); setTimeout(() => { toast.classList.remove('show'); toast.textContent = '已保存为草稿'; }, 2200); });
     const show = key => { document.querySelectorAll('.view').forEach(v => v.classList.remove('active')); document.getElementById('view-' + key).classList.add('active'); document.querySelectorAll('.nav button').forEach(b => b.classList.toggle('active', b.dataset.view === key)); document.getElementById('crumbText').textContent = names[key]; };
+    [...document.querySelectorAll('button')].filter(btn => btn.textContent.trim() === '查看操作记录').forEach(btn => btn.addEventListener('click', () => show('audit')));
+    document.querySelector('#view-current h1').textContent = '品牌价格主档';
+    document.querySelector('#view-current .subhead').textContent = '按SKU查看品牌已定义并生效的各类价格；本表不展示店铺监测结果。';
+    document.querySelector('#view-current .card-head h2').textContent = '品牌价格主档明细';
+    document.querySelectorAll('#view-current .filters .field').forEach(field => { const label = field.querySelector('label')?.textContent.trim(); if (label === '运营组' || label === '平台') field.style.display = 'none'; });
+    document.querySelector('#view-monitor h1').textContent = '价格监测列表';
+    document.querySelector('#view-monitor .subhead').textContent = '每日比对店铺ASP与品牌价格要求，展示破价结果和处理状态。';
+    const downstreamNav = document.querySelector('.nav button[data-view="downstream"]'); if (downstreamNav) downstreamNav.style.display = 'none';
+    const downstreamView = document.getElementById('view-downstream'); if (downstreamView) downstreamView.style.display = 'none';
+    const listsNav = document.querySelector('.nav button[data-view="lists"]'); if (listsNav) listsNav.style.display = 'none';
+    const listsView = document.getElementById('view-lists'); if (listsView) listsView.style.display = 'none';
+    const currentNav = document.querySelector('.nav button[data-view="current"]'); if (currentNav) currentNav.style.display = 'none';
+    const currentView = document.getElementById('view-current'); if (currentView) currentView.style.display = 'none';
+    const exemptionNav = document.querySelector('.nav button[data-view="exemption"]'); if (exemptionNav) exemptionNav.style.display = 'none';
+    const exemptionView = document.getElementById('view-exemption'); if (exemptionView) exemptionView.style.display = 'none';
     document.querySelectorAll('.nav button').forEach(btn => btn.addEventListener('click', () => show(btn.dataset.view)));
     const modal = document.getElementById('modal');
     const open = title => { document.getElementById('modalTitle').textContent = title; modal.classList.add('open'); };
+    const simplifyDefinitionTable = () => {
+      const table = document.querySelector('#view-definition table');
+      if (!table) return;
+      table.querySelector('thead tr').innerHTML = '<th>价格类型名称</th><th>价格含义</th><th>适用范围</th><th>维护维度</th><th>状态</th><th>更新时间</th><th>操作</th>';
+      const meanings = { WSP: '经销商贸易价格', MASP: '品牌统一建议零售价', REGULAR: '店铺日常执行价格', PROMO: '指定期间店铺促销底价' };
+      table.querySelectorAll('tbody tr').forEach(row => {
+        const cells = row.querySelectorAll('td');
+        if (cells.length < 8) return;
+        const code = cells[0].querySelector('small')?.textContent.trim() || '';
+        const type = cells[1].textContent.trim();
+        const meaning = meanings[code] || (type.includes('WSP') ? '经销商贸易价格' : '自定义价格类型');
+        row.innerHTML = `<td>${cells[0].innerHTML}</td><td>${meaning}</td><td>${cells[2].innerHTML}</td><td>${cells[3].innerHTML}</td><td>${cells[5].innerHTML}</td><td>${cells[6].innerHTML}</td><td>${cells[7].innerHTML}</td>`;
+      });
+    };
+    simplifyDefinitionTable();
+    normalizeTimestamps();
+    const definitionMockRows = [
+      ['WSP', '经销商贸易价格', '不同经销商运营组', 'SKU + 运营组 + 有效期'],
+      ['ASP', '经销商店铺品牌活动底价', '运营组 + 平台 + 店铺', 'SKU + 运营组 + 平台 + 店铺 + 有效期'],
+      ['MSRP', '品牌统一建议零售价', '全品牌 SKU', 'SKU + 有效期']
+    ];
+    const definitionTbody = document.querySelector('#view-definition table tbody');
+    if (definitionTbody) {
+      definitionTbody.innerHTML = definitionMockRows.map(row => `<tr><td><strong>${row[0]}</strong></td><td>${row[1]}</td><td>${row[2]}</td><td>${row[3]}</td><td><span class="tag green">启用</span></td><td>2026-08-27 09:00:00</td><td><button class="btn text">查看</button><button class="btn text">编辑</button></td></tr>`).join('');
+      const definitionCount = document.querySelector('#view-definition .card-head .tag'); if (definitionCount) definitionCount.textContent = `启用 ${definitionMockRows.length} 类`;
+      const definitionTotal = document.querySelector('#view-definition .pager span'); if (definitionTotal) definitionTotal.textContent = `共 ${definitionMockRows.length} 类价格定义`;
+      definitionTbody.querySelectorAll('.btn.text').forEach(btn => btn.addEventListener('click', () => {
+        const row = btn.closest('tr');
+        const name = row ? row.querySelector('td strong')?.textContent : '价格定义';
+        open(btn.textContent.trim() === '查看' ? `查看价格定义 · ${name}` : `编辑价格定义 · ${name}`);
+      }));
+    }
+    const definitionTypeFilter = document.querySelector('#view-definition .filters select');
+    if (definitionTypeFilter) definitionTypeFilter.innerHTML = '<option>全部价格类型</option><option>WSP</option><option>ASP</option><option>MSRP</option>';
+    const typeDefinitionModal = document.getElementById('typeDefinitionModal');
+    const typeButton = document.createElement('button'); typeButton.className = 'btn'; typeButton.textContent = '管理价格类型';
+    document.querySelector('#view-definition .page-head .actions').prepend(typeButton);
+    typeButton.addEventListener('click', () => typeDefinitionModal.classList.add('open'));
+    document.getElementById('closeTypeDefinition').addEventListener('click', () => typeDefinitionModal.classList.remove('open'));
+    document.getElementById('cancelTypeDefinition').addEventListener('click', () => typeDefinitionModal.classList.remove('open'));
+    document.getElementById('saveTypeDefinition').addEventListener('click', () => {
+      const name = document.getElementById('customTypeName').value.trim();
+      const code = document.getElementById('customTypeCode').value.trim().toUpperCase();
+      const scope = document.getElementById('customTypeScope').value;
+      const validity = document.getElementById('customTypeValidity').value;
+      const approval = document.getElementById('customTypeApproval').value;
+      if (!name || !code) { alert('请填写价格类型名称和编码'); return; }
+      const tbody = document.querySelector('#view-definition table tbody');
+      tbody.insertAdjacentHTML('beforeend', `<tr><td><strong>${name}</strong><br><small class="muted">${code}</small></td><td>自定义价格类型 · ${validity}</td><td>自定义适用对象</td><td>${scope}</td><td><span class="tag green">启用</span></td><td>刚刚</td><td><button class="btn text">查看</button><button class="btn text">编辑</button></td></tr>`);
+      document.querySelector('#view-definition .filters select').insertAdjacentHTML('beforeend', `<option>${name}</option>`);
+      typeDefinitionModal.classList.remove('open');
+      document.getElementById('customTypeName').value = ''; document.getElementById('customTypeCode').value = ''; document.getElementById('customTypeRemark').value = '';
+      const toast = document.getElementById('toast'); toast.textContent = '自定义价格类型已创建'; toast.classList.add('show'); setTimeout(() => { toast.classList.remove('show'); toast.textContent = '已保存为草稿'; }, 1800);
+    });
     document.getElementById('openPolicy').addEventListener('click', () => open('新建价格政策'));
+    document.getElementById('openDefinition').addEventListener('click', () => open('新建价格定义'));
+    document.querySelectorAll('#view-definition .btn.text').forEach(btn => btn.addEventListener('click', () => {
+      const row = btn.closest('tr');
+      const name = row ? row.querySelector('td strong')?.textContent : '价格定义';
+      open(btn.textContent.trim() === '查看' ? `查看价格定义 · ${name}` : `编辑价格定义 · ${name}`);
+    }));
     document.getElementById('openList').addEventListener('click', () => open('新建价目表'));
     document.getElementById('closeModal').addEventListener('click', () => modal.classList.remove('open'));
     document.getElementById('cancelModal').addEventListener('click', () => modal.classList.remove('open'));
     document.getElementById('saveModal').addEventListener('click', () => { modal.classList.remove('open'); const toast = document.getElementById('toast'); toast.classList.add('show'); setTimeout(() => toast.classList.remove('show'), 1800); });
+    // 价格审计记录：集中保留所有价格操作的前后值、操作者和结果。
+    const auditNav = document.createElement('button'); auditNav.dataset.view = 'audit'; auditNav.innerHTML = '<span>▤</span><span>价格审计记录</span>'; document.querySelector('.nav .nav-label:last-of-type')?.insertAdjacentElement('afterend', auditNav); auditNav.addEventListener('click', () => show('audit'));
+    document.querySelector('.workspace').insertAdjacentHTML('beforeend', `<section class="view" id="view-audit"><div class="page-head"><div><h1>价格审计记录</h1><div class="subhead">记录价格新增、调整、导入、审批、生效和监控比对的完整操作轨迹。</div></div><div class="actions"><button class="btn" id="exportAudit">导出审计记录</button></div></div><div class="card"><div class="card-head"><h2>操作明细</h2><span class="tag blue" id="auditCount">共 20 条记录</span></div><div class="filters"><div class="field"><label>SKU / 单号</label><input id="auditKeyword" placeholder="输入 SKU、批次号或审批单号" /></div><div class="field"><label>操作类型</label><select id="auditAction"><option>全部操作</option><option>新增价格</option><option>批量调价</option><option>导入价格</option><option>审批通过</option><option>价格生效</option><option>RPA监控比对</option></select></div><div class="field"><label>价格类型</label><select id="auditPriceType"><option>全部价格类型</option><option>WSP</option><option>MASP</option><option>ASP</option><option>RPA实际售价</option></select></div><div class="field"><label>操作结果</label><select id="auditResult"><option>全部结果</option><option>成功</option><option>失败</option><option>产生破价</option></select></div><div class="field"><label>操作时间起</label><input id="auditFrom" type="datetime-local" /></div><div class="field"><label>操作时间止</label><input id="auditTo" type="datetime-local" /></div><div class="field"><label>&nbsp;</label><button class="btn primary" id="auditSearch">筛选</button></div></div><div class="table-wrap"><table style="min-width:1500px"><thead><tr><th>操作时间</th><th>操作人</th><th>操作类型</th><th>价格类型</th><th>操作对象</th><th>变更前</th><th>变更后</th><th>操作原因</th><th>审批状态</th><th>操作结果</th><th>关联单号</th><th>操作</th></tr></thead><tbody id="auditRows"></tbody></table></div><div class="pager"><span id="auditPager">共 20 条记录</span><div class="pages"><button class="page-btn active">1</button><button class="page-btn">2</button><button class="page-btn">›</button></div></div></div></section>`);
+    const auditData = Array.from({length: 20}, (_, i) => { const actions = ['新增价格','批量调价','导入价格','审批通过','价格生效','RPA监控比对']; const types = ['WSP','MASP','ASP','RPA实际售价']; const action = actions[i % actions.length]; const type = types[i % types.length]; const result = action === 'RPA监控比对' && i % 3 === 0 ? '产生破价' : (i === 7 ? '失败' : '成功'); return { time: `2026-08-${String(30 - (i % 8)).padStart(2,'0')} ${String(9 + (i % 8)).padStart(2,'0')}:${String(10 + i).padStart(2,'0')}:00`, operator: i % 2 ? '价格运营员' : '品牌管理员', action, type, object: `zlot${String(1 + Math.floor(i / 4)).padStart(5,'0')}-c0${1 + (i % 4)} · ${i % 2 ? '天猫 / 上海天猫1店' : 'A级经销商'}`, before: type === 'RPA实际售价' ? '¥86.00' : `¥${180 + i * 3}.00`, after: type === 'RPA实际售价' ? `¥${i % 3 === 0 ? '78.00' : '92.00'}` : `¥${190 + i * 3}.00`, reason: action === 'RPA监控比对' ? '每日RPA价格比对' : (action === '导入价格' ? '批量导入价格文件' : '业务调价'), approval: ['批量调价','导入价格','审批通过'].includes(action) ? (i % 4 === 0 ? '审批中' : '审批通过') : '不适用', result, ref: `${action === 'RPA监控比对' ? 'RPA-' : 'PRC-'}202608${String(i + 1).padStart(3,'0')}` }; });
+    let visibleAuditRows = auditData;
+    const renderAuditRows = rows => { visibleAuditRows = rows; const body = document.getElementById('auditRows'); if (!body) return; body.innerHTML = rows.map((r, i) => `<tr><td>${r.time}</td><td>${r.operator}</td><td>${r.action}</td><td><span class="tag ${r.type === 'ASP' ? 'red' : r.type === 'RPA实际售价' ? 'amber' : 'blue'}">${r.type}</span></td><td>${r.object}</td><td>${r.before}</td><td>${r.after}</td><td>${r.reason}</td><td><span class="tag ${r.approval === '审批中' ? 'amber' : r.approval === '审批通过' ? 'green' : 'gray'}">${r.approval}</span></td><td><span class="tag ${r.result === '成功' ? 'green' : r.result === '产生破价' ? 'red' : 'amber'}">${r.result}</span></td><td>${r.ref}</td><td><button type="button" class="btn text audit-detail" data-index="${i}">查看详情</button></td></tr>`).join(''); const count = document.getElementById('auditCount'); if (count) count.textContent = `共 ${rows.length} 条记录`; const pager = document.getElementById('auditPager'); if (pager) pager.textContent = `共 ${rows.length} 条记录`; body.querySelectorAll('.audit-detail').forEach(btn => btn.addEventListener('click', () => { const r = visibleAuditRows[Number(btn.dataset.index)]; alert(`审计详情\\n\\n操作时间：${r.time}\\n操作人：${r.operator}\\n操作类型：${r.action}\\n价格类型：${r.type}\\n操作对象：${r.object}\\n变更前：${r.before}\\n变更后：${r.after}\\n操作原因：${r.reason}\\n审批状态：${r.approval}\\n操作结果：${r.result}\\n关联单号：${r.ref}`); })); };
+    renderAuditRows(auditData);
+    document.getElementById('auditSearch')?.addEventListener('click', () => { const keyword = (document.getElementById('auditKeyword')?.value || '').trim().toLowerCase(); const action = document.getElementById('auditAction')?.value || '全部操作'; const type = document.getElementById('auditPriceType')?.value || '全部价格类型'; const result = document.getElementById('auditResult')?.value || '全部结果'; const from = document.getElementById('auditFrom')?.value, to = document.getElementById('auditTo')?.value; renderAuditRows(auditData.filter(r => (!keyword || `${r.object} ${r.ref}`.toLowerCase().includes(keyword)) && (action === '全部操作' || r.action === action) && (type === '全部价格类型' || r.type === type) && (result === '全部结果' || r.result === result) && (!from || new Date(r.time.replace(' ','T')) >= new Date(from)) && (!to || new Date(r.time.replace(' ','T')) <= new Date(to)))); });
+    document.getElementById('exportAudit')?.addEventListener('click', () => { const headers = ['操作时间','操作人','操作类型','价格类型','操作对象','变更前','变更后','操作原因','审批状态','操作结果','关联单号']; const csv = [headers, ...visibleAuditRows.map(r => [r.time,r.operator,r.action,r.type,r.object,r.before,r.after,r.reason,r.approval,r.result,r.ref])].map(row => row.map(csvEscape).join(',')).join('\\r\\n'); const url = URL.createObjectURL(new Blob(['\\ufeff' + csv], {type:'text/csv;charset=utf-8'})); const a = document.createElement('a'); a.href=url; a.download=`价格审计记录_${new Date().toISOString().slice(0,10)}.csv`; a.click(); URL.revokeObjectURL(url); priceToast(`已导出 ${visibleAuditRows.length} 条审计记录`); });
+    const tradeTable = document.querySelector('#view-trade table');
+    if (tradeTable) tradeTable.querySelector('thead tr').innerHTML = '<th>SKU</th><th>运营组</th><th>经销商层级</th><th>WSP</th><th>MASP</th><th>创建时间</th><th>更新时间</th>';
+    const tradeFilters = document.querySelector('#view-trade .filters');
+    if (tradeFilters) { tradeFilters.innerHTML = '<div class="field"><label>SKU</label><input id="tradeSkuFilter" placeholder="输入 SKU" /></div><div class="field"><label>经销商层级</label><select id="tradeLevelFilter"><option>全部层级</option><option>A级经销商</option><option>B级经销商</option></select></div><div class="field"><label>创建时间起</label><input id="tradeCreatedFrom" type="datetime-local" /></div><div class="field"><label>创建时间止</label><input id="tradeCreatedTo" type="datetime-local" /></div><div class="field"><label>更新时间起</label><input id="tradeUpdatedFrom" type="datetime-local" /></div><div class="field"><label>更新时间止</label><input id="tradeUpdatedTo" type="datetime-local" /></div><div class="field"><label>&nbsp;</label><button class="btn primary" id="tradeSearch">筛选</button></div>'; }
+    document.querySelector('#view-trade .page-head .actions').innerHTML = '<button class="btn" id="importTrade">导入协议价</button><button class="btn" id="exportTrade">导出协议价</button><button class="btn" id="openTradeBulk">批量调价</button><button class="btn primary" id="openTradeEntry">＋ 新增协议价</button><input id="tradeFileInput" type="file" accept=".csv,.txt" hidden />';
+    document.querySelector('#view-trade .page-head .actions #openTradeEntry')?.addEventListener('click', () => { document.getElementById('tradeEntryStart').value = new Date().toISOString().slice(0,16); tradeEntryModal.classList.add('open'); });
+    document.querySelector('#view-trade .page-head .actions #openTradeBulk')?.addEventListener('click', () => { document.getElementById('bulkStart').value = new Date().toISOString().slice(0,16); tradeBulkModal.classList.add('open'); });
+    const tradeFilterDate = value => value ? new Date(value.replace(' ','T')).getTime() : null;
+    document.getElementById('tradeSearch')?.addEventListener('click', () => { const sku = (document.getElementById('tradeSkuFilter')?.value || '').trim().toLowerCase(), level = document.getElementById('tradeLevelFilter')?.value || '全部层级'; const cf = tradeFilterDate(document.getElementById('tradeCreatedFrom')?.value), ct = tradeFilterDate(document.getElementById('tradeCreatedTo')?.value), uf = tradeFilterDate(document.getElementById('tradeUpdatedFrom')?.value), ut = tradeFilterDate(document.getElementById('tradeUpdatedTo')?.value); renderTradeRows(tradeData.filter(r => (!sku || r.sku.toLowerCase().includes(sku)) && (level === '全部层级' || r.level === level) && (!cf || tradeFilterDate(r.created) >= cf) && (!ct || tradeFilterDate(r.created) <= ct) && (!uf || tradeFilterDate(r.updated || r.created) >= uf) && (!ut || tradeFilterDate(r.updated || r.created) <= ut))); });
+    document.body.insertAdjacentHTML('beforeend', '<div class="modal-backdrop" id="tradeGuideModal"><div class="modal" style="max-width:820px"><div class="modal-head"><h3>协议价导入填写说明</h3><button class="icon-btn" id="closeTradeGuide">×</button></div><div class="modal-body"><div class="muted">一行一条 SKU＋经销商层级协议价记录。WSP 为经销商贸易价，MASP 为该 SKU 的品牌统一建议零售价；开始时间和结束时间必须填写，长期价格使用 9999-12-31 23:59:59。</div><div class="table-wrap"><table style="min-width:0"><thead><tr><th>列名</th><th>必填</th><th>填写说明</th></tr></thead><tbody><tr><td>SKU</td><td>是</td><td>必须存在且为启用状态</td></tr><tr><td>运营组 / 经销商层级</td><td>是</td><td>运营组与经销商层级一一对应，填写 A级经销商或 B级经销商</td></tr><tr><td>WSP / MASP</td><td>是</td><td>填写大于 0 的数字，最多两位小数</td></tr><tr><td>生效开始时间 / 生效结束时间</td><td>是</td><td>格式 YYYY-MM-DD HH:mm:ss，时间区间不得早于开始时间</td></tr></tbody></table></div><div class="muted">导入采用整批校验：缺列、空值、价格格式错误、SKU不存在、同一 SKU＋运营组时间重叠或同一 SKU 的 MASP 时间重叠，任一行错误都会阻止整批导入，并返回具体行号和原因。</div></div><div class="modal-foot"><button class="btn" id="closeTradeGuide2">关闭</button><button class="btn primary" id="downloadTradeTemplate2">下载模板</button></div></div></div>');
+    const tradeGuideModal = document.getElementById('tradeGuideModal'); const closeTradeGuide = () => tradeGuideModal.classList.remove('open'); document.getElementById('importTrade')?.addEventListener('click', () => tradeGuideModal.classList.add('open')); document.getElementById('closeTradeGuide')?.addEventListener('click', closeTradeGuide); document.getElementById('closeTradeGuide2')?.addEventListener('click', closeTradeGuide);
+    const downloadTradeTemplate = () => { const rows = [['SKU','运营组','经销商层级','WSP','MSRP','生效开始时间','生效结束时间'],['zlot00001-c01','A级经销商','A级经销商','120.00','299.00','2026-09-01 00:00:00','9999-12-31 23:59:59'],['zlot00001-c02','B级经销商','B级经销商','150.00','299.00','2026-09-01 00:00:00','9999-12-31 23:59:59']]; const csv = rows.map(row => row.map(csvEscape).join(',')).join('\r\n'); const url = URL.createObjectURL(new Blob(['\ufeff' + csv], {type:'text/csv;charset=utf-8'})); const a = document.createElement('a'); a.href = url; a.download = '品牌贸易协议价导入模板.csv'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 0); priceToast('协议价导入模板已下载'); }; document.getElementById('downloadTradeTemplate')?.addEventListener('click', downloadTradeTemplate); tradeGuideModal?.addEventListener('click', event => { if (event.target.closest('#downloadTradeTemplate2')) downloadTradeTemplate(); });
+    const tradeChooseFile = document.createElement('button'); tradeChooseFile.className = 'btn primary'; tradeChooseFile.type = 'button'; tradeChooseFile.textContent = '选择价格文件'; tradeChooseFile.style.marginBottom = '12px'; const tradeFileName = document.createElement('span'); tradeFileName.className = 'muted'; tradeFileName.textContent = '尚未选择文件'; tradeFileName.style.marginLeft = '10px'; const tradeGuideBody = tradeGuideModal?.querySelector('.modal-body'); if (tradeGuideBody) { tradeGuideBody.prepend(tradeFileName); tradeGuideBody.prepend(tradeChooseFile); } tradeChooseFile.addEventListener('click', () => document.getElementById('tradeFileInput')?.click());
+    const downloadTradeTemplateFixed = () => { const rows = [['SKU','运营组','经销商层级','WSP','生效开始时间','生效结束时间'],['zlot00001-c01','A级经销商','A级经销商','120.00','2026-09-01 00:00:00','9999-12-31 23:59:59'],['zlot00001-c02','B级经销商','B级经销商','150.00','2026-09-01 00:00:00','9999-12-31 23:59:59']]; const csv = rows.map(row => row.map(csvEscape).join(',')).join(String.fromCharCode(13, 10)); const url = URL.createObjectURL(new Blob([String.fromCharCode(0xFEFF) + csv], {type:'text/csv;charset=utf-8'})); const a = document.createElement('a'); a.href = url; a.download = '品牌贸易协议价导入模板.csv'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 0); priceToast('协议价导入模板已下载'); };
+    const templateButton = document.getElementById('downloadTradeTemplate2'); if (templateButton) { const replacement = templateButton.cloneNode(true); templateButton.replaceWith(replacement); replacement.addEventListener('click', downloadTradeTemplateFixed); }
+    document.getElementById('tradeFileInput')?.addEventListener('change', event => { tradeFileName.textContent = event.target.files[0]?.name || '尚未选择文件'; });
+    document.getElementById('tradeFileInput')?.addEventListener('change', event => { const file = event.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = () => { const rows = parseCsv(String(reader.result).replace(/^\\ufeff/, '')); if (rows.length < 2) { alert('导入失败：文件中没有可用数据'); return; } const header = rows[0].map(v => v.trim()), idx = name => header.indexOf(name), idxAlias = (...names) => names.map(name => idx(name)).find(i => i >= 0), required = ['SKU','运营组','经销商层级','WSP','MSRP','生效开始时间','生效结束时间'], missing = required.filter(name => idx(name) < 0); if (missing.length) { alert(`导入失败：缺少必要列：${missing.join('、')}`); return; } const errors = [], additions = [], now = new Date().toISOString().replace('T',' ').slice(0,19), msrpIndex = idxAlias('MSRP','MASP'); rows.slice(1).forEach((cells, i) => { const line = i + 2, sku = cells[idx('SKU')]?.trim(), group = cells[idx('运营组')]?.trim(), level = cells[idx('经销商层级')]?.trim(), wsp = Number(cells[idx('WSP')]), masp = Number(cells[msrpIndex]), start = cells[idx('生效开始时间')]?.trim(), end = cells[idx('生效结束时间')]?.trim(); if (!sku || !group || !level || !wsp || wsp <= 0 || !masp || masp <= 0) errors.push(`第${line}行：SKU、运营组、层级和 WSP/MSRP 必须为有效值`); else if (!start || !end || Number.isNaN(new Date(start).getTime()) || Number.isNaN(new Date(end).getTime()) || new Date(end) < new Date(start)) errors.push(`第${line}行：生效时间为空或区间错误`); else if (additions.some(r => r.sku === sku && r.group === group && r.start === start) || tradeData.some(r => r.sku === sku && r.group === group && new Date(start) <= new Date(r.end) && new Date(end) >= new Date(r.start))) errors.push(`第${line}行：同一 SKU＋运营组存在重叠生效区间`); else additions.push({ sku, group, level, wsp, masp, start, end, created: now, updated: now, operator: '价格运营员' }); }); if (errors.length) { alert(`导入失败，共${errors.length}条错误：\\n\\n${errors.slice(0,8).join('\\n')}${errors.length > 8 ? '\\n……' : ''}`); return; } tradeData.unshift(...additions); renderTradeRows(tradeData); priceToast(`成功导入 ${additions.length} 条协议价`); event.target.value = ''; }; reader.readAsText(file, 'UTF-8'); });
+    document.getElementById('exportTrade')?.addEventListener('click', () => { const headers = ['SKU','运营组','经销商层级','WSP','MSRP','创建时间','更新时间','生效开始时间','生效结束时间']; const csv = [headers, ...visibleTradeRows.map(r => [r.sku,r.group,r.level,r.wsp,r.masp,r.created,r.updated || r.created,r.start,r.end])].map(row => row.map(csvEscape).join(',')).join('\\r\\n'); const url = URL.createObjectURL(new Blob(['\\ufeff' + csv], {type:'text/csv;charset=utf-8'})); const a = document.createElement('a'); a.href=url; a.download=`品牌贸易协议价_${new Date().toISOString().slice(0,10)}.csv`; a.click(); URL.revokeObjectURL(url); priceToast(`已导出 ${visibleTradeRows.length} 条当前协议价`); });
+    const legacyTradeFileInput = document.getElementById('tradeFileInput'); if (legacyTradeFileInput) { const tradeFileInput = legacyTradeFileInput.cloneNode(true); legacyTradeFileInput.replaceWith(tradeFileInput); tradeFileInput.addEventListener('change', event => { const file = event.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = () => { const rows = parseCsv(String(reader.result).replace(/^\\ufeff/, '')); if (rows.length < 2) { alert('导入失败：文件中没有可用数据'); return; } const header = rows[0].map(v => v.trim()), idx = name => header.indexOf(name), required = ['SKU','运营组','经销商层级','WSP','生效开始时间','生效结束时间'], missing = required.filter(name => idx(name) < 0); if (missing.length) { alert(`导入失败：缺少必要列：${missing.join('、')}`); return; } const errors = [], additions = [], now = new Date().toISOString().replace('T',' ').slice(0,19); rows.slice(1).forEach((cells, i) => { const line = i + 2, sku = cells[idx('SKU')]?.trim(), group = cells[idx('运营组')]?.trim(), level = cells[idx('经销商层级')]?.trim(), wsp = Number(cells[idx('WSP')]), start = cells[idx('生效开始时间')]?.trim(), end = cells[idx('生效结束时间')]?.trim(), old = tradeData.find(r => r.sku === sku && r.group === group); if (!sku || !group || !level || !wsp || wsp <= 0) errors.push(`第${line}行：SKU、运营组、层级和 WSP 必须为有效值`); else if (!start || !end || Number.isNaN(new Date(start).getTime()) || Number.isNaN(new Date(end).getTime()) || new Date(end) < new Date(start)) errors.push(`第${line}行：生效时间为空或区间错误`); else if (additions.some(r => r.sku === sku && r.group === group && new Date(start) <= new Date(r.end) && new Date(end) >= new Date(r.start)) || tradeData.some(r => r.sku === sku && r.group === group && new Date(start) <= new Date(r.end) && new Date(end) >= new Date(r.start))) errors.push(`第${line}行：同一 SKU＋运营组存在重叠生效区间`); else additions.push({ sku, group, level, wsp, masp: old?.masp || 0, start, end, created: now, updated: now, operator: '价格运营员' }); }); if (errors.length) { alert(`导入失败，共${errors.length}条错误：\\n\\n${errors.slice(0,8).join('\\n')}`); return; } tradeData.unshift(...additions); renderTradeRows(tradeData); priceToast(`成功导入 ${additions.length} 条 WSP 协议价`); event.target.value = ''; }; reader.readAsText(file, 'UTF-8'); }); }
+    if (tradeGuideModal) { const guide = tradeGuideModal.querySelector('.modal-body'); if (guide) guide.innerHTML = guide.innerHTML.replaceAll('WSP / MASP', 'WSP').replaceAll('MASP', 'MSRP').replace('同一 SKU＋运营组时间重叠或同一 SKU 的 MSRP 时间重叠', '同一 SKU＋运营组时间重叠'); }
+    document.getElementById('tradeFileInput')?.addEventListener('change', event => { tradeFileName.textContent = event.target.files[0]?.name || '尚未选择文件'; });
+    // 所有价格筛选区统一提供“重置”，清空条件后恢复默认列表。
+    document.querySelectorAll('.view .filters').forEach(filters => {
+      if (filters.querySelector('.filter-reset')) return;
+      const resetField = document.createElement('div');
+      resetField.className = 'field';
+      resetField.innerHTML = '<label>&nbsp;</label><button type="button" class="btn filter-reset">重置</button>';
+      filters.appendChild(resetField);
+      resetField.querySelector('.filter-reset').addEventListener('click', () => {
+        filters.querySelectorAll('input').forEach(input => {
+          if (input.type === 'checkbox') input.checked = false;
+          else input.value = '';
+        });
+        filters.querySelectorAll('select').forEach(select => { select.selectedIndex = 0; });
+        const searchButton = filters.querySelector('#aspSearch, #monitorSearch, #tradeSearch, #priceSearch');
+        if (searchButton) searchButton.click();
+      });
+    });
+    const finalTerminologyWalker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+    const finalTerminologyNodes = []; while (finalTerminologyWalker.nextNode()) finalTerminologyNodes.push(finalTerminologyWalker.currentNode);
+    finalTerminologyNodes.forEach(node => { node.nodeValue = node.nodeValue.replaceAll('A经商', 'A级经销商').replaceAll('B经商', 'B级经销商').replaceAll('C经商', 'A级经销商').replaceAll('官方直营', 'B级经销商').replaceAll('MASP', 'MSRP'); });
+    document.querySelector('.nav button[data-view="exemption"]')?.remove();
+    document.getElementById('view-exemption')?.remove();
+    document.getElementById('exemptionApplyModal')?.remove();
+    document.querySelectorAll('.stats .stat').forEach(stat => { if (stat.textContent.includes('有效豁免')) stat.remove(); });
+    // 价格监控仅保留监控列表与导出能力，移除“监控规则”入口。
+    document.querySelectorAll('#view-monitor button').forEach(button => {
+      if (button.textContent.trim() === '监控规则') button.remove();
+    });
   </script>
-
-<script>
-(function(){
-  function ensureTabs(rootLabel, tabDefs){
-    const bar = document.getElementById('openTabsBar');
-    if(!bar) return;
-    let tabs = tabDefs.slice();
-    let active = tabs[0] && tabs[0].id;
-    function render(){
-      bar.innerHTML = tabs.map(t => {
-        const act = t.id===active ? ' active' : '';
-        return '<button type="button" class="open-tab'+act+'" data-id="'+t.id+'" title="'+t.label+'"><span>'+t.label+'</span><span class="tab-close" data-close="'+t.id+'" title="关闭">✕</span></button>';
-      }).join('');
-      bar.querySelectorAll('.open-tab').forEach(btn=>{
-        btn.addEventListener('click', (e)=>{
-          if(e.target && e.target.getAttribute('data-close')) return;
-          active = btn.getAttribute('data-id');
-          const t = tabs.find(x=>x.id===active);
-          if(t && t.onActivate) t.onActivate();
-          render();
-        });
-      });
-      bar.querySelectorAll('[data-close]').forEach(x=>{
-        x.addEventListener('click', (e)=>{
-          e.stopPropagation();
-          const id = x.getAttribute('data-close');
-          if(tabs.length<=1) return;
-          const i = tabs.findIndex(t=>t.id===id);
-          if(i<0) return;
-          tabs.splice(i,1);
-          if(active===id) active = tabs[Math.max(0,i-1)].id;
-          render();
-        });
-      });
-    }
-    window.__zippoOpenTab = function(id, label, onActivate){
-      let t = tabs.find(x=>x.id===id);
-      if(!t){ t={id,label,onActivate}; tabs.push(t); }
-      else { t.label=label; if(onActivate) t.onActivate=onActivate; }
-      active=id; if(onActivate) onActivate(); render();
-    };
-    render();
-  }
-  window.__zippoEnsureTabs = ensureTabs;
-})();
-</script>
-
-<script>
-document.addEventListener('DOMContentLoaded', function(){
-  if (window.__zippoEnsureTabs) {
-    window.__zippoEnsureTabs('价格政策', [{ id:'home', label:'价格政策' }]);
-  }
-  document.querySelectorAll('.pagination, .pager').forEach(function(el){
-    if (el.querySelector('.page-size-select')) return;
-    var span = el.querySelector('span') || el.firstElementChild;
-    var sel = document.createElement('select');
-    sel.className = 'page-size-select';
-    sel.setAttribute('aria-label','每页条数');
-    sel.innerHTML = '<option value="20" selected>20条/页</option><option value="50">50条/页</option><option value="100">100条/页</option>';
-    if (span && span.parentNode === el) el.insertBefore(sel, span.nextSibling);
-    else el.appendChild(sel);
-  });
-});
-</script>
-
-
-<script>
-document.addEventListener('DOMContentLoaded', function(){
-  document.querySelectorAll('.nav button[data-view]').forEach(function(btn){
-    btn.addEventListener('click', function(){
-      var id = btn.getAttribute('data-view');
-      var label = (btn.querySelectorAll('span')[1]||btn).textContent.trim().replace(/\d+/g,'').trim() || id;
-      if (typeof show === 'function') show(id);
-      if (window.__zippoOpenTab) window.__zippoOpenTab('v-'+id, label, function(){ if (typeof show==='function') show(id); });
-    });
-  });
-});
-</script>
-
-
-<script>
-/* ZIPPO_MOCK_LIST_PAD: expand first large table to 120 rows + real pager */
-(function(){
-  const TARGET = 120;
-  function padTable(table){
-    if(!table || table.dataset.mockPadded) return;
-    const tb = table.tBodies[0];
-    if(!tb || !tb.rows.length) return;
-    const seed = [...tb.rows].map(r => r.outerHTML);
-    while(tb.rows.length < TARGET){
-      const html = seed[tb.rows.length % seed.length]
-        .replace(/>([^<]{0,40})</, (m,g)=> '>'+g.replace(/(\d+)/, n => String(+n+tb.rows.length))+'<');
-      tb.insertAdjacentHTML('beforeend', html);
-    }
-    table.dataset.mockPadded = '1';
-    wirePager(table);
-  }
-  function wirePager(table){
-    let page=1, size=20;
-    const card = table.closest('.card') || table.closest('.view') || table.parentElement;
-    if (card) card.classList.add('has-table');
-    // remove pagers wrongly nested inside table-wrap
-    const tw = table.closest('.table-wrap');
-    if (tw) tw.querySelectorAll('.pager, .pagination').forEach(el => el.remove());
-    let pager = Array.from(card.querySelectorAll(':scope > .pager, :scope > .pagination')).pop();
-    if(!pager){
-      pager = document.createElement('div');
-      pager.className = 'pager pagination zippo-pager-sticky';
-      card.appendChild(pager);
-    }
-    const all = [...table.tBodies[0].rows];
-    function render(){
-      const pages = Math.max(1, Math.ceil(all.length/size));
-      if(page>pages) page=pages;
-      all.forEach((r,i)=>{ r.style.display = (i>=(page-1)*size && i<page*size) ? '' : 'none'; });
-      pager.innerHTML = '<span>共 '+all.length+' 条 · 第 '+page+'/'+pages+' 页</span>'+
-        '<div style="display:flex;align-items:center;gap:8px">'+
-        '<select aria-label="每页条数"><option value="20">20条/页</option><option value="50">50条/页</option><option value="100">100条/页</option></select>'+
-        '<button type="button" class="pg-prev">上一页</button><button type="button" class="pg-next">下一页</button></div>';
-      const sel = pager.querySelector('select'); sel.value = String(size);
-      sel.onchange = ()=>{ size=+sel.value; page=1; render(); };
-      pager.querySelector('.pg-prev').onclick = ()=>{ page=Math.max(1,page-1); render(); };
-      pager.querySelector('.pg-next').onclick = ()=>{ page=Math.min(pages,page+1); render(); };
-    }
-    render();
-  }
-  document.addEventListener('DOMContentLoaded', function(){
-    document.querySelectorAll('.view .table-wrap table').forEach((tb)=>{
-      padTable(tb);
-    });
-  });
-})();
-</script>
-
 </body>
-
-<script>
-/* ZIPPO_GLOBAL_SHELL_V2 */
-(function(){
-  if(window.__zippoShellV2) return;
-  window.__zippoShellV2 = 1;
-  document.querySelectorAll('.card').forEach(function(card){
-    if(card.querySelector('.table-wrap table')) card.classList.add('has-table');
-  });
-  document.querySelectorAll('.pager, .pagination').forEach(function(p){
-    p.classList.add('zippo-pager-sticky');
-  });
-  function wrapAvatar(el){
-    if(!el || el.closest('.zippo-user-menu')) return;
-    var wrap = document.createElement('div');
-    wrap.className = 'zippo-user-menu';
-    var panel = document.createElement('div');
-    panel.className = 'zippo-user-menu-panel';
-    panel.innerHTML = '<button type="button" data-act="profile">个人中心</button><button type="button" data-act="logout">退出登录</button>';
-    el.parentNode.insertBefore(wrap, el);
-    wrap.appendChild(el);
-    wrap.appendChild(panel);
-    el.style.cursor = 'pointer';
-    el.addEventListener('click', function(e){ e.stopPropagation(); wrap.classList.toggle('open'); });
-    panel.querySelector('[data-act=profile]').onclick = function(){
-      wrap.classList.remove('open');
-      var t=document.getElementById('toast'); if(t){t.textContent='个人中心';t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1600);} else alert('个人中心');
-    };
-    panel.querySelector('[data-act=logout]').onclick = function(){
-      wrap.classList.remove('open');
-      var t=document.getElementById('toast'); if(t){t.textContent='已退出登录';t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1600);} else alert('已退出登录');
-    };
-    document.addEventListener('click', function(){ wrap.classList.remove('open'); });
-  }
-  document.querySelectorAll('[aria-label="账号"], [title="管理员"], .d05-avatar, .d03-avatar, .zippo-avatar-trigger').forEach(wrapAvatar);
-  document.querySelectorAll('.top-right span[title], .global-topbar .top-right > span[style*="border-radius:50%"]').forEach(function(el){
-    if(el.textContent && el.textContent.length<=2) wrapAvatar(el);
-  });
-  document.querySelectorAll('.w-8.h-8.rounded-full, .rounded-full.bg-primary').forEach(function(el){
-    if(el.closest('header') && !el.closest('.zippo-user-menu')) wrapAvatar(el);
-  });
-})();
-</script>
-
 <script src="view-guard.js"></script>
 </html>

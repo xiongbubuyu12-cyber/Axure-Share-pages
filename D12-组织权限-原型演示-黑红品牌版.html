@@ -6,7 +6,9 @@
 
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>D12 组织权限 · 多组织管理 · 黑红品牌版原型</title>
+  <!-- 修订 2026-09-02：当前角色切换；方案 D：加工商独立组织+双能力 capabilities；外部合作仅设计师 -->
+  <!-- 修订 2026-09-02b：去掉组织管理员↔业务角色互斥校验与文案，对齐「不强制互斥 / 配置期扩权」；中段扫尾：补加工商菜单模板 Tab/数据与 tplKey，顶栏/树/审核 toast 与加工商独立组织一致 -->
+<title>D12 组织权限 · 多组织管理 · 黑红品牌版原型</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
   <script>
@@ -239,13 +241,14 @@ aside nav > .mt-6.px-3.py-3.rounded-lg {
         </template>
       </nav>
 <div class="flex items-center gap-3">
-      <div class="hidden sm:flex items-center gap-2 text-xs text-white/70">
-        <span>演示角色</span>
+      <div class="hidden sm:flex items-center gap-2 text-xs text-white/70" title="演示：模拟顶栏「当前角色」切换；正式产品多角色账号在此切换，不做权限并集">
+        <span>当前角色</span>
         <select x-model="role" @change="onRoleChange()" class="border border-white/20 rounded-md px-2 py-1.5 text-sm bg-black text-white focus:outline-none focus:ring-2 focus:ring-primary/50">
           <option value="PLATFORM_ADMIN">平台管理员</option>
           <option value="BRAND_ADMIN">品牌管理员</option>
           <option value="BRAND_OPERATOR">品牌业务（默认无入口）</option>
           <option value="DISTRIBUTOR_ADMIN">经销商组织管理员</option>
+          <option value="MANUFACTURER_ADMIN">加工商组织管理员</option>
           <option value="RETAILER_ADMIN">零售商组织管理员</option>
         </select>
       </div>
@@ -293,7 +296,7 @@ aside nav > .mt-6.px-3.py-3.rounded-lg {
           <div class="px-5 py-4 flex flex-wrap items-center justify-between gap-3 border-b border-line-soft">
             <div>
               <h1 class="text-base font-semibold">组织架构</h1>
-              <p class="text-xs text-ink-tertiary mt-0.5">左树右详情 · 经销商平级可排序 · 同经销商下零售商可排序 · 外部合作系统预置</p>
+              <p class="text-xs text-ink-tertiary mt-0.5">左树右详情 · 经销商/加工商平级可排序 · 零售商可排序 · 加工商独立组织 · 外部合作仅设计师 · 双能力可标</p>
             </div>
             <div class="flex flex-wrap gap-2">
               <button x-show="canEditOrg" @click="openMenuTemplate()" class="px-3 py-1.5 text-sm rounded-md border border-line hover:bg-fill">菜单模板</button>
@@ -368,14 +371,15 @@ aside nav > .mt-6.px-3.py-3.rounded-lg {
                   <div class="text-lg font-semibold" x-text="selectedOrg && selectedOrg.name"></div>
                   <div class="text-xs text-ink-tertiary mt-1 flex flex-wrap gap-3">
                     <span>类型：<span class="text-ink" x-text="selectedOrg && selectedOrg.typeLabel"></span></span>
+                    <span x-show="selectedOrg && capabilitiesLabel(selectedOrg)" x-text="selectedOrg && capabilitiesLabel(selectedOrg)"></span>
                     <span>状态：<span :class="selectedOrg && selectedOrg.status==='启用'?'text-success':'text-warning'" x-text="selectedOrg && selectedOrg.status"></span></span>
                     <span>负责人：<span class="text-ink" x-text="selectedOrg && selectedOrg.owner"></span></span>
                   </div>
                 </div>
                 <div class="flex flex-wrap gap-2" x-show="canEditOrg">
                   <button @click="openOrgModal('edit')" class="px-3 py-1.5 text-sm rounded-md border border-line hover:bg-fill" x-show="selectedOrg && selectedOrg.type!=='EXTERNAL' && selectedOrg.type!=='BRAND'">编辑</button>
-                  <button @click="moveOrg(selectedOrg,'up')" class="px-3 py-1.5 text-sm rounded-md border border-line hover:bg-fill" x-show="selectedOrg && (selectedOrg.type==='DISTRIBUTOR' || selectedOrg.type==='RETAILER')">上移</button>
-                  <button @click="moveOrg(selectedOrg,'down')" class="px-3 py-1.5 text-sm rounded-md border border-line hover:bg-fill" x-show="selectedOrg && (selectedOrg.type==='DISTRIBUTOR' || selectedOrg.type==='RETAILER')">下移</button>
+                  <button @click="moveOrg(selectedOrg,'up')" class="px-3 py-1.5 text-sm rounded-md border border-line hover:bg-fill" x-show="selectedOrg && (selectedOrg.type==='DISTRIBUTOR' || selectedOrg.type==='MANUFACTURER' || selectedOrg.type==='RETAILER')">上移</button>
+                  <button @click="moveOrg(selectedOrg,'down')" class="px-3 py-1.5 text-sm rounded-md border border-line hover:bg-fill" x-show="selectedOrg && (selectedOrg.type==='DISTRIBUTOR' || selectedOrg.type==='MANUFACTURER' || selectedOrg.type==='RETAILER')">下移</button>
                   <button @click="toggleOrgStatus()" class="px-3 py-1.5 text-sm rounded-md border border-line hover:bg-fill" x-show="selectedOrg && selectedOrg.type!=='BRAND'" x-text="selectedOrg && selectedOrg.status==='启用'?'停用':'启用'"></button>
                   <button @click="confirmDeleteOrg()" class="px-3 py-1.5 text-sm rounded-md border border-primary/30 text-primary hover:bg-primary-bg" x-show="selectedOrg && selectedOrg.type!=='EXTERNAL' && selectedOrg.type!=='BRAND'">删除</button>
                 </div>
@@ -410,8 +414,8 @@ aside nav > .mt-6.px-3.py-3.rounded-lg {
                   </div>
                 </div>
                 <div class="p-4 text-sm text-ink-secondary" x-show="selectedOrg && (selectedOrg.type==='BRAND' || selectedOrg.type==='EXTERNAL')">
-                  <span x-show="selectedOrg && selectedOrg.type==='BRAND'">品牌根节点：不走经销商·零售商类型模板继承策略。下属经销商均为平级组织，无等级关系。</span>
-                  <span x-show="selectedOrg && selectedOrg.type==='EXTERNAL'">外部合作节点：系统预置，不可通过「新建组织」创建；挂接加工商与设计师账号；不走类型模板继承。</span>
+                  <span x-show="selectedOrg && selectedOrg.type==='BRAND'">品牌根节点：下属经销商、加工商均为平级；外部合作仅挂设计师。同主体双能力挂在单一组织节点上。</span>
+                  <span x-show="selectedOrg && selectedOrg.type==='EXTERNAL'">外部合作节点：系统预置，不可「新建组织」创建；**仅挂设计师**；加工商请建独立加工商组织；不走类型模板继承。</span>
                 </div>
               </div>
               <div class="mt-4">
@@ -730,9 +734,10 @@ aside nav > .mt-6.px-3.py-3.rounded-lg {
         <label class="block space-y-1"><span class="text-xs text-ink-secondary">组织类型</span>
           <div class="flex gap-4 pt-1">
             <label class="flex items-center gap-1.5"><input type="radio" value="DISTRIBUTOR" x-model="orgForm.type" :disabled="orgModalMode==='edit'" />经销商</label>
+            <label class="flex items-center gap-1.5"><input type="radio" value="MANUFACTURER" x-model="orgForm.type" :disabled="orgModalMode==='edit'" />加工商</label>
             <label class="flex items-center gap-1.5"><input type="radio" value="RETAILER" x-model="orgForm.type" :disabled="orgModalMode==='edit'" />零售商</label>
           </div>
-          <p class="text-[11px] text-ink-tertiary mt-1" x-show="orgModalMode==='create'">外部合作为系统预置节点，不在此创建</p>
+          <p class="text-[11px] text-ink-tertiary mt-1" x-show="orgModalMode==='create'">外部合作（仅设计师）为系统预置，不在此创建；同主体双能力可在经销商上标注能力</p>
         </label>
         <label class="block space-y-1"><span class="text-xs text-ink-secondary">上级组织</span>
           <select x-model="orgForm.parent" class="w-full border border-line rounded-md px-3 py-2 bg-white" :disabled="orgModalMode==='edit'">
@@ -745,7 +750,10 @@ aside nav > .mt-6.px-3.py-3.rounded-lg {
         <label class="block space-y-1"><span class="text-xs text-ink-secondary">负责人</span>
           <input x-model="orgForm.owner" class="w-full border border-line rounded-md px-3 py-2" placeholder="自由文本" /></label>
         <div class="text-xs text-ink-tertiary bg-fill rounded px-3 py-2" x-show="orgModalMode==='create'">
-          提示：新建后将默认继承「<span x-text="orgForm.type==='RETAILER'?'零售商':'经销商'"></span>模板」菜单；个别组织差异化由品牌在模板范围内单独调整
+          提示：新建后将默认继承「<span x-text="orgForm.type==='RETAILER'?'零售商':(orgForm.type==='MANUFACTURER'?'加工商':'经销商')"></span>模板」菜单；个别组织差异化由品牌在模板范围内单独调整
+        </div>
+        <div class="text-xs text-ink-tertiary bg-fill rounded px-3 py-2" x-show="orgModalMode==='create' && orgForm.type==='DISTRIBUTOR'">
+          演示：华东经销商已标「经销+加工」双能力；纯经销商仅经销能力
         </div>
       </div>
       <div class="flex justify-end gap-2 mt-5">
@@ -769,6 +777,9 @@ aside nav > .mt-6.px-3.py-3.rounded-lg {
         </button>
         <button @click="menuTplTab='RETAILER'" class="pb-2.5 text-sm relative" :class="menuTplTab==='RETAILER'?'text-primary font-semibold':'text-ink-secondary'">
           零售商模板<span x-show="menuTplTab==='RETAILER'" class="absolute left-0 right-0 -bottom-px h-0.5 bg-primary"></span>
+        </button>
+        <button @click="menuTplTab='MANUFACTURER'" class="pb-2.5 text-sm relative" :class="menuTplTab==='MANUFACTURER'?'text-primary font-semibold':'text-ink-secondary'">
+          加工商模板<span x-show="menuTplTab==='MANUFACTURER'" class="absolute left-0 right-0 -bottom-px h-0.5 bg-primary"></span>
         </button>
       </div>
       <div class="flex-1 overflow-y-auto p-5 space-y-2">
@@ -849,7 +860,7 @@ aside nav > .mt-6.px-3.py-3.rounded-lg {
           </select>
         </label>
         <div class="space-y-1">
-          <div class="text-xs text-ink-secondary">角色 *（组织管理员与普通业务角色互斥）</div>
+          <div class="text-xs text-ink-secondary">角色 *（可多选；运行时仅当前角色生效，不强制互斥）</div>
           <template x-for="role in accountRoleOptions" :key="role">
             <label class="flex items-center gap-2 text-sm">
               <input type="checkbox" class="rounded border-line text-primary" :value="role" x-model="accountForm.roles" :disabled="accountFormReadonly" />
@@ -859,7 +870,7 @@ aside nav > .mt-6.px-3.py-3.rounded-lg {
         </div>
         <p class="text-xs text-ink-tertiary bg-fill rounded px-3 py-2" x-show="accountDrawerMode==='create'">保存后将弹窗展示临时密码，支持复制；确认后推送开通通知</p>
         <button x-show="!accountFormReadonly" @click="go('dataScope'); accountDrawerOpen=false; toast('请在账户数据范围页继续配置')" class="text-sm text-primary hover:underline">配置账户数据范围 →</button>
-        <p class="text-xs text-warning" x-show="accountFormReadonly">品牌不修改经销商/零售商既有账号内容（演示：表单只读）</p>
+        <p class="text-xs text-warning" x-show="accountFormReadonly">品牌不修改经销商/零售商/加工商既有账号内容（演示：表单只读）</p>
       </div>
       <div class="px-5 py-4 border-t border-line-soft flex justify-end gap-2">
         <button @click="accountDrawerOpen=false" class="px-3 py-1.5 text-sm rounded-md border border-line hover:bg-fill">取消</button>
@@ -881,9 +892,9 @@ aside nav > .mt-6.px-3.py-3.rounded-lg {
         <div>公司：<span x-text="(regCurrent && regCurrent.company) || '—'"></span></div>
         <div>手机号：<span class="font-mono" x-text="regCurrent && regCurrent.mobile"></span></div>
         <div class="pt-2 text-xs text-ink-secondary">角色</div>
-        <label class="flex items-center gap-2"><input type="radio" value="加工商" x-model="regForm.role" />加工商</label>
+        <label class="flex items-center gap-2 text-ink-tertiary" title="加工商请走独立加工商组织入驻"><input type="radio" value="加工商" disabled />加工商（改走加工商组织）</label>
         <label class="flex items-center gap-2"><input type="radio" value="设计师" x-model="regForm.role" />设计师</label>
-        <div class="text-xs text-ink-tertiary">归属：外部合作节点（系统预置，固定）</div>
+        <div class="text-xs text-ink-tertiary">归属：外部合作（仅设计师）；加工商归属独立加工商组织</div>
         <label class="block space-y-1 pt-2"><span class="text-xs text-ink-secondary">驳回原因（驳回时必填）</span>
           <textarea x-model="regForm.reason" rows="3" class="w-full border border-line rounded-md px-3 py-2"></textarea></label>
       </div>
@@ -943,8 +954,19 @@ function orgApp() {
       childCount: 4 + (idx % 3), memberCount: 12 + idx * 3,
       inherit: idx === 1 ? '单独维护（已取消默认）' : '默认继承「经销商模板」',
       inheritMode: idx === 1 ? 'CUSTOM' : 'INHERIT',
+      capabilities: idx === 0 ? ['DISTRIBUTOR', 'MANUFACTURER'] : ['DISTRIBUTOR'],
       open: idx < 2, children: retailersOf(name, 4 + (idx % 3))
     }));
+    children.push({
+      id: 'mfg1', name: '精工制造A', type: 'MANUFACTURER', typeLabel: '加工商', depth: 1, status: '启用',
+      owner: '王厂长', childCount: 0, memberCount: 8, inherit: '默认继承「加工商模板」', inheritMode: 'INHERIT',
+      capabilities: ['MANUFACTURER'], open: false, children: []
+    });
+    children.push({
+      id: 'mfg2', name: '联创代工B', type: 'MANUFACTURER', typeLabel: '加工商', depth: 1, status: '启用',
+      owner: '赵工', childCount: 0, memberCount: 5, inherit: '默认继承「加工商模板」', inheritMode: 'INHERIT',
+      capabilities: ['MANUFACTURER'], open: false, children: []
+    });
     children.push({
       id: 'ext', name: '外部合作', type: 'EXTERNAL', typeLabel: '外部合作', depth: 1, status: '启用',
       owner: '—', childCount: 0, memberCount: 28, inherit: '—', inheritMode: 'INHERIT', open: false, children: []
@@ -965,16 +987,19 @@ function orgApp() {
   const makeAccounts = () => {
     const list = [];
     let id = 1;
-    const orgs = ['品牌总部', ...distributors, '外部合作', '上海零售商A', '杭州零售商B', '广州零售商A', '深圳零售商B'];
+    const orgs = ['品牌总部', ...distributors, '精工制造A', '联创代工B', '外部合作', '上海零售商A', '杭州零售商B', '广州零售商A', '深圳零售商B'];
     orgs.forEach((org, oi) => {
-      for (let i = 0; i < (org === '外部合作' ? 16 : 10); i++) {
+      const isMfg = org.includes('制造') || org.includes('代工');
+      for (let i = 0; i < (org === '外部合作' ? 10 : (isMfg ? 8 : 10)); i++) {
         const name = firstNames[(oi + i) % firstNames.length] + lastNames[(oi * 3 + i) % lastNames.length];
         const roles = org === '外部合作'
-          ? (i % 3 === 0 ? ['加工商','设计师'] : (i % 2 ? ['设计师'] : ['加工商']))
-          : (i === 0 ? ['组织管理员'] : [roleNames[1 + (i % 6)]]);
+          ? ['设计师']
+          : (isMfg
+            ? (i === 0 ? ['组织管理员'] : ['加工商'])
+            : (i === 0 ? ['组织管理员'] : [roleNames[1 + (i % 6)]]));
         list.push({
           id: 'a' + (id++), name,
-          company: org === '外部合作' ? (roles.includes('设计师') && i % 2 ? '' : '精工制造' + (i+1) + '厂') : (org.includes('零售') ? '' : org.replace('经销商','贸易')),
+          company: isMfg ? org : (org === '外部合作' ? (i % 2 ? '' : '独立工作室' + (i+1)) : (org.includes('零售') ? '' : org.replace('经销商','贸易'))),
           org, roles, mobile: '1' + String(3800000000 + oi * 100 + i), email: i % 3 ? '' : `u${id}@zippo-demo.cn`,
           status: i % 9 === 0 ? '停用' : '启用', lastLogin: '2026-08-0' + (1 + (i % 5)) + ' 09:' + String(10 + i).padStart(2, '0'),
           created: (i % 3 ? '2026-07-' : '2026-08-') + String(i % 3 ? (15 + ((oi + i) % 14)) : (1 + (i % 12))).padStart(2, '0')
@@ -1052,6 +1077,13 @@ function orgApp() {
         { code: 'asset', name: '素材空间', checked: true },
         { code: 'channel', name: '渠道管理', checked: true },
       ],
+      MANUFACTURER: [
+        { code: 'selection', name: '选品中心', checked: true },
+        { code: 'product', name: '商品管理', checked: true },
+        { code: 'price', name: '价格管理', checked: false },
+        { code: 'asset', name: '素材空间', checked: true },
+        { code: 'channel', name: '渠道管理', checked: false },
+      ],
     },
     roles: [...makeRoles('品牌总部'), ...makeRoles('华东经销商'), ...makeRoles('华南经销商')],
     roleFilters: { keyword: '', type: '', start: defRange.start, end: defRange.end },
@@ -1076,7 +1108,7 @@ function orgApp() {
     scopeOrgOptions: [],
 
     get roleLabel() {
-      return ({ PLATFORM_ADMIN:'平台管理员', BRAND_ADMIN:'品牌管理员', BRAND_OPERATOR:'品牌业务', DISTRIBUTOR_ADMIN:'经销商组织管理员', RETAILER_ADMIN:'零售商组织管理员' })[this.role];
+      return ({ PLATFORM_ADMIN:'平台管理员', BRAND_ADMIN:'品牌管理员', BRAND_OPERATOR:'品牌业务', DISTRIBUTOR_ADMIN:'经销商组织管理员', MANUFACTURER_ADMIN:'加工商组织管理员', RETAILER_ADMIN:'零售商组织管理员' })[this.role];
     },
     get currentUser() {
       const map = {
@@ -1084,6 +1116,7 @@ function orgApp() {
         BRAND_ADMIN: { name: '陈品牌', avatar: '陈' },
         BRAND_OPERATOR: { name: '刘业务', avatar: '刘' },
         DISTRIBUTOR_ADMIN: { name: '李四', avatar: '李' },
+        MANUFACTURER_ADMIN: { name: '王厂长', avatar: '王' },
         RETAILER_ADMIN: { name: '周店长', avatar: '周' },
       };
       return map[this.role];
@@ -1113,6 +1146,9 @@ function orgApp() {
       if (this.role === 'DISTRIBUTOR_ADMIN') {
         const d = tree[0].children.find(c => c.name === '华东经销商');
         tree = d ? [{ ...d, depth: 0, open: true }] : [];
+      } else if (this.role === 'MANUFACTURER_ADMIN') {
+        const m = tree[0].children.find(c => c.type === 'MANUFACTURER' && c.name === '精工制造A');
+        tree = m ? [{ ...m, depth: 0, open: true }] : [];
       } else if (this.role === 'RETAILER_ADMIN') {
         tree = [{ id: 'my', name: '上海零售商A', type: 'RETAILER', typeLabel: '零售商', depth: 0, status: '启用', owner: '周店长', childCount: 0, memberCount: 6, inherit: '默认继承「零售商模板」', inheritMode: 'INHERIT', open: false, children: [] }];
       }
@@ -1173,8 +1209,9 @@ function orgApp() {
     },
     get accountOrgOptions() {
       if (this.role === 'DISTRIBUTOR_ADMIN') return ['华东经销商'];
+      if (this.role === 'MANUFACTURER_ADMIN') return ['精工制造A'];
       if (this.role === 'RETAILER_ADMIN') return ['上海零售商A'];
-      return ['品牌总部', ...distributors, '外部合作'];
+      return ['品牌总部', ...distributors, '精工制造A', '联创代工B', '外部合作'];
     },
     get accountRoleOptions() {
       return ['组织管理员','商品编辑','选品专员','价格专员','加工商','设计师'];
@@ -1190,12 +1227,20 @@ function orgApp() {
       this.page = this.canAccessOrg ? 'architecture' : 'architecture';
       this.accountTab = 'list';
       if (this.role === 'DISTRIBUTOR_ADMIN') this.selectedOrg = this.orgTree[0].children.find(c => c.name === '华东经销商');
+      else if (this.role === 'MANUFACTURER_ADMIN') this.selectedOrg = this.orgTree[0].children.find(c => c.type === 'MANUFACTURER' && c.name === '精工制造A');
       else if (this.role === 'RETAILER_ADMIN') this.selectedOrg = { id: 'my', name: '上海零售商A', type: 'RETAILER', typeLabel: '零售商', status: '启用', owner: '周店长', childCount: 0, memberCount: 6, inherit: '默认继承「零售商模板」', inheritMode: 'INHERIT' };
       else this.selectedOrg = this.orgTree[0].children[0];
       this.refreshOrgMenuPreview();
       this.scopeAccountId = (this.scopeAccountOptions[0] || {}).id || '';
       this.loadScope();
-      this.toast('已切换为：' + this.roleLabel);
+      this.toast('当前角色已切换为：' + this.roleLabel + '（演示：立即刷新权限，不做并集）');
+    },
+    capabilitiesLabel(org) {
+      const c = (org && org.capabilities) || [];
+      if (!c.length) return '';
+      const map = { DISTRIBUTOR:'经销', MANUFACTURER:'加工' };
+      return '能力：' + c.map(x => map[x] || x).join('+');
+
     },
     go(id) { if (!this.canAccessOrg) return; this.page = id; },
     resetRoleFilters() {
@@ -1219,7 +1264,8 @@ function orgApp() {
     },
     refreshOrgMenuPreview() {
       if (!this.selectedOrg) return;
-      const tplKey = this.selectedOrg.type === 'RETAILER' ? 'RETAILER' : 'DISTRIBUTOR';
+      const tplKey = this.selectedOrg.type === 'RETAILER' ? 'RETAILER'
+        : (this.selectedOrg.type === 'MANUFACTURER' ? 'MANUFACTURER' : 'DISTRIBUTOR');
       const tpl = this.menuTemplates[tplKey] || this.menuTemplates.DISTRIBUTOR;
       const custom = this.selectedOrg.inheritMode === 'CUSTOM';
       this.orgMenuPreview = tpl.map(m => {
@@ -1253,18 +1299,21 @@ function orgApp() {
       if (this.orgForm.type === 'RETAILER' && this.orgForm.parent === '品牌总部') {
         this.toast('零售商上级须为经销商', 'error'); return;
       }
+      if (this.orgForm.type === 'MANUFACTURER' && this.orgForm.parent !== '品牌总部') {
+        this.toast('加工商须挂在品牌下', 'error'); return;
+      }
       this.orgModalOpen = false;
       this.toast(this.orgModalMode === 'create' ? '组织已创建（默认继承模板）' : '组织已更新');
     },
     moveOrg(node, dir) {
       if (!node || !this.canEditOrg) return;
-      if (node.type !== 'DISTRIBUTOR' && node.type !== 'RETAILER') {
-        this.toast('仅同级经销商或同经销商下零售商可调整顺序', 'error'); return;
+      if (node.type !== 'DISTRIBUTOR' && node.type !== 'RETAILER' && node.type !== 'MANUFACTURER') {
+        this.toast('仅同级经销商/加工商或同经销商下零售商可调整顺序', 'error'); return;
       }
       const brand = this.orgTree[0];
       let siblings = null;
-      if (node.type === 'DISTRIBUTOR') {
-        siblings = brand.children.filter(c => c.type === 'DISTRIBUTOR');
+      if (node.type === 'DISTRIBUTOR' || node.type === 'MANUFACTURER') {
+        siblings = brand.children.filter(c => c.type === node.type);
       } else {
         const parent = brand.children.find(d => d.children && d.children.some(r => r.id === node.id));
         if (!parent) { this.toast('未找到上级经销商', 'error'); return; }
@@ -1323,7 +1372,9 @@ function orgApp() {
       this.confirmMsg = '将丢弃单独维护结果，重新跟随类型模板。';
       this.confirmAction = () => {
         this.selectedOrg.inheritMode = 'INHERIT';
-        this.selectedOrg.inherit = '默认继承「经销商模板」';
+        const tplName = this.selectedOrg.type === 'RETAILER' ? '零售商模板'
+          : (this.selectedOrg.type === 'MANUFACTURER' ? '加工商模板' : '经销商模板');
+        this.selectedOrg.inherit = '默认继承「' + tplName + '」';
         this.selectedOrg._customMenus = null;
         this.refreshOrgMenuPreview();
         this.toast('已恢复默认继承');
@@ -1382,9 +1433,6 @@ function orgApp() {
     },
     saveAccount() {
       if (!this.accountForm.name || !this.accountForm.mobile) { this.toast('姓名与手机号必填', 'error'); return; }
-      const hasAdmin = this.accountForm.roles.includes('组织管理员');
-      const hasBiz = this.accountForm.roles.some(r => r !== '组织管理员' && r !== '加工商' && r !== '设计师');
-      if (hasAdmin && hasBiz) { this.toast('组织管理员与普通业务角色互斥', 'error'); return; }
       if (this.accounts.some(a => a.mobile === this.accountForm.mobile && a.id !== this.accountForm.id)) {
         this.toast('手机号已被占用（含停用账号）', 'error'); return;
       }
@@ -1444,7 +1492,8 @@ function orgApp() {
     approveRegister() {
       this.regCurrent.status = '已通过';
       this.regDrawerOpen = false;
-      this.showTempPasswordModal('已开通并归属外部合作');
+      const dest = this.regForm.role === '加工商' ? '加工商组织' : '外部合作';
+      this.showTempPasswordModal('已开通并归属' + dest);
     },
     rejectRegister() {
       if (!this.regForm.reason.trim()) { this.toast('驳回须填写原因', 'error'); return; }

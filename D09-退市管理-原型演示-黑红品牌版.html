@@ -6,7 +6,13 @@
 
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>D09 退市管理 · 黑红品牌版原型 V1.2</title>
+  <title>D09 退市管理 · 黑红品牌版原型 V1.4</title>
+  <!--
+    修订记录：
+    V1.4 | 2026-09-03 | 用户确认：全局开关与商品到期强制改为排斥；增补申请单「紧急/限期下架」；依据 20260825&26 评审相关材料
+    V1.3 | 2026-09-03 | IP 到期强制下架示意 + 原因「IP授权到期」
+    V1.2 | 2026-08-15 | HCI P0 清零等
+  -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
   <script>
@@ -603,6 +609,16 @@ aside nav > .mt-6.px-3.py-3.rounded-lg {
                 <input type="date" x-model="applyForm.planDate" class="w-full border rounded-md px-3 py-2 text-sm" :class="errors.planDate ? 'border-primary' : 'border-line'" />
                 <span class="text-xs text-primary" x-show="errors.planDate" x-text="errors.planDate"></span>
               </label>
+              <label class="flex items-center gap-2 text-sm lg:col-span-2">
+                <input type="checkbox" x-model="applyForm.urgentDeadline" class="rounded border-line text-primary" />
+                <span>紧急/限期下架（路径三 · 与全局开关、商品到期强制互斥）</span>
+              </label>
+              <label class="block text-sm space-y-1" x-show="applyForm.urgentDeadline">
+                <span>限期下架日 <span class="text-primary">*</span></span>
+                <input type="date" x-model="applyForm.deadlineDate" class="w-full border rounded-md px-3 py-2 text-sm" :class="errors.deadlineDate ? 'border-primary' : 'border-line'" />
+                <span class="text-xs text-ink-tertiary">通过后商品立即已退市；渠道下架按该日定时，不走路径一立即下架。</span>
+                <span class="text-xs text-primary" x-show="errors.deadlineDate" x-text="errors.deadlineDate"></span>
+              </label>
               <label class="block text-sm space-y-1 lg:col-span-2">
                 <span>补充说明 <span x-show="reasonRequiresNote" class="text-primary">*</span></span>
                 <textarea x-model="applyForm.note" maxlength="500" rows="3" class="w-full border rounded-md px-3 py-2 text-sm" :class="errors.note ? 'border-primary' : 'border-line'"></textarea>
@@ -615,7 +631,7 @@ aside nav > .mt-6.px-3.py-3.rounded-lg {
 
             <div class="rounded-md border border-line-soft bg-fill p-3 text-xs text-ink-secondary leading-relaxed space-y-1">
               <div>· 提交后按配置进入退市审批或免审落定</div>
-              <div>· 退市不等于渠道下架；审批通过后是否自动下架以系统设置开关为准（当前 <span class="text-ink" x-text="settings.autoUnlist ? '开启' : '关闭'"></span>）</div>
+              <div>· 退市不等于渠道下架。三条路径<strong>互斥</strong>：① 审批通过后看系统设置开关（当前 <span class="text-ink" x-text="settings.autoUnlist ? '开启' : '关闭'"></span>）；② 商品勾选「到期强制下架」按授权到期日定时；③ 本单勾选「紧急/限期下架」按限期日定时。</div>
               <div>· 预计退市时间仅作计划记录</div>
             </div>
           </div>
@@ -815,10 +831,10 @@ aside nav > .mt-6.px-3.py-3.rounded-lg {
       <section x-show="page==='settings' && canDelist" class="space-y-4">
         <div class="bg-white rounded-lg shadow-card border border-line-soft p-5">
           <h1 class="text-base font-semibold">退市通过后自动渠道下架</h1>
-          <p class="mt-1 text-xs text-ink-tertiary mb-5">商品退市状态与渠道上下架是两套字段，退市不等于下架。仅当开关开启且审批通过后，才对指定渠道自动下架；审批过程中不提前下架。渠道下架失败时商品仍为已退市，系统记失败日志。</p>
+          <p class="mt-1 text-xs text-ink-tertiary mb-5">商品退市状态与渠道上下架是两套字段。<strong>三条路径互斥</strong>：① 本开关（退市通过后，仅对未走②③的商品）；② 商品级「到期强制下架」（按授权到期日定时）；③ 申请单「紧急/限期下架」（按限期下架日定时）。审批中不提前下架；下架失败不回滚商品生命周期，记失败日志。</p>
           <label class="flex items-center gap-3 mb-4">
             <input type="checkbox" x-model="settings.autoUnlist" class="rounded border-line text-primary focus:ring-primary" />
-            <span class="text-sm font-medium">开启：退市审批通过后自动触发渠道下架</span>
+            <span class="text-sm font-medium">开启：退市审批通过后自动触发渠道下架（路径一）</span>
           </label>
           <div x-show="settings.autoUnlist" class="mb-4">
             <div class="text-xs text-ink-tertiary mb-2">指定渠道（可多选；渠道清单引用主数据，维护见渠道管理/枚举管理说明）</div>
@@ -832,6 +848,35 @@ aside nav > .mt-6.px-3.py-3.rounded-lg {
             </div>
           </div>
           <button @click="saveSettings()" class="px-4 py-2 text-sm rounded-md bg-primary text-white hover:bg-primary-hover">保存下架配置</button>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-card border border-line-soft p-5">
+          <h1 class="text-base font-semibold">IP / 商品 · 到期强制下架（示意）</h1>
+          <p class="mt-1 text-xs text-ink-tertiary mb-4">字段在<strong>商品管理</strong>维护：是否 IP 产品、授权到期日、到期强制下架（默认不勾）。勾选后按授权到期日<strong>定时</strong>请求渠道下架；与路径一（全局开关）<strong>排斥</strong>——该商品退市通过时不再走开关下架。本页仅演示只读预览。</p>
+          <div class="table-wrap border border-line-soft rounded-md">
+            <table class="w-full text-sm">
+              <thead class="bg-fill text-xs text-ink-secondary">
+                <tr>
+                  <th class="text-left px-3 py-2 font-medium">SKU</th>
+                  <th class="text-left px-3 py-2 font-medium">IP</th>
+                  <th class="text-left px-3 py-2 font-medium">授权到期日</th>
+                  <th class="text-left px-3 py-2 font-medium">到期强制下架</th>
+                  <th class="text-left px-3 py-2 font-medium">定时说明</th>
+                </tr>
+              </thead>
+              <tbody>
+                <template x-for="row in ipUnlistDemo" :key="row.sku">
+                  <tr class="border-t border-line-soft">
+                    <td class="px-3 py-2 font-medium" x-text="row.sku"></td>
+                    <td class="px-3 py-2" x-text="row.isIp ? '是' : '否'"></td>
+                    <td class="px-3 py-2" x-text="row.expire || '—'"></td>
+                    <td class="px-3 py-2" x-text="row.force ? '是' : '否（默认）'"></td>
+                    <td class="px-3 py-2 text-ink-secondary text-xs" x-text="row.hint"></td>
+                  </tr>
+                </template>
+              </tbody>
+            </table>
+          </div>
         </div>
 
         <div class="bg-white rounded-lg shadow-card border border-line-soft p-5">
@@ -1077,7 +1122,7 @@ aside nav > .mt-6.px-3.py-3.rounded-lg {
 
   <script>
     function delistingApp() {
-      const reasons = ['产品迭代替代','销量不达标','质量问题','供应链中断','合规原因','其他','季节性调整'];
+        const reasons = ['产品迭代替代','销量不达标','质量问题','供应链中断','合规原因','IP授权到期','其他','季节性调整'];
       const applicants = ['陈启明','李薇','王海宁','赵晓','周然','吴倩'];
       const channelOptions = ['天猫旗舰','京东自营','官网商城','抖音旗舰'];
       const brands = ['ZIPPO', 'ZIPPO Armor', 'ZIPPO Vintage', 'ZIPPO Accessory'];
@@ -1256,12 +1301,18 @@ aside nav > .mt-6.px-3.py-3.rounded-lg {
           { id: 'r3', name: '质量问题', requireNote: false, enabled: true },
           { id: 'r4', name: '供应链中断', requireNote: false, enabled: true },
           { id: 'r5', name: '合规原因', requireNote: false, enabled: true },
+          { id: 'r8', name: 'IP授权到期', requireNote: false, enabled: true },
           { id: 'r6', name: '其他', requireNote: true, enabled: true },
           { id: 'r7', name: '季节性调整', requireNote: false, enabled: true },
         ],
+        ipUnlistDemo: [
+          { sku: 'SKU2001-A', isIp: true, expire: '2026-09-03', force: true, hint: '到期日定时下架；与路径一排斥（通过后不走开关）' },
+          { sku: 'SKU2007-B', isIp: true, expire: '2026-12-31', force: false, hint: '未勾选→退市通过后仍看全局开关' },
+          { sku: 'SKU2010-A', isIp: false, expire: '', force: false, hint: '非 IP；仅可能走路径一或申请单紧急/限期' },
+        ],
         channelOptions,
         settings: { autoUnlist: false, channels: ['天猫旗舰','京东自营'] },
-        applyForm: { mode: 'SPU', lines: [], reason: '', note: '', planDate: '2026-08-14' },
+        applyForm: { mode: 'SPU', lines: [], reason: '', note: '', planDate: '2026-08-14', urgentDeadline: false, deadlineDate: '' },
         picker: { brand: '', category: '', keyword: '', selectedSpus: [], selectedSkus: [] },
         importOpen: false,
         importText: '',
@@ -1494,7 +1545,7 @@ aside nav > .mt-6.px-3.py-3.rounded-lg {
         },
         openNewForm() {
           this.editingFormId = null;
-          this.applyForm = { mode: 'SPU', lines: [], reason: '', note: '', planDate: '2026-08-14' };
+          this.applyForm = { mode: 'SPU', lines: [], reason: '', note: '', planDate: '2026-08-14', urgentDeadline: false, deadlineDate: '' };
           this.errors = {};
           this.markEditClean();
           this.page = 'applyEdit';
@@ -1508,7 +1559,7 @@ aside nav > .mt-6.px-3.py-3.rounded-lg {
               brand: (cat && cat.brand) || 'ZIPPO', category: (cat && cat.category) || '打火机',
             };
           });
-          this.applyForm = { mode: 'SPU', lines, reason: row.reason, note: row.note || '', planDate: row.planDate };
+          this.applyForm = { mode: 'SPU', lines, reason: row.reason, note: row.note || '', planDate: row.planDate, urgentDeadline: !!row.urgentDeadline, deadlineDate: row.deadlineDate || '' };
           this.errors = {};
           this.markEditClean();
           this.page = 'applyEdit';
@@ -1789,6 +1840,7 @@ aside nav > .mt-6.px-3.py-3.rounded-lg {
           if (!this.applyForm.reason) this.errors.reason = '请选择退市原因';
           if (this.reasonRequiresNote && !(this.applyForm.note || '').trim()) this.errors.note = '该原因须填写补充说明';
           if (!this.applyForm.planDate) this.errors.planDate = '请填写预计退市时间';
+          if (this.applyForm.urgentDeadline && !this.applyForm.deadlineDate) this.errors.deadlineDate = '紧急/限期下架须填写限期下架日';
           if (Object.keys(this.errors).length) return;
           this.submitting = true;
           setTimeout(() => {
@@ -1814,12 +1866,16 @@ aside nav > .mt-6.px-3.py-3.rounded-lg {
               formNo, status: 'PENDING', reason: this.applyForm.reason, planDate: this.applyForm.planDate,
               applicant: this.currentUser.name, submittedAt: '2026-08-14 10:40',
               note: this.applyForm.note, node: '品牌初审',
+              urgentDeadline: !!this.applyForm.urgentDeadline,
+              deadlineDate: this.applyForm.deadlineDate || '',
               skuCount: lines.length, spuCount: spuSet.size, lineIds: lines.map(l => l.id),
             });
             this.skuLines = lines.concat(this.skuLines);
             this.submitting = false;
             this.markEditClean();
-            this.toast('已提交申请单 ' + formNo + '（' + lines.length + ' 个 SKU）→ 退市中');
+            let tip = '已提交申请单 ' + formNo + '（' + lines.length + ' 个 SKU）→ 退市中';
+            if (this.applyForm.urgentDeadline) tip += '；紧急/限期下架日 ' + this.applyForm.deadlineDate + '（与路径一/二互斥）';
+            this.toast(tip);
             this.page = 'applyList';
           }, 450);
         },
@@ -1889,9 +1945,9 @@ aside nav > .mt-6.px-3.py-3.rounded-lg {
             });
             let msg = '退市审批通过：SKU 已退市，进入退市执行';
             if (this.settings.autoUnlist && this.settings.channels.length) {
-              msg += '；已按开关对「' + this.settings.channels.join('、') + '」发起下架';
+              msg += '；路径一已对「' + this.settings.channels.join('、') + '」发起下架（未走路径二/三的 SKU）';
             } else {
-              msg += '；自动下架开关关闭，渠道未自动下架';
+              msg += '；路径一关闭或未指定渠道，未自动下架';
             }
             this.toast(msg);
             t.status = 'APPROVED';

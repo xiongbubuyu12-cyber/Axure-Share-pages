@@ -1,31 +1,28 @@
 <!doctype html>
 <html lang="zh-CN">
 <head>
-<!-- poc-embed-guest -->
-<script src="poc-embed-guest.js"></script>
-
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>渠道管理 · 黑红品牌版原型</title>
+  <title>AI-PIM 渠道管理高保真交互稿</title>
   <style>
-    :root { --ink:#151515; --muted:#747474; --line:#dedede; --page:#EDEDED; --card:#fff; --fill:#f1f1ef; --red:#c8102e; --red-dark:#a20b24; --red-soft:#FDE8EC; --radius:8px; --shadow:0 10px 24px rgba(0,0,0,.07); }
+    :root { --ink:#151515; --muted:#747474; --line:#dedede; --page:#f5f5f4; --card:#fff; --fill:#f1f1ef; --red:#c8102e; --red-dark:#a20b24; --red-soft:#fff0f2; --radius:8px; --shadow:0 10px 24px rgba(0,0,0,.07); }
     * { box-sizing:border-box; }
     body { margin:0; color:var(--ink); background:var(--page); font:14px/1.55 -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif; }
     button,input,select,textarea { font:inherit; }
     button { cursor:pointer; }
     .app { min-height:100vh; display:grid; grid-template-columns:248px 1fr; }
-    .sidebar{background:#0A0A0A; color:#fff; padding:22px 14px; position:sticky; top:0; height:100vh; }
-    .brand { display:none; padding:0 10px 24px; border-bottom:1px solid #E8E8E8; margin-bottom:18px; }
+    .sidebar { background:#101010; color:#fff; padding:22px 14px; position:sticky; top:0; height:100vh; }
+    .brand { padding:0 10px 24px; border-bottom:1px solid #303030; margin-bottom:18px; }
     .brand-mark { display:flex; align-items:center; gap:10px; font-weight:700; letter-spacing:.4px; }
     .mark { width:29px; height:29px; display:grid; place-items:center; background:var(--red); font-size:12px; font-weight:800; }
     .brand small { color:#a9a9a9; display:block; margin-top:6px; font-size:12px; }
-    .nav-label { color:#E8E8E8; font-size:13px; font-weight:600; letter-spacing:.02em; padding:8px 10px 6px; }
+    .nav-label { color:#888; font-size:11px; letter-spacing:.9px; padding:0 10px 7px; }
     .nav button { appearance:none; width:100%; border:0; color:#cfcfcf; background:transparent; text-align:left; border-radius:6px; padding:10px; margin:2px 0; display:flex; justify-content:space-between; align-items:center; }
-    .nav button:hover { background:#2d2d2d; color:#fff; }
-    .nav button.active { background:#2d2d2d; color:#fff; font-weight:600; box-shadow:inset 3px 0 0 #C8102E; }
-    .nav .n { color:#8A8A8A; font-size:11px; }
-    .nav button.active .n { color:#C8102E; }
-    .sidebar-note { display:none !important;  position:absolute; bottom:22px; left:24px; right:24px; color:#8A8A8A; font-size:12px; line-height:1.65; }
+    .nav button:hover { background:#242424; color:#fff; }
+    .nav button.active { background:var(--red); color:#fff; font-weight:600; }
+    .nav .n { color:#aaa; font-size:11px; }
+    .nav button.active .n { color:#fff; }
+    .sidebar-note { position:absolute; bottom:22px; left:24px; right:24px; color:#888; font-size:12px; line-height:1.65; }
     main { min-width:0; padding:30px 34px 24px; }
     .crumb { color:var(--muted); font-size:13px; margin-bottom:9px; }
     .head { display:flex; justify-content:space-between; gap:20px; align-items:flex-start; margin-bottom:22px; }
@@ -41,7 +38,7 @@
     .filters { padding:16px; display:flex; gap:12px; flex-wrap:wrap; margin-bottom:16px; }
     .filters input,.filters select,.field input,.field select,.field textarea { height:34px; border:1px solid #cfcfcd; background:#fff; border-radius:5px; color:var(--ink); padding:0 10px; outline:0; }
     .filters input:focus,.filters select:focus,.field input:focus,.field select:focus,.field textarea:focus { border-color:var(--red); box-shadow:0 0 0 3px rgba(200,16,46,.10); }
-    .filters input { width:270px; }
+    .filters input { width:270px; }.filters textarea { width:100%; min-height:58px; border:1px solid #cfcfcd; border-radius:5px; padding:8px 10px; resize:vertical; outline:0; color:var(--ink); background:#fff; }.filters textarea:focus { border-color:var(--red); box-shadow:0 0 0 3px rgba(200,16,46,.10); }
     .filters select { min-width:138px; }
     .btn { height:34px; border:1px solid #cfcfcd; border-radius:5px; background:#fff; color:var(--ink); padding:0 13px; font-weight:500; }
     .btn:hover { background:#f3f3f1; }
@@ -60,284 +57,68 @@
     td { padding:13px 14px; border-top:1px solid #ededeb; vertical-align:middle; }
     tr:hover td { background:#fffafb; }
     .sub { color:var(--muted); font-size:12px; margin-top:2px; }.link{border:0;background:transparent;color:var(--red);padding:0;font-weight:600}.link:hover{text-decoration:underline}
-    .pagination { display:flex; justify-content:space-between; align-items:center; color:var(--muted); font-size:12px; padding:13px 2px; }.pages{display:flex;gap:6px}.page{border:1px solid var(--line);background:#fff;border-radius:4px;width:28px;height:28px}.page.active{color:#fff;background:#222;border-color:#222}
+    .pagination { display:flex; justify-content:flex-end; align-items:center; gap:14px; color:var(--muted); font-size:12px; padding:13px 2px; }.pages{display:flex;gap:6px}.page{border:1px solid var(--line);background:#fff;border-radius:4px;width:28px;height:28px}.page.active{color:#fff;background:#222;border-color:#222}.page-edge{border:1px solid var(--line);background:#fff;border-radius:4px;height:28px;padding:0 9px;color:#555}
     .grid { display:grid; grid-template-columns:repeat(3,minmax(240px,1fr)); gap:14px; }
     .channel-card { background:#fff; border:1px solid var(--line); border-radius:var(--radius); padding:18px; transition:box-shadow .2s,transform .2s; }.channel-card:hover{box-shadow:var(--shadow);transform:translateY(-1px)}
     .card-title { display:flex; justify-content:space-between; gap:10px; align-items:flex-start; margin-bottom:12px; }.card-title h3{margin:0;font-size:16px}.card-title p{margin:3px 0 0;color:var(--muted);font-size:12px}.card-info{display:grid;gap:7px;padding:12px 0;border-top:1px solid #eee;border-bottom:1px solid #eee;margin-bottom:13px;color:#555;font-size:13px}.card-actions{display:flex;justify-content:space-between;align-items:center}
     .switch { width:38px;height:21px;border:0;border-radius:20px;background:#b7b7b4;position:relative;vertical-align:middle }.switch:after{content:"";position:absolute;width:17px;height:17px;border-radius:50%;background:#fff;top:2px;left:2px;transition:.16s}.switch.on{background:var(--red)}.switch.on:after{left:19px}
     .two-col { display:grid; grid-template-columns:minmax(0,1fr) 300px; gap:16px; }.side-panel{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:18px}.side-panel h3{margin:0 0 12px;font-size:15px}.status-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-top:1px solid #eee}.status-row:first-of-type{border-top:0}
     .tree { font-size:13px; color:#444; }.tree div{padding:7px 5px}.tree .selected{background:var(--red-soft);color:#971026;border-left:3px solid var(--red);font-weight:600}.tree .branch{font-weight:600}.tree .indent{padding-left:22px}.tree .indent2{padding-left:40px}
-    .rule-card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:17px;margin-bottom:12px}.rule-head{display:flex;justify-content:space-between;gap:12px;align-items:center}.rule-head h3{margin:0;font-size:15px}.rule-detail{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0 10px}.chip{border:1px solid #d6d6d4;background:#fafaf9;padding:5px 8px;border-radius:4px;font-size:12px}.rule-foot{padding-top:11px;border-top:1px solid #eee;color:var(--muted);font-size:12px}
+    .rule-card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:17px;margin-bottom:12px}.rule-head{display:flex;justify-content:space-between;gap:12px;align-items:center}.rule-head h3{margin:0;font-size:15px}.rule-detail{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0 10px}.chip{border:1px solid #d6d6d4;background:#fafaf9;padding:5px 8px;border-radius:4px;font-size:12px}.mapping-token{display:inline-flex;align-items:center;gap:6px}.token-remove{border:0;background:transparent;color:#888;cursor:pointer;font-size:14px;line-height:1;padding:0 2px}.token-remove:hover{color:var(--red)}.rule-foot{padding-top:11px;border-top:1px solid #eee;color:var(--muted);font-size:12px}
     .tabs{display:flex;gap:22px;border-bottom:1px solid var(--line);margin-bottom:16px}.tab{border:0;background:transparent;padding:11px 2px;color:#666;font-weight:600}.tab.active{color:var(--red);border-bottom:2px solid var(--red)}
     .form-card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:20px;margin-bottom:14px}.form-card h2{font-size:17px;margin:0 0 16px}.form-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}.field{display:grid;gap:6px}.field label{font-weight:600;font-size:13px}.field label i{font-style:normal;color:var(--red)}.field input[readonly]{background:#f4f4f2;color:#777}.field textarea{min-height:78px;padding-top:9px;resize:vertical}.span-2{grid-column:span 2}.span-3{grid-column:span 3}.hint{font-size:12px;color:var(--muted)}
-    .sku-table input{width:100%;height:30px;border:1px solid #d5d5d2;border-radius:4px;padding:0 7px}.asset{height:120px;border:1px dashed #bbb;border-radius:6px;background:#fafaf9;display:grid;place-items:center;color:#777;font-size:13px}.asset b{display:block;text-align:center;color:#333;margin-top:4px}.asset-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+    .sku-table input{width:100%;height:30px;border:1px solid #d5d5d2;border-radius:4px;padding:0 7px}.asset{min-height:120px;border:1px dashed #bbb;border-radius:6px;background:#fafaf9;display:grid;place-items:center;color:#777;font-size:13px;padding:10px;gap:3px}.asset b{display:block;text-align:center;color:#333;margin-top:4px}.asset-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}.asset-actions{display:flex;gap:4px;flex-wrap:wrap;justify-content:center;margin-top:5px}.asset-actions .link{font-size:11px}.asset-actions .link:disabled{color:#aaa;cursor:not-allowed;text-decoration:none}.asset-dropzone{display:flex;min-height:100px;border:1px dashed #bbb;border-radius:6px;background:#fafaf9;align-items:center;justify-content:center;flex-direction:column;gap:8px;color:#555;cursor:pointer;text-align:center}.asset-dropzone.is-dragover{border-color:#c9002b;background:#fff1f3}.asset-dropzone .hint{font-size:12px}
     .panel-alert{border-left:4px solid var(--red);background:var(--red-soft);padding:11px 13px;margin-bottom:14px;color:#7d1527}.task-line{border-left:2px solid #bbb;padding:0 0 18px 16px;margin-left:8px;position:relative}.task-line:before{content:"";width:9px;height:9px;position:absolute;left:-5px;top:5px;border-radius:50%;background:#222}.task-line.fail:before{background:var(--red)}.task-line:last-child{padding-bottom:0}.task-line b{display:block}.task-line span{color:var(--muted);font-size:12px}
-    .modal-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.42);z-index:20;align-items:center;justify-content:center;padding:24px}.modal-backdrop.open{display:flex}.modal{width:min(620px,100%);max-height:88vh;overflow:auto;background:#fff;border-radius:10px;box-shadow:0 24px 55px rgba(0,0,0,.24);animation:pop .2s ease}.modal.wide{width:min(760px,100%)}@keyframes pop{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}.modal-head{padding:18px 20px;border-bottom:1px solid #e5e5e3;display:flex;align-items:center;justify-content:space-between}.modal-head h2{margin:0;font-size:18px}.close{border:0;background:transparent;font-size:24px;color:#666;line-height:1}.modal-body{padding:20px}.modal-foot{border-top:1px solid #e5e5e3;padding:14px 20px;display:flex;justify-content:flex-end;gap:8px}.check{display:flex;gap:8px;align-items:center;padding:9px 0;border-bottom:1px solid #eee}.check:last-child{border:0}
+    .notice-card{background:#fff;border:1px solid #efb5bf;border-left:4px solid var(--red);border-radius:var(--radius);padding:14px 16px;margin-bottom:16px}.notice-card h3{margin:0 0 5px;font-size:14px}.notice-card p{margin:0;color:#666;font-size:12px}.notice-list{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}.notice-item{background:var(--red-soft);border-radius:5px;padding:7px 10px;color:#7d1527;font-size:12px}.token-picker{display:flex;gap:8px;flex-wrap:wrap;padding:10px;border:1px solid #d8d8d5;border-radius:5px;background:#fafaf9}.token-picker label{display:flex;gap:6px;align-items:center;background:#fff;border:1px solid #d6d6d4;border-radius:4px;padding:7px 9px;font-weight:500}.strategy-preview{background:#161616;color:#fff;border-radius:5px;padding:12px 14px;font-size:13px}.strategy-preview b{color:#ffccd4}
+    .nav-group{color:#777;font-size:11px;letter-spacing:.8px;padding:14px 10px 5px}.nav-group:first-child{padding-top:0}.subnav{padding-left:10px}.subnav button{font-size:13px}.claim-tabs{display:flex;gap:28px;border-bottom:1px solid var(--line);margin:20px 0 16px}.claim-tabs .tab{font-size:15px;padding:11px 4px}.claim-info{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px;margin-bottom:16px;display:flex;justify-content:space-between;gap:12px;align-items:center;color:#555}.field-rule-table td,.field-rule-table th{padding:11px 12px}.mapping-layout{display:grid;grid-template-columns:240px minmax(0,1fr);gap:16px}.mapping-side,.mapping-main{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:16px}.mapping-side .selected{background:var(--red-soft);color:#971026;border-left:3px solid var(--red);font-weight:600;padding:10px}.mapping-side .item{padding:10px;border-bottom:1px solid #eee}.rule-builder{border:1px solid #e0e0dd;border-radius:6px;padding:14px;background:#fafaf9}.rule-builder .row{margin-bottom:10px}.rule-builder .row:last-child{margin-bottom:0}.mapping-token-line{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}.mapping-preview{background:#171717;color:#fff;border-radius:5px;padding:10px 12px;margin:8px 0;font-size:13px}.mapping-preview b{color:#fff;font-size:14px}
+    .dealer-pool .head{margin-bottom:18px}.dealer-pool .head h1{font-size:28px}.dealer-pool .claim-tabs{margin:8px 0 16px}.dealer-pool .pool-filters{padding:18px 16px;display:grid;grid-template-columns:repeat(4,minmax(150px,1fr)) auto auto;align-items:end;gap:14px;margin-bottom:14px}.pool-filter-field{display:grid;gap:6px}.pool-filter-field label{font-size:12px;color:#555;font-weight:600}.dealer-pool .pool-filters input,.dealer-pool .pool-filters select{width:100%;height:36px}.dealer-pool .pool-batch{padding:12px 16px;margin-bottom:12px}.dealer-pool .pool-batch .bar-left{gap:12px}.dealer-pool .table-wrap{border-radius:10px}.dealer-pool th{padding:12px 14px}.dealer-pool td{padding:14px}.dealer-pool .asset{width:46px!important;height:46px!important}.dealer-pool .pagination{padding-top:12px}
+    .modal-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.42);z-index:20;align-items:center;justify-content:center;padding:24px}.modal-backdrop.open{display:flex}.modal{width:min(620px,100%);max-height:88vh;overflow:auto;background:#fff;border-radius:10px;box-shadow:0 24px 55px rgba(0,0,0,.24);animation:pop .2s ease}.modal.wide{width:min(760px,100%)}.drawer-backdrop{align-items:stretch;justify-content:flex-end;padding:0}.drawer{width:min(460px,100%);height:100%;background:#fff;box-shadow:-18px 0 45px rgba(0,0,0,.2);display:flex;flex-direction:column;animation:slidein .2s ease}.drawer .modal-body{overflow:auto;flex:1}.drawer .modal-foot{margin-top:auto}@keyframes pop{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}@keyframes slidein{from{transform:translateX(100%)}to{transform:none}}.modal-head{padding:18px 20px;border-bottom:1px solid #e5e5e3;display:flex;align-items:center;justify-content:space-between}.modal-head h2{margin:0;font-size:18px}.close{border:0;background:transparent;font-size:24px;color:#666;line-height:1}.modal-body{padding:20px}.modal-foot{border-top:1px solid #e5e5e3;padding:14px 20px;display:flex;justify-content:flex-end;gap:8px}.check{display:flex;gap:8px;align-items:center;padding:9px 0;border-bottom:1px solid #eee}.check:last-child{border:0}
     .toast{position:fixed;right:26px;top:22px;background:#161616;color:#fff;border-left:4px solid var(--red);padding:12px 16px;border-radius:4px;box-shadow:var(--shadow);display:none;z-index:40}.toast.show{display:block;animation:fade .2s ease}.muted{color:var(--muted)}
-    @media(max-width:1020px){.app{grid-template-columns:1fr}.sidebar{position:static;height:auto;padding:14px}.sidebar-note{display:none}.nav{display:flex;overflow:auto;gap:4px}.nav-label{display:none}.nav button{width:auto;white-space:nowrap}.brand{display:none;margin-bottom:10px;padding-bottom:10px}.grid{grid-template-columns:repeat(2,minmax(240px,1fr))}.two-col{grid-template-columns:1fr}.form-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.span-3{grid-column:span 2}.asset-grid{grid-template-columns:repeat(3,1fr)}}
-    @media(max-width:640px){main{padding:20px 14px}.head{display:block}.head-meta{text-align:left;margin-top:12px}.summary{grid-template-columns:repeat(2,1fr)}.stat:nth-child(2){border-right:0}.stat:nth-child(n+3){border-top:1px solid var(--line)}.grid,.form-grid{grid-template-columns:1fr}.span-2,.span-3{grid-column:auto}.filters input,.filters select{width:100%}.asset-grid{grid-template-columns:repeat(2,1fr)}}
+    .embedded-prototype{width:100%;height:calc(100vh - 90px);min-height:760px;border:1px solid var(--line);border-radius:var(--radius);background:#fff;box-shadow:var(--shadow)}
+    @media(max-width:1020px){.app{grid-template-columns:1fr}.sidebar{position:static;height:auto;padding:14px}.sidebar-note{display:none}.nav{display:flex;overflow:auto;gap:4px}.nav-label{display:none}.nav button{width:auto;white-space:nowrap}.brand{margin-bottom:10px;padding-bottom:10px}.grid{grid-template-columns:repeat(2,minmax(240px,1fr))}.two-col{grid-template-columns:1fr}.form-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.span-3{grid-column:span 2}.asset-grid{grid-template-columns:repeat(3,1fr)}}
+    @media(max-width:640px){main{padding:20px 14px}.head{display:block}.head-meta{text-align:left;margin-top:12px}.summary{grid-template-columns:repeat(2,1fr)}.stat:nth-child(2){border-right:0}.stat:nth-child(n+3){border-top:1px solid var(--line)}.grid,.form-grid{grid-template-columns:1fr}.span-2,.span-3{grid-column:auto}.filters input,.filters select{width:100%}.dealer-pool .pool-filters{grid-template-columns:1fr}.asset-grid{grid-template-columns:repeat(2,1fr)}}
     @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:0.01ms!important;transition-duration:0.01ms!important}}
-  
-    .brand-stripe { height: 4px; background: linear-gradient(90deg, #0A0A0A 0%, #0A0A0A 72%, #C8102E 72%, #C8102E 100%); }
-
-    /* §2.2 已打开页面 Tab */
-    .open-tabs { display:flex; align-items:center; gap:2px; flex:1; min-width:0; overflow-x:auto; margin:0 12px; }
-    .open-tab {
-      display: inline-flex; align-items: center; gap: 6px; max-width: 160px;
-      padding: 6px 10px; font-size: 13px; border-radius: 4px; cursor:pointer;
-      color: rgba(255,255,255,.72); white-space: nowrap; transition: all .15s;
-      border: 0; border-bottom: 2px solid transparent; background: transparent;
-    }
-    .open-tab:hover { color: #fff; background: rgba(255,255,255,.08); }
-    .open-tab.active { color: #fff; font-weight: 600; border-bottom-color: #C8102E; background: rgba(200,16,46,.18); }
-    .open-tab .tab-close { opacity: .55; font-size: 12px; line-height: 1; padding: 2px 4px; border-radius: 3px; }
-    .open-tab .tab-close:hover { opacity: 1; background: rgba(255,255,255,.15); }
-    .global-topbar {
-      height: 56px; display:flex; align-items:center; padding:0 16px;
-      background:#0A0A0A; color:#fff; position:sticky; top:0; z-index:50;
-    }
-    .global-topbar .logo { font-weight:700; letter-spacing:.06em; font-size:14px; flex-shrink:0; }
-    .global-topbar .top-right { display:flex; align-items:center; gap:10px; flex-shrink:0; margin-left:auto; }
-    .global-topbar .top-right select {
-      background:rgba(255,255,255,.08); color:#fff; border:1px solid rgba(255,255,255,.2);
-      border-radius:4px; padding:4px 8px; font-size:12px;
-    }
-    .page-size-select {
-      border:1px solid #d4d4d4; border-radius:4px; padding:3px 6px; font-size:12px; background:#fff; margin:0 8px;
-    }
-
-
-    html, body { height:100%; margin:0; overflow:hidden; }
-    .app { height:100vh !important; min-height:0 !important; overflow:hidden !important; }
-    .app > .sidebar, .app > aside.sidebar {
-      height:100vh !important; overflow-y:auto; position:relative !important; top:auto !important;
-    }
-    .app > .main, .app > main {
-      height:100vh; min-height:0; overflow:hidden; display:flex; flex-direction:column;
-    }
-    .app > .main > .topbar, .app > main > .topbar { flex:0 0 auto; }
-    .app > .main > .workspace, .app > main > .workspace,
-    .app > .main > main, .app > main > .view-host {
-      flex:1 1 auto; min-height:0; overflow-y:auto;
-    }
-    /* when global-topbar present above .app */
-    body > .global-topbar, body > .brand-stripe { flex:0 0 auto; }
-    body.zippo-fixed {
-      display:flex; flex-direction:column; height:100vh; overflow:hidden;
-    }
-    body.zippo-fixed > .app { flex:1 1 auto; min-height:0; height:auto !important; }
-    body.zippo-fixed > .app > .sidebar { height:100% !important; }
-    body.zippo-fixed > .app > .main, body.zippo-fixed > .app > main { height:100%; }
-
-.zippo-scroll-main{height:100%;overflow-y:auto;min-height:0;}
-
-    /* body 纵向壳：顶栏固定，下方 zippo-body 占满剩余高度 */
-    body.overflow-hidden, body.zippo-fixed, body.d06-shell {
-      display: flex !important; flex-direction: column !important; height: 100vh !important; margin: 0;
-    }
-    body > header, body > .brand-stripe, body > .h-1.brand-stripe, body > div.h-1 {
-      flex: 0 0 auto !important;
-    }
-    .zippo-body { flex: 1 1 auto !important; min-height: 0 !important; height: auto !important; }
-    main.zippo-main, .zippo-main {
-      flex: 1 1 auto !important; min-width: 0 !important; min-height: 0 !important;
-      overflow-y: auto !important;
-    }
-
-
-/* Spec §2.2 white sidebar override */
-.proto-sidebar, aside.sidebar, aside.primary-nav, .module-sidebar, .d-sidebar {
-  background: #0A0A0A !important; color: #cfcfcf !important;
-  border-right: 1px solid #EBEBEB !important;
-}
-.proto-nav-item.active, .nav button.active, .nav-item.active, .side-nav a.active, .menu-item.active {
-  background: #FDE8EC !important; color: #C8102E !important; font-weight: 600;
-}
-
-
-
-/* ZIPPO_NAV_L1L2_V3 */
-.nav-label, .proto-sidebar-title, .proto-sidebar-title .label, .nav-l1, summary.nav-l1 {
-  font-size: 13px !important;
-  font-weight: 600 !important;
-  color: #E8E8E8 !important;
-  letter-spacing: .02em !important;
-  text-transform: none !important;
-}
-.proto-nav-item, .nav button, .nav-item, .side-nav a, .menu-item, .nav-l2 {
-  color: #E0E0E0 !important;
-  font-size: 13px !important;
-}
-.proto-nav-item:hover, .nav button:hover, .nav-l2:hover {
-  color: #ffffff !important;
-}
-.sidebar-note, .sidebar-foot, .sidebar-footer,
-aside .mt-6.px-3.py-3.rounded-lg.bg-fill,
-aside [class*="黑红品牌版"] {
-  display: none !important;
-}
-
-
-/* ZIPPO_NAV_HIERARCHY_V3 */
-details.nav-group { margin: 0 0 6px; border: 0; }
-details.nav-group > summary.nav-l1 {
-  list-style: none; cursor: pointer; user-select: none;
-  display: flex; align-items: center; justify-content: space-between; gap: 8px;
-  min-height: 40px; padding: 0 12px; margin: 0; border-radius: 4px;
-  font-size: 13px !important; font-weight: 600 !important; line-height: 1.2;
-  color: #FFFFFF !important; letter-spacing: 0 !important; text-transform: none !important;
-  background: transparent;
-}
-details.nav-group > summary.nav-l1::-webkit-details-marker { display: none; }
-details.nav-group > summary.nav-l1 .nav-chev {
-  font-size: 10px; color: rgba(255,255,255,.7); transition: transform .15s;
-}
-details.nav-group:not([open]) > summary.nav-l1 .nav-chev { transform: rotate(-90deg); }
-details.nav-group > summary.nav-l1:hover { background: #2d2d2d; }
-.nav-l2-wrap { display: flex; flex-direction: column; gap: 2px; padding: 2px 0 6px; }
-.nav-l2-wrap .proto-nav-item,
-.nav-l2-wrap > button,
-.nav-l2-wrap .nav-item,
-aside .nav-l2-wrap button {
-  font-size: 13px !important;
-  color: #E8E8E8 !important;
-  min-height: 40px;
-}
-/* dark sidebar contrast: kill low-contrast tertiary / selected white block */
-aside.proto-sidebar, aside.sidebar, aside.module-sidebar, .proto-sidebar {
-  color: #E8E8E8 !important;
-}
-aside.proto-sidebar .text-ink-secondary,
-aside.proto-sidebar .text-ink-tertiary,
-aside.proto-sidebar .text-ink,
-aside .nav-label {
-  color: #E8E8E8 !important;
-}
-aside.proto-sidebar button.text-ink-secondary,
-aside.proto-sidebar a.text-ink-secondary {
-  color: #E8E8E8 !important;
-}
-aside.proto-sidebar .bg-\[\#F5F5F5\],
-aside.proto-sidebar button.bg-\[\#F5F5F5\] {
-  background: #2d2d2d !important;
-  color: #FFFFFF !important;
-}
-aside.proto-sidebar .hover\:bg-fill:hover,
-aside.proto-sidebar button:hover {
-  background: #2d2d2d !important;
-  color: #FFFFFF !important;
-}
-/* L1 labels that are not yet details */
-.nav-label, .proto-nav-group, .proto-sidebar-title {
-  font-size: 13px !important;
-  font-weight: 600 !important;
-  color: #FFFFFF !important;
-  letter-spacing: 0 !important;
-  text-transform: none !important;
-}
-.proto-nav-item, .nav button, aside .nav button {
-  color: #E8E8E8 !important;
-  font-size: 13px !important;
-}
-.proto-nav-item.active, .nav button.active {
-  color: #FFFFFF !important;
-}
-/* hide sidebar bottom notes / brand footnotes */
-.sidebar-note, .sidebar-foot, .sidebar-footer,
-aside .zippo-sidebar-note,
-aside nav > .mt-6.px-3.py-3.rounded-lg {
-  display: none !important;
-}
-
-/* ZIPPO_NAV_SPACING_V2 */
-.nav, .proto-sidebar-nav, aside .nav, .sidebar .nav {
-  gap: 4px !important;
-}
-.proto-nav-item, .nav button, .nav-item, .side-nav a, .menu-item {
-  min-height: 40px !important;
-  height: auto !important;
-  max-height: none !important;
-  padding-top: 8px !important;
-  padding-bottom: 8px !important;
-  box-sizing: border-box !important;
-  flex-shrink: 0 !important;
-}
-.nav-label, .proto-sidebar-title .label {
-  padding-top: 10px !important;
-  padding-bottom: 4px !important;
-}
-
-/* ZIPPO_GLOBAL_SHELL_V2 */
-.card.has-table { display:flex; flex-direction:column; min-height:0; }
-.card.has-table > .table-wrap { flex:1 1 auto; min-height:0; overflow:auto; }
-.card > .pager, .card > .pager.pagination, .pager.zippo-pager-sticky {
-  position:sticky; bottom:0; z-index:5; flex-shrink:0;
-  background:#fff; border-top:1px solid #EBEBEB; margin-top:0;
-  box-shadow:0 -4px 12px rgba(0,0,0,.04);
-}
-.sidebar-foot, .sidebar-footer { display:none !important; }
-.zippo-user-menu { position:relative; display:inline-flex; }
-.zippo-user-menu-panel {
-  display:none; position:absolute; right:0; top:calc(100% + 6px); min-width:128px;
-  background:#fff; color:#0A0A0A; border:1px solid #EBEBEB; border-radius:6px;
-  box-shadow:0 8px 24px rgba(0,0,0,.12); padding:4px; z-index:80;
-}
-.zippo-user-menu.open .zippo-user-menu-panel { display:block; }
-.zippo-user-menu-panel button {
-  display:block; width:100%; text-align:left; border:0; background:transparent;
-  padding:8px 10px; font-size:13px; border-radius:4px; cursor:pointer; color:#0A0A0A;
-}
-.zippo-user-menu-panel button:hover { background:#F5F5F5; }
-
-</style>
+  </style>
 </head>
-<body class="zippo-fixed">
-  
-<header class="global-topbar" aria-label="全局顶栏">
-  <div class="logo">ZIPPO</div>
-  <nav class="open-tabs" id="openTabsBar" aria-label="已打开页面">
-    <button type="button" class="open-tab active" data-id="home" title="渠道接入"><span>渠道接入</span><span class="tab-close" title="关闭">✕</span></button>
-  </nav>
-  <div class="top-right">
-    <select aria-label="演示角色"><option>品牌运营</option><option>管理员</option></select>
-    <button type="button" title="通知" aria-label="通知" style="width:32px;height:32px;border:0;border-radius:4px;background:transparent;color:rgba(255,255,255,.7);cursor:pointer;position:relative"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg><span class="zippo-notify-dot" style="position:absolute;top:6px;right:6px;width:6px;height:6px;border-radius:50%;background:#C8102E"></span></button>
-    <span style="width:28px;height:28px;border-radius:50%;background:#C8102E;display:inline-grid;place-items:center;font-size:12px;font-weight:700" aria-label="账号">管</span>
-  </div>
-</header>
-<div class="brand-stripe" style="height:4px;background:linear-gradient(90deg,#0A0A0A 0%,#0A0A0A 72%,#C8102E 72%,#C8102E 100%)"></div>
-<div class="app">
-    <aside class="sidebar proto-sidebar" aria-label="渠道管理导航">
-      <nav class="nav"><details class="nav-group" open><summary class="nav-l1">渠道中心<span class="nav-chev">▾</span></summary><div class="nav-l2-wrap">
-        <button class="active" data-view="access">渠道接入 <span class="n">01</span></button>
-        <button data-view="category">平台类目管理 <span class="n">02</span></button>
-        <button data-view="mapping">类目映射管理 <span class="n">03</span></button>
-        <button data-view="pool">经销商商品池 <span class="n">04</span></button>
-        <button data-view="products">渠道商品列表 <span class="n">05</span></button>
-        <button data-view="editor">渠道商品编辑 <span class="n">06</span></button>
-        <button data-view="tracking">上下架状态追踪 <span class="n">07</span></button>
-      </div></details></nav>
-      
+<body>
+  <div class="app">
+    <aside class="sidebar" aria-label="渠道管理导航">
+      <div class="brand"><div class="brand-mark">渠道管理</div><small>高保真交互稿</small></div>
+      <nav class="nav">
+        <div class="nav-group">商品分发</div>
+        <button class="active" data-view="claim">商品领用 <span class="n">01</span></button>
+        <button data-view="pool">经销商池 <span class="n">02</span></button>
+        <div class="nav-group">渠道列表</div>
+        <button data-view="products">渠道列表 <span class="n">03</span></button>
+        <button data-view="editor">渠道编辑 <span class="n">04</span></button>
+        <button data-view="tracking">上下架状态追踪 <span class="n">05</span></button>
+        <div class="nav-group">设置</div>
+        <button data-view="access">渠道接入管理 <span class="n">06</span></button>
+        <button data-view="mapping">类目映射管理 <span class="n">07</span></button>
+        <button data-view="fieldMapping">字段映射管理 <span class="n">08</span></button>
+        <button data-view="aggregation">聚合策略 <span class="n">09</span></button>
+      </nav>
+      <div class="sidebar-note">一期渠道：天猫、京东、抖音、拼多多<br>当前稿仅呈现已确认的业务功能。</div>
     </aside>
 
-    <main class="zippo-scroll-main">
-      <section class="view active" id="access">
+    <main>
+      <section class="view" id="access">
         <div class="crumb">渠道中心 / 渠道接入</div><div class="head"><div><h1>渠道接入管理</h1><p>维护组织下各平台店铺的授权、连接和启停状态。</p></div><div class="head-meta">最后更新：2026-08-03 10:32</div></div>
-        <div class="bar"><div class="bar-left"><button class="btn primary" data-modal="channelModal">新建渠道</button></div><div class="bar-right"><span class="muted">已配置渠道 4 个</span></div></div>
+        <div class="bar"><div class="bar-left"><button class="btn primary" data-modal="channelModal">新建渠道</button></div></div>
         <div class="filters"><input placeholder="搜索渠道名称、店铺名称或店铺ID"><select><option>全部组织</option><option>ZIPPO中国</option><option>华东销售公司</option></select><select><option>全部平台</option><option>天猫</option><option>京东</option><option>抖音</option><option>拼多多</option></select><button class="btn">重置</button><button class="btn primary">搜索</button></div>
         <div class="grid">
-          <article class="channel-card"><div class="card-title"><div><h3>华东上海天猫店</h3><p>ZIPPO中国 / 华东销售公司 / 电子商务</p></div><span class="tag ready">可用</span></div><div class="card-info"><span>店铺：Zippo 官方旗舰店</span><span>授权：已授权至 2027-07-31</span><span>连接：正常，2026-08-03 10:20</span></div><div class="card-actions"><div class="row"><button class="link" data-modal="channelModal">编辑</button><button class="link" data-toast="已打开该渠道的同步日志">日志</button></div><button class="switch on" aria-label="渠道已启用" data-channel-switch></button></div></article>
-          <article class="channel-card"><div class="card-title"><div><h3>华西成都京东店</h3><p>ZIPPO中国 / 华西销售公司 / 电子商务</p></div><span class="tag ready">可用</span></div><div class="card-info"><span>店铺：Zippo 京东自营专区</span><span>授权：已授权至 2027-06-18</span><span>连接：正常，2026-08-03 10:17</span></div><div class="card-actions"><div class="row"><button class="link" data-modal="channelModal">编辑</button><button class="link" data-toast="已打开该渠道的同步日志">日志</button></div><button class="switch on" aria-label="渠道已启用" data-channel-switch></button></div></article>
-          <article class="channel-card"><div class="card-title"><div><h3>华南广州抖音店</h3><p>ZIPPO中国 / 华南销售公司 / 电子商务</p></div><span class="tag pending">待启用</span></div><div class="card-info"><span>店铺：Zippo 抖音官方店</span><span>授权：已授权至 2027-04-21</span><span>连接：等待测试</span></div><div class="card-actions"><div class="row"><button class="link" data-modal="channelModal">编辑</button><button class="link" data-toast="请先完成测试连接">日志</button></div><button class="switch" aria-label="渠道未启用" data-channel-switch></button></div></article>
-          <article class="channel-card"><div class="card-title"><div><h3>华北北京拼多多店</h3><p>ZIPPO中国 / 华北销售公司 / 电子商务</p></div><span class="tag error">连接异常</span></div><div class="card-info"><span>店铺：Zippo 品牌专卖店</span><span>授权：已授权至 2027-02-10</span><span>连接：接口响应异常</span></div><div class="card-actions"><div class="row"><button class="link" data-modal="channelModal">编辑</button><button class="link" data-toast="异常原因：平台接口响应超时">日志</button></div><button class="switch" aria-label="渠道未启用" data-channel-switch></button></div></article>
-        </div>
+          <article class="channel-card"><div class="card-title"><div><h3>华东上海天猫店</h3><p>ZIPPO中国 / 华东销售公司 / 电子商务</p></div><span class="tag ready">可用</span></div><div class="card-info"><span>店铺：Zippo 官方旗舰店</span><span>授权：已授权至 2027-07-31</span><span>连接：正常，2026-08-03 10:20</span></div><div class="card-actions"><div class="row"><button class="link" data-modal="channelModal">编辑</button><button class="link" data-toast="已打开该渠道的同步日志">同步日志</button></div><button class="switch on" aria-label="渠道已启用" data-channel-switch></button></div></article>
+          <article class="channel-card"><div class="card-title"><div><h3>华西成都京东店</h3><p>ZIPPO中国 / 华西销售公司 / 电子商务</p></div><span class="tag ready">可用</span></div><div class="card-info"><span>店铺：Zippo 京东自营专区</span><span>授权：已授权至 2027-06-18</span><span>连接：正常，2026-08-03 10:17</span></div><div class="card-actions"><div class="row"><button class="link" data-modal="channelModal">编辑</button><button class="link" data-toast="已打开该渠道的同步日志">同步日志</button></div><button class="switch on" aria-label="渠道已启用" data-channel-switch></button></div></article>
+          <article class="channel-card"><div class="card-title"><div><h3>华南广州抖音店</h3><p>ZIPPO中国 / 华南销售公司 / 电子商务</p></div><span class="tag pending">待启用</span></div><div class="card-info"><span>店铺：Zippo 抖音官方店</span><span>授权：已授权至 2027-04-21</span><span>连接：等待测试</span></div><div class="card-actions"><div class="row"><button class="link" data-modal="channelModal">编辑</button><button class="link" data-toast="请先完成测试连接">同步日志</button></div><button class="switch" aria-label="渠道未启用" data-channel-switch></button></div></article>
+          <article class="channel-card"><div class="card-title"><div><h3>华北北京拼多多店</h3><p>ZIPPO中国 / 华北销售公司 / 电子商务</p></div><span class="tag error">连接异常</span></div><div class="card-info"><span>店铺：Zippo 品牌专卖店</span><span>授权：已授权至 2027-02-10</span><span>连接：接口响应异常</span></div><div class="card-actions"><div class="row"><button class="link" data-modal="channelModal">编辑</button><button class="link" data-toast="异常原因：平台接口响应超时">同步日志</button></div><button class="switch" aria-label="渠道未启用" data-channel-switch></button></div></article>
+        </div><div class="pagination"><span>每页 10 条，共 1 页</span><button class="page-edge" data-top>置顶</button><div class="pages"><button class="page active">1</button></div><button class="page-edge" data-bottom>置底</button></div>
       </section>
 
       <section class="view" id="category">
         <div class="crumb">渠道中心 / 平台类目管理</div><div class="head"><div><h1>平台类目管理</h1><p>按店铺查询和更新平台授权类目。手动拉取最小范围为单个店铺。</p></div><div class="head-meta">自动拉取：每月1日 00:00:00</div></div>
-        <div class="summary"><div class="stat"><b>3,824</b><span>当前有效授权类目</span></div><div class="stat"><b>126</b><span>历史失效类目</span></div><div class="stat"><b>4</b><span>已接入店铺</span></div><div class="stat"><b>2026-08-01</b><span>最近自动拉取完成</span></div></div>
         <div class="bar"><div class="bar-left"><button class="btn primary" id="pullStore">拉取当前店铺类目</button><button class="btn" data-toast="已打开类目拉取任务记录">查看任务记录</button></div><div class="bar-right"><span class="tag ready">华东上海天猫店</span></div></div>
         <div class="filters"><input placeholder="搜索类目路径、类目ID或关键字"><select><option>全部平台</option><option selected>天猫</option></select><select><option>全部渠道</option><option selected>华东上海天猫店</option></select><select><option>全部状态</option><option>当前有效</option><option>历史失效</option></select><button class="btn primary">搜索</button></div>
-        <div class="two-col"><div class="table-wrap"><table><thead><tr><th>平台类目ID</th><th>平台类目路径</th><th>对应店铺</th><th>最近拉取时间</th><th>状态</th><th>操作</th></tr></thead><tbody><tr><td>50020808</td><td>ZIPPO/瑞士军刀/眼镜 &gt; 品牌打火机及配件 &gt; ZIPPO/芝宝</td><td>华东上海天猫店</td><td>2026-08-01 02:16:34</td><td><span class="tag ready">当前有效</span></td><td><button class="link" data-toast="已创建该店铺的类目拉取任务">拉取</button></td></tr><tr><td>50020809</td><td>ZIPPO/瑞士军刀/眼镜 &gt; 品牌打火机及配件 &gt; 打火机配件/工具</td><td>华东上海天猫店</td><td>2026-08-01 02:16:34</td><td><span class="tag ready">当前有效</span></td><td><button class="link" data-toast="已创建该店铺的类目拉取任务">拉取</button></td></tr><tr><td>50020811</td><td>ZIPPO/瑞士军刀/眼镜 &gt; 品牌打火机及配件 &gt; 煤油</td><td>华东上海天猫店</td><td>2026-07-01 02:11:12</td><td><span class="tag neutral">历史失效</span></td><td><span class="muted">保留历史</span></td></tr></tbody></table></div><aside class="side-panel"><h3>店铺拉取说明</h3><div class="status-row"><span>拉取对象</span><b>单个店铺</b></div><div class="status-row"><span>失败重试</span><b>3 次</b></div><div class="status-row"><span>失败通知</span><b>当前操作人</b></div><div class="status-row"><span>历史类目</span><b>保留180天</b></div></aside></div><div class="pagination"><span>共 3,950 条，当前第 1 页</span><div class="pages"><button class="page active">1</button><button class="page">2</button><button class="page">3</button></div></div>
+        <div class="two-col"><div class="table-wrap"><table><thead><tr><th>平台类目ID</th><th>平台类目路径</th><th>对应店铺</th><th>最近拉取时间</th><th>状态</th><th>操作</th></tr></thead><tbody><tr><td>50020808</td><td>ZIPPO/瑞士军刀/眼镜 &gt; 品牌打火机及配件 &gt; ZIPPO/芝宝</td><td>华东上海天猫店</td><td>2026-08-01 02:16:34</td><td><span class="tag ready">当前有效</span></td><td><button class="link" data-toast="已创建该店铺的类目拉取任务">拉取</button></td></tr><tr><td>50020809</td><td>ZIPPO/瑞士军刀/眼镜 &gt; 品牌打火机及配件 &gt; 打火机配件/工具</td><td>华东上海天猫店</td><td>2026-08-01 02:16:34</td><td><span class="tag ready">当前有效</span></td><td><button class="link" data-toast="已创建该店铺的类目拉取任务">拉取</button></td></tr><tr><td>50020811</td><td>ZIPPO/瑞士军刀/眼镜 &gt; 品牌打火机及配件 &gt; 煤油</td><td>华东上海天猫店</td><td>2026-07-01 02:11:12</td><td><span class="tag neutral">历史失效</span></td><td><span class="muted">保留历史</span></td></tr></tbody></table></div><aside class="side-panel"><h3>店铺拉取说明</h3><div class="status-row"><span>拉取对象</span><b>单个店铺</b></div><div class="status-row"><span>失败重试</span><b>3 次</b></div><div class="status-row"><span>失败通知</span><b>当前操作人</b></div><div class="status-row"><span>历史类目</span><b>保留180天</b></div></aside></div><div class="pagination"><span>每页 10 条，共 395 页</span><button class="page-edge" data-top>置顶</button><div class="pages"><button class="page active">1</button><button class="page">2</button><button class="page">3</button></div><button class="page-edge" data-bottom>置底</button></div>
       </section>
 
       <section class="view" id="mapping">
@@ -346,48 +127,105 @@ aside nav > .mt-6.px-3.py-3.rounded-lg {
         <div class="filters"><input placeholder="搜索品牌类目、渠道或平台类目"><select><option>全部渠道</option><option>华东上海天猫店</option><option>华西成都京东店</option></select><select><option>全部状态</option><option>待处理</option><option>已生效</option><option>已停用</option></select><button class="btn primary">搜索</button></div>
         <article class="rule-card"><div class="rule-head"><div><h3>品牌打火机 / 煤油打火机</h3><div class="sub">适用渠道：华东上海天猫店</div></div><span class="tag ready">已生效</span></div><div class="rule-detail"><span class="chip">平台类目：ZIPPO/芝宝</span><span class="chip">条件：商品标题包含“油”</span><span class="chip">优先级：1</span><span class="chip">来源：人工确认</span></div><div class="rule-foot"><button class="link" data-modal="ruleModal">编辑规则</button>　<button class="link" data-modal="previewModal">命中预览</button></div></article>
         <article class="rule-card"><div class="rule-head"><div><h3>品牌打火机 / 常规打火机</h3><div class="sub">适用渠道：华西成都京东店</div></div><span class="tag pending">待处理</span></div><div class="rule-detail"><span class="chip">推荐类目：ZIPPO/芝宝</span><span class="chip">推荐置信度：92%</span><span class="chip">来源：智能推荐</span></div><div class="rule-foot"><button class="link" id="acceptOne">采纳推荐</button>　<button class="link" data-modal="ruleModal">人工改判</button></div></article>
-        <article class="rule-card"><div class="rule-head"><div><h3>品牌打火机 / 配件</h3><div class="sub">适用渠道：华东上海天猫店</div></div><span class="tag error">规则冲突</span></div><div class="rule-detail"><span class="chip">存在两条相同优先级规则</span><span class="chip">需调整后才能发布</span></div><div class="rule-foot"><button class="link" data-modal="ruleModal">处理冲突</button></div></article>
+        <article class="rule-card"><div class="rule-head"><div><h3>品牌打火机 / 配件</h3><div class="sub">适用渠道：华东上海天猫店</div></div><span class="tag error">规则冲突</span></div><div class="rule-detail"><span class="chip">存在两条相同优先级规则</span><span class="chip">需调整后才能发布</span></div><div class="rule-foot"><button class="link" data-modal="ruleModal">处理冲突</button></div></article><div class="pagination"><span>每页 10 条，共 25 页</span><button class="page-edge" data-top>置顶</button><div class="pages"><button class="page active">1</button><button class="page">2</button><button class="page">3</button></div><button class="page-edge" data-bottom>置底</button></div>
       </section>
 
-      <section class="view" id="pool">
-        <div class="crumb">渠道中心 / 经销商商品池</div><div class="head"><div><h1>经销商商品池</h1><p>查看经销商可经营商品，并将商品分配至自己的下游渠道。</p></div><div class="head-meta">当前经销商：华东经销商</div></div>
-        <div class="summary"><div class="stat"><b>248</b><span>池内已生效商品</span></div><div class="stat"><b>36</b><span>已分配下游渠道</span></div><div class="stat"><b>6</b><span>待分配商品</span></div><div class="stat"><b>3</b><span>已失效商品</span></div></div>
-        <div class="bar"><div class="bar-left"><button class="btn primary" id="distribute">分配至下游渠道</button></div><div class="bar-right"><span class="muted">已选择 0 个商品</span></div></div>
-        <div class="filters"><input placeholder="搜索商品名称、品牌货品编码、经销商编码"><select><option>全部状态</option><option>已生效</option><option>已失效</option></select><select><option>全部下游渠道</option><option>华东上海天猫店</option><option>华东线下门店</option></select><button class="btn primary">搜索</button></div>
-        <div class="table-wrap"><table><thead><tr><th><input type="checkbox" aria-label="选择全部商品"></th><th>商品信息</th><th>品牌货品编码</th><th>品牌SKU编码</th><th>经销商编码</th><th>已分配渠道</th><th>状态</th><th>操作</th></tr></thead><tbody><tr><td><input type="checkbox" class="pool-check" aria-label="选择商品"></td><td><b>ZIPPO 复古镀铬煤油打火机</b><div class="sub">商品编码：ZP-2026-001</div></td><td>BR-G-001</td><td>BR-SKU-001</td><td>HD-ZP-10001</td><td>华东上海天猫店、华东线下门店</td><td><span class="tag ready">已生效</span></td><td><button class="link" data-toast="请先选择商品后进行分配">分配渠道</button></td></tr><tr><td><input type="checkbox" class="pool-check" aria-label="选择商品"></td><td><b>ZIPPO 黑冰系列打火机</b><div class="sub">商品编码：ZP-2026-014</div></td><td>BR-G-014</td><td>BR-SKU-014</td><td>HD-ZP-10012</td><td>未分配</td><td><span class="tag ready">已生效</span></td><td><button class="link" data-toast="请先选择商品后进行分配">分配渠道</button></td></tr><tr><td><input disabled type="checkbox" aria-label="失效商品"></td><td><b>ZIPPO 限量收藏系列</b><div class="sub">商品编码：ZP-2025-088</div></td><td>BR-G-088</td><td>BR-SKU-088</td><td>HD-ZP-10088</td><td>华东上海天猫店</td><td><span class="tag neutral">已失效</span></td><td><span class="muted">停止分配并下架</span></td></tr></tbody></table></div><div class="pagination"><span>共 248 条</span><div class="pages"><button class="page active">1</button><button class="page">2</button></div></div>
+      <section class="view active" id="claim">
+        <div class="crumb">商品分发 / 商品领用</div><div class="head"><div><h1>商品领用</h1><p>当前运营组仅可领取分发至本运营组的有效 SKU，领用后进入经销商商品池。</p></div><div class="head-meta">当前运营组：经销商A运营组</div></div>
+        <div class="channel-claim-v2">
+          <div class="channel-claim-note"><b>领用规则</b>：只展示分发至当前运营组、已生效且未撤回的 SKU。领用后以 SKU 维度进入商品池；拒绝记录保留，后续由商品分发专员重新分发。</div>
+          <div class="channel-claim-tabs"><button class="channel-claim-tab active" data-claim-tab="pending">待领用商品</button><button class="channel-claim-tab" data-claim-tab="records">分发记录</button><button class="channel-claim-tab" data-claim-tab="sync">主数据更新同步</button></div>
+          <section class="channel-claim-pane active" data-claim-pane="pending"><div class="claim-info"><span>当前运营组：<b>经销商A运营组</b>，只展示分发到本运营组的已生效 SKU。</span><button class="btn" data-claim-refresh>刷新</button></div>
+            <div class="card channel-claim-filter"><div class="field"><label>分发明细编号</label><input id="claimFilterId" placeholder="输入明细编号"></div><div class="field"><label>SKU编码 / 商品</label><input id="claimFilterSku" placeholder="输入 SKU 编码或商品名称"></div><div class="field"><label>平台</label><select id="claimFilterPlatform"><option value="">全部平台</option><option>天猫</option><option>京东</option><option>抖音</option><option>拼多多</option></select></div><div class="field"><label>渠道店铺</label><input id="claimFilterShop" placeholder="输入店铺名称"></div><div class="field"><label>主数据版本</label><input id="claimFilterVersion" placeholder="如 v12"></div><button class="btn" data-claim-reset>重置</button></div>
+            <div class="channel-claim-result">状态：<span class="tag pending">待领用</span>（本页固定范围） · <b id="claimResultCount">2</b> 条结果</div>
+            <div class="table-wrap"><table><thead><tr><th>分发明细编号</th><th>SKU编码 / 商品</th><th>平台 / 店铺</th><th>主数据版本</th><th>状态</th><th>操作</th></tr></thead><tbody id="claimPendingRows"><tr data-claim-status="待领用"><td><b>DIST-DTL-20260904-0001</b></td><td><b>SKU-Z-LOT-26011-000001</b><div class="sub">Classic Windproof Lighter</div></td><td>天猫<div class="sub">上海天猫专卖店</div></td><td>v12</td><td><span class="tag pending">待领用</span></td><td><button class="btn primary" data-claim-action="claim">领用</button> <button class="btn" data-claim-action="reject">拒绝</button></td></tr><tr data-claim-status="待领用"><td><b>DIST-DTL-20260904-0002</b></td><td><b>SKU-Z-LSE-26012-000002</b><div class="sub">Black Matte Lighter</div></td><td>京东<div class="sub">华东京东专卖店</div></td><td>v8</td><td><span class="tag pending">待领用</span></td><td><button class="btn primary" data-claim-action="claim">领用</button> <button class="btn" data-claim-action="reject">拒绝</button></td></tr></tbody></table></div>
+          </section>
+          <section class="channel-claim-pane" data-claim-pane="records"><div class="card"><div class="toolbar"><div><h2>分发记录</h2><small>拒绝、撤回与再次分发均保留记录。</small></div></div><div class="table-wrap"><table><thead><tr><th>分发明细编号</th><th>SKU编码</th><th>目标运营组</th><th>结果</th><th>结果说明</th><th>操作</th></tr></thead><tbody id="claimRecordRows"><tr><td>DIST-DTL-20260903-0003</td><td>SKU-Z-BND-L-ZE-000001</td><td>经销商A运营组</td><td><span class="tag ready">已领用</span></td><td>已进入商品池</td><td>—</td></tr><tr><td>DIST-DTL-20260902-0005</td><td>SKU-Z-LSE-26012-000004</td><td>经销商A运营组</td><td><span class="tag error">已拒绝</span></td><td>当前店铺暂不经营该款商品</td><td><button class="link" data-claim-action="redispatch">再次分发</button></td></tr></tbody></table></div></div></section>
+          <section class="channel-claim-pane" data-claim-pane="sync"><div class="panel-alert">仅当主数据更新审核生效后，系统才同步 SKU 状态及标记为“参与商品分发”的字段。渠道转换字段和渠道商品内容不被覆盖。</div><div class="card"><div class="toolbar"><div><h2>已领用商品的主数据更新</h2><small>同步到经销商商品池，不代表渠道商品已上架或已更新。</small></div><button class="btn primary" data-claim-sync>执行待同步任务</button></div><div class="claim-sync-grid"><article><b>SKU-Z-BND-L-ZE-000001</b><span class="sub">火焰经典礼盒组合</span><span class="tag pending">待同步</span><small>v4 → v5 · 商品名称、销售价、产品图片</small></article><article><b>SKU-Z-LSE-26012-000010</b><span class="sub">Black Matte Lighter</span><span class="tag ready">已同步</span><small>v7 → v8 · 中文描述</small></article></div></div></section>
+        </div>
+      </section>
+
+      <section class="view dealer-pool" id="pool">
+        <div class="crumb">AI-PIM / 商品中心 / 经销商商品池</div>
+        <div class="head"><div><h1>经销商商品池</h1><p>查看经销商可经营商品，并将商品分配至自己的下游渠道。</p></div><div class="head-meta">当前运营组：经销商A运营组</div></div>
+        <div class="filters pool-filters"><div class="pool-filter-field"><label>商品名称</label><input id="poolProductName" placeholder="输入商品名称"></div><div class="pool-filter-field"><label>SKU编码</label><input id="poolSkuCode" placeholder="输入 SKU 编码"></div><div class="pool-filter-field"><label>类目</label><select><option>全部类目</option><option>经典防风打火机</option><option>饰品打火机</option><option>配件/耗材</option></select></div><button class="btn primary">查询</button><button class="btn">重置</button></div>
+        <div class="bar pool-batch"><div class="bar-left"><button class="btn primary" id="distribute" disabled>分配至下游渠道</button><span class="muted">勾选商品后执行批量分配</span></div><div class="bar-right"><span class="muted">已选择 0 个商品</span></div></div>
+        <div class="table-wrap"><table><thead><tr><th><input type="checkbox" aria-label="选择全部商品"></th><th>商品主图</th><th>SKU编码</th><th>商品名称</th><th>类目</th><th>状态</th><th>操作</th></tr></thead><tbody><tr><td><input type="checkbox" class="pool-check" aria-label="选择商品"></td><td><span class="asset" style="width:42px;height:42px">图</span></td><td>SKU-ZP15001-BLK</td><td><b>Classic Windproof Lighter</b></td><td>经典防风打火机</td><td><span class="tag ready">已生效</span></td><td><button class="link" data-toast="已打开商品详情">查看</button></td></tr><tr><td><input type="checkbox" class="pool-check" aria-label="选择商品"></td><td><span class="asset" style="width:42px;height:42px">图</span></td><td>SKU-ZP352-BRS</td><td><b>Venetian Venetian Brass</b></td><td>饰品打火机</td><td><span class="tag ready">已生效</span></td><td><button class="link" data-toast="已打开商品详情">查看</button></td></tr><tr><td><input disabled type="checkbox" aria-label="失效商品"></td><td><span class="asset" style="width:42px;height:42px">图</span></td><td>SKU-ACC-001</td><td><b>Zippo Lighter Fluid 12oz</b></td><td>配件/耗材</td><td><span class="tag neutral">已失效</span></td><td><button class="link" data-toast="已打开商品详情">查看</button></td></tr><tr><td><input type="checkbox" class="pool-check" aria-label="选择商品"></td><td><span class="asset" style="width:42px;height:42px">图</span></td><td>SKU-ZP218-BLK</td><td><b>ZP-218 Black Matte Lighter</b></td><td>经典防风打火机</td><td><span class="tag ready">已生效</span></td><td><button class="link" data-toast="已打开商品详情">查看</button></td></tr></tbody></table></div><div class="pagination"><span>每页 10 条，共 25 页</span><button class="page-edge" data-top>置顶</button><div class="pages"><button class="page active">1</button><button class="page">2</button><button class="page">3</button></div><button class="page-edge" data-bottom>置底</button></div>
       </section>
 
       <section class="view" id="products">
         <div class="crumb">渠道中心 / 渠道商品列表</div><div class="head"><div><h1>渠道商品列表</h1><p>以单个渠道实例为主视角，完成商品生成、拉取、审核同步和上下架。</p></div><div class="head-meta">当前渠道：华东上海天猫店</div></div>
-        <div class="bar"><div class="bar-left"><button class="btn primary" id="generateProduct">生成商品</button><button class="btn" id="pullProduct">从平台拉取</button><button class="btn" id="syncAudit">审核同步</button><button class="btn" id="goOnline">批量上架</button><button class="btn" id="goOffline">批量下架</button><button class="btn" id="changeCategory">批量修改类目</button></div></div>
+        <div class="bar"><div class="bar-left"><button class="btn primary" id="generateProduct">生成商品</button><button class="btn" id="pullProduct">从平台拉取</button><button class="btn" id="syncAudit">审核同步</button><button class="btn" id="goOnline">批量上架</button><button class="btn" id="goOffline">批量下架</button><button class="btn" id="changeCategory">批量修改类目</button><button class="btn" data-modal="batchDataModal">批量导入属性</button><button class="btn" id="exportAttributes">批量导出属性</button><button class="btn" data-modal="batchAssetModal">批量上传资源</button></div></div>
         <div class="filters"><input placeholder="商品名称、商品编码、SKU编码、平台商品ID"><select><option>华东上海天猫店</option><option>华西成都京东店</option></select><select><option>全部商品状态</option><option>待审核</option><option>已提交</option><option>已上架</option><option>已下架</option></select><select><option>全部同步状态</option><option>未同步</option><option>同步成功</option><option>同步失败</option></select><button class="btn primary">搜索</button></div>
-        <div class="table-wrap"><table><thead><tr><th><input type="checkbox" id="productAll" aria-label="选择全部渠道商品"></th><th>商品信息</th><th>平台类目</th><th>SKU数量</th><th>商品状态</th><th>审核结果 / 失败原因</th><th>同步状态</th><th>操作</th></tr></thead><tbody><tr><td><input class="product-check" type="checkbox" aria-label="选择渠道商品"></td><td><b>ZIPPO 复古镀铬煤油打火机</b><div class="sub">商品编码：HD-ZP-10001　平台商品ID：--</div></td><td>ZIPPO/芝宝</td><td>2</td><td><span class="tag pending">待审核</span></td><td>--</td><td><span class="tag neutral">未同步</span></td><td><button class="link" data-view-go="editor">编辑</button></td></tr><tr><td><input class="product-check" type="checkbox" aria-label="选择渠道商品"></td><td><b>ZIPPO 黑冰系列打火机</b><div class="sub">商品编码：HD-ZP-10012　平台商品ID：82939201</div></td><td>ZIPPO/芝宝</td><td>3</td><td><span class="tag pending">已提交</span></td><td>平台审核未通过：主图尺寸不符合要求</td><td><span class="tag error">同步失败</span></td><td><button class="link" data-view-go="editor">编辑</button></td></tr><tr><td><input class="product-check" type="checkbox" aria-label="选择渠道商品"></td><td><b>ZIPPO 经典哑光黑打火机</b><div class="sub">商品编码：HD-ZP-10025　平台商品ID：82939208</div></td><td>ZIPPO/芝宝</td><td>2</td><td><span class="tag ready">已上架</span></td><td>审核通过</td><td><span class="tag ready">同步成功</span></td><td><button class="link" data-view-go="editor">编辑</button></td></tr></tbody></table></div><div class="pagination"><span>共 83 条，已选 0 条</span><div class="pages"><button class="page active">1</button><button class="page">2</button><button class="page">3</button></div></div>
+        <div class="table-wrap"><table><thead><tr><th><input type="checkbox" id="productAll" aria-label="选择全部渠道商品"></th><th>商品主图</th><th>商品信息</th><th>平台商品ID</th><th>平台类目</th><th>SKU数量</th><th>商品状态</th><th>审核结果 / 失败原因</th><th>同步状态</th><th>创建时间</th><th>更新时间</th><th>同步时间</th><th>操作</th></tr></thead><tbody><tr><td><input class="product-check" type="checkbox" aria-label="选择渠道商品"></td><td><span class="asset" style="width:46px;height:46px">图</span></td><td><b>ZIPPO 复古镀铬煤油打火机</b><div class="sub">商品编码：HD-ZP-10001</div></td><td>--</td><td>ZIPPO/芝宝</td><td>2</td><td><span class="tag pending">待审核</span></td><td>--</td><td><span class="tag neutral">未同步</span></td><td>2026-08-01 09:20</td><td>2026-08-03 10:12</td><td>--</td><td><button class="link" data-view-go="editor">编辑</button></td></tr><tr><td><input class="product-check" type="checkbox" aria-label="选择渠道商品"></td><td><span class="asset" style="width:46px;height:46px">图</span></td><td><b>ZIPPO 黑冰系列打火机</b><div class="sub">商品编码：HD-ZP-10012</div></td><td>82939201</td><td>ZIPPO/芝宝</td><td>3</td><td><span class="tag pending">已提交</span></td><td>平台审核未通过：主图尺寸不符合要求</td><td><span class="tag error">同步失败</span></td><td>2026-08-01 11:05</td><td>2026-08-03 09:42</td><td>2026-08-03 09:45</td><td><button class="link" data-view-go="editor">编辑</button></td></tr><tr><td><input class="product-check" type="checkbox" aria-label="选择渠道商品"></td><td><span class="asset" style="width:46px;height:46px">图</span></td><td><b>ZIPPO 经典哑光黑打火机</b><div class="sub">商品编码：HD-ZP-10025</div></td><td>82939208</td><td>ZIPPO/芝宝</td><td>2</td><td><span class="tag ready">已上架</span></td><td>审核通过</td><td><span class="tag ready">同步成功</span></td><td>2026-07-30 14:18</td><td>2026-08-03 08:36</td><td>2026-08-03 08:40</td><td><button class="link" data-view-go="editor">编辑</button></td></tr></tbody></table></div><div class="pagination"><span>每页 10 条，共 9 页，已选 0 条</span><button class="page-edge" data-top>置顶</button><div class="pages"><button class="page active">1</button><button class="page">2</button><button class="page">3</button></div><button class="page-edge" data-bottom>置底</button></div>
       </section>
 
       <section class="view" id="editor">
         <div class="crumb">渠道中心 / 渠道商品列表 / 商品编辑</div><div class="head"><div><h1>渠道商品编辑</h1><p>维护当前渠道商品的基础资料、类目属性、销售SKU和图文素材。</p></div><div class="head-meta"><span class="tag pending">待审核 / 未同步</span></div></div>
-        <div class="bar"><div class="bar-left"><button class="btn" id="fillDefault">一键填充渠道信息</button></div><div class="bar-right"><button class="btn" id="saveDraft">保存草稿</button><button class="btn" id="confirmSave">确认保存</button><button class="btn primary" id="submitAudit">审核同步</button></div></div>
+        <div class="bar"><div class="bar-left"></div><div class="bar-right"><button class="btn" id="saveDraft">保存草稿</button><button class="btn" id="confirmSave">确认保存</button><button class="btn primary" id="submitAudit">审核同步</button></div></div>
         <div class="tabs"><button class="tab active" data-edit-tab="basic">基础信息</button><button class="tab" data-edit-tab="attr">类目属性</button><button class="tab" data-edit-tab="sku">销售SKU</button><button class="tab" data-edit-tab="assets">图文素材</button></div>
         <div id="edit-basic" class="edit-pane"><div class="form-card"><h2>基础信息</h2><div class="form-grid"><div class="field"><label>商品编码</label><input value="HD-ZP-10001" readonly></div><div class="field"><label>商品名称</label><input value="ZIPPO 复古镀铬煤油打火机" readonly></div><div class="field"><label>平台类目 <i>*</i></label><select><option>ZIPPO/瑞士军刀/眼镜 / 品牌打火机及配件 / ZIPPO/芝宝</option></select><span class="hint">未同步过平台时允许更改类目</span></div><div class="field span-2"><label>平台标题 <i>*</i></label><input value="ZIPPO芝宝复古镀铬煤油打火机 正版男士礼品收藏"></div><div class="field"><label>导购标题</label><input placeholder="最多15个汉字"></div></div></div></div>
         <div id="edit-attr" class="edit-pane" style="display:none"><div class="form-card"><h2>类目属性</h2><div class="panel-alert">当前类目属性由店铺授权类目和已确认映射规则决定。平台标记为必填的字段必须填写。</div><div class="form-grid"><div class="field"><label>zippo系列 <i>*</i></label><select><option>复古系列</option></select></div><div class="field"><label>品牌 <i>*</i></label><select><option>ZIPPO/芝宝</option></select></div><div class="field"><label>货号</label><input value="HD-ZP-10001" readonly></div><div class="field"><label>产地 <i>*</i></label><select><option>美国</option></select></div><div class="field"><label>上市年份季节</label><select><option>2026年秋季</option></select></div><div class="field"><label>工艺</label><select><option>镀铬</option></select></div></div></div></div>
         <div id="edit-sku" class="edit-pane" style="display:none"><div class="form-card"><h2>销售SKU</h2><div class="table-wrap sku-table"><table><thead><tr><th>销售属性</th><th>SKU编码</th><th>价格（元）</th><th>库存（件）</th><th>商家编码</th><th>是否启用</th></tr></thead><tbody><tr><td>镀铬 / 标准款</td><td>BR-SKU-001-A</td><td><input value="268.00"></td><td><input value="168"></td><td><input value="HD-ZP-10001-A"></td><td><button class="switch on" data-sku-switch aria-label="SKU已启用"></button></td></tr><tr><td>镀铬 / 礼盒款</td><td>BR-SKU-001-B</td><td><input value="328.00"></td><td><input value="96"></td><td><input value="HD-ZP-10001-B"></td><td><button class="switch on" data-sku-switch aria-label="SKU已启用"></button></td></tr></tbody></table></div></div></div>
-        <div id="edit-assets" class="edit-pane" style="display:none"><div class="form-card"><h2>图文素材</h2><div class="field"><label>1:1主图 <i>*</i></label><span class="hint">按平台类目要求上传，支持调整顺序。</span><div class="asset-grid"><div class="asset">1:1<br><b>主图 1</b></div><div class="asset">1:1<br><b>主图 2</b></div><div class="asset">1:1<br><b>上传图片</b></div></div></div><div class="field" style="margin-top:20px"><label>3:4主图</label><div class="asset-grid"><div class="asset">3:4<br><b>上传图片</b></div><div class="asset">3:4<br><b>上传图片</b></div></div></div><div class="field" style="margin-top:20px"><label>宝贝详情 <i>*</i></label><span class="hint">一期采用上传详情图片后按顺序拼接的方式。</span><div class="asset-grid"><div class="asset">详情图 1</div><div class="asset">详情图 2</div><div class="asset">上传详情图</div></div></div></div></div>
+        <div id="edit-assets" class="edit-pane" style="display:none"><div class="form-card"><h2>图文素材</h2><div class="panel-alert">每个图片坑位均支持上传、删除和替换。上传可选择本地文件或素材空间；从素材空间选择只建立引用关系，不复制原文件。</div><div class="field"><label>1:1主图 <i>*</i></label><span class="hint">按平台类目要求维护主图坑位。</span><div class="asset-grid"><div class="asset">1:1<br><b>主图 1</b><div class="asset-actions"><button class="link" type="button" data-asset-slot="主图 1" data-asset-mode="upload" data-modal="assetUploadModal">上传</button><button class="link" type="button" data-asset-slot="主图 1" data-asset-mode="delete" data-asset-has-value="false">删除</button><button class="link" type="button" disabled>替换</button></div></div><div class="asset">1:1<br><b>主图 2</b><div class="asset-actions"><button class="link" type="button" data-asset-slot="主图 2" data-asset-mode="upload" data-modal="assetUploadModal">上传</button><button class="link" type="button" data-asset-slot="主图 2" data-asset-mode="delete" data-asset-has-value="false">删除</button><button class="link" type="button" disabled>替换</button></div></div><div class="asset">1:1<br><b>已上传图片</b><div class="asset-actions"><button class="link" type="button" data-asset-slot="主图 3" data-asset-mode="upload" data-modal="assetUploadModal">上传</button><button class="link" type="button" data-asset-slot="主图 3" data-asset-mode="delete">删除</button><button class="link" type="button" data-asset-slot="主图 3" data-asset-mode="replace" data-modal="assetUploadModal">替换</button></div></div></div></div><div class="field" style="margin-top:20px"><label>3:4主图</label><div class="asset-grid"><div class="asset">3:4<br><b>主图 1</b><div class="asset-actions"><button class="link" type="button" data-asset-slot="3:4主图 1" data-asset-mode="upload" data-modal="assetUploadModal">上传</button><button class="link" type="button" data-asset-slot="3:4主图 1" data-asset-mode="delete" data-asset-has-value="false">删除</button><button class="link" type="button" disabled>替换</button></div></div><div class="asset">3:4<br><b>已上传图片</b><div class="asset-actions"><button class="link" type="button" data-asset-slot="3:4主图 2" data-asset-mode="upload" data-modal="assetUploadModal">上传</button><button class="link" type="button" data-asset-slot="3:4主图 2" data-asset-mode="delete">删除</button><button class="link" type="button" data-asset-slot="3:4主图 2" data-asset-mode="replace" data-modal="assetUploadModal">替换</button></div></div></div></div><div class="field" style="margin-top:20px"><label>宝贝详情 <i>*</i></label><span class="hint">详情图片按坑位顺序引用，缺失序号不影响其他坑位。</span><div class="asset-grid"><div class="asset">详情图 1<div class="asset-actions"><button class="link" type="button" data-asset-slot="详情图 1" data-asset-mode="upload" data-modal="assetUploadModal">上传</button><button class="link" type="button" data-asset-slot="详情图 1" data-asset-mode="delete">删除</button><button class="link" type="button" data-asset-slot="详情图 1" data-asset-mode="replace" data-modal="assetUploadModal">替换</button></div></div><div class="asset">详情图 2<div class="asset-actions"><button class="link" type="button" data-asset-slot="详情图 2" data-asset-mode="upload" data-modal="assetUploadModal">上传</button><button class="link" type="button" data-asset-slot="详情图 2" data-asset-mode="delete">删除</button><button class="link" type="button" data-asset-slot="详情图 2" data-asset-mode="replace" data-modal="assetUploadModal">替换</button></div></div><div class="asset">空坑位<div class="asset-actions"><button class="link" type="button" data-asset-slot="详情图 3" data-asset-mode="upload" data-modal="assetUploadModal">上传</button><button class="link" type="button" data-asset-slot="详情图 3" data-asset-mode="delete" data-asset-has-value="false">删除</button><button class="link" type="button" disabled>替换</button></div></div></div></div></div></div>
       </section>
 
       <section class="view" id="tracking">
-        <div class="crumb">渠道中心 / 上下架状态追踪与手动下架</div><div class="head"><div><h1>上下架状态追踪与手动下架</h1><p>按商品查看提交任务、审核结果、失败原因和下架处理结果。</p></div><div class="head-meta">任务记录保留历史，不覆盖</div></div>
-        <div class="bar"><div class="bar-left"><button class="btn danger" data-modal="offlineModal">手动下架</button></div><div class="bar-right"><span class="muted">任务按商品行展示</span></div></div>
+        <div class="crumb">渠道中心 / 上下架状态追踪</div><div class="head"><div><h1>上下架状态追踪</h1><p>按商品查看提交任务、审核结果、失败原因和下架处理结果。</p></div><div class="head-meta">任务记录保留历史，不覆盖</div></div>
+        <div class="bar"><div class="bar-right"><span class="muted">任务按商品行展示</span></div></div>
         <div class="filters"><input placeholder="任务编号、商品编码或店铺名称"><select><option>全部任务类型</option><option>上架</option><option>重新提交</option><option>手动下架</option></select><select><option>全部任务状态</option><option>处理中</option><option>成功</option><option>失败</option></select><button class="btn primary">搜索</button></div>
-        <div class="two-col"><div class="table-wrap"><table><thead><tr><th>任务编号</th><th>任务类型</th><th>渠道实例 / 店铺</th><th>商品编码</th><th>提交时间</th><th>任务状态</th><th>结果摘要</th><th>操作</th></tr></thead><tbody><tr><td>TK20260803001</td><td>上架</td><td>华东上海天猫店</td><td>HD-ZP-10025</td><td>2026-08-03 09:25</td><td><span class="tag ready">成功</span></td><td>平台审核通过，商品已上架</td><td><button class="link" data-toast="该任务已成功，无需处理">查看</button></td></tr><tr><td>TK20260803002</td><td>重新提交</td><td>华东上海天猫店</td><td>HD-ZP-10012</td><td>2026-08-03 09:42</td><td><span class="tag error">失败</span></td><td>主图尺寸不符合要求</td><td><button class="link" data-view-go="editor">去修正</button>　<button class="link" id="resubmit">重新提交</button></td></tr><tr><td>TK20260803003</td><td>手动下架</td><td>华东上海天猫店</td><td>HD-ZP-10008</td><td>2026-08-03 10:01</td><td><span class="tag pending">处理中</span></td><td>已提交平台，等待结果</td><td><span class="muted">处理中</span></td></tr></tbody></table></div><aside class="side-panel"><h3>任务处理时间线</h3><div class="task-line"><b>已创建上架任务</b><span>2026-08-03 09:42</span></div><div class="task-line fail"><b>平台返回失败</b><span>主图尺寸不符合要求</span></div><div class="task-line"><b>等待业务人员修正后重新提交</b><span>原任务仅作历史保留</span></div></aside></div>
+        <div class="two-col"><div class="table-wrap"><table><thead><tr><th>任务编号</th><th>任务类型</th><th>渠道实例 / 店铺</th><th>商品编码</th><th>提交时间</th><th>任务状态</th><th>结果摘要</th><th>操作</th></tr></thead><tbody><tr><td>TK20260803001</td><td>上架</td><td>华东上海天猫店</td><td>HD-ZP-10025</td><td>2026-08-03 09:25</td><td><span class="tag ready">成功</span></td><td>平台审核通过，商品已上架</td><td><button class="link" data-toast="该任务已成功，无需处理">查看</button></td></tr><tr><td>TK20260803002</td><td>重新提交</td><td>华东上海天猫店</td><td>HD-ZP-10012</td><td>2026-08-03 09:42</td><td><span class="tag error">失败</span></td><td>主图尺寸不符合要求</td><td><button class="link" data-view-go="editor">去修正</button>　<button class="link" id="resubmit">重新提交</button></td></tr><tr><td>TK20260803003</td><td>手动下架</td><td>华东上海天猫店</td><td>HD-ZP-10008</td><td>2026-08-03 10:01</td><td><span class="tag pending">处理中</span></td><td>已提交平台，等待结果</td><td><span class="muted">处理中</span></td></tr><tr><td>TK20260804004</td><td>主数据停用下架</td><td>华东上海天猫店</td><td>HD-ZP-10008</td><td>2026-08-04 10:16</td><td><span class="tag pending">待处理</span></td><td>SKU-A 已停用，已通知商品运营人员</td><td><button class="link" data-modal="offlineModal">处理下架</button></td></tr></tbody></table></div><aside class="side-panel"><h3>任务处理时间线</h3><div class="task-line"><b>已创建上架任务</b><span>2026-08-03 09:42</span></div><div class="task-line fail"><b>平台返回失败</b><span>主图尺寸不符合要求</span></div><div class="task-line"><b>等待业务人员修正后重新提交</b><span>原任务仅作历史保留</span></div><div class="task-line fail"><b>主数据停用通知已发送</b><span>等待商品运营人员确认下架</span></div></aside></div><div class="pagination"><span>每页 10 条，共 3 页</span><button class="page-edge" data-top>置顶</button><div class="pages"><button class="page active">1</button><button class="page">2</button></div><button class="page-edge" data-bottom>置底</button></div>
+      </section>
+
+      <section class="view" id="fieldMapping">
+        <div class="crumb">设置 / 字段映射管理</div>
+        <div class="head"><div><h1>字段映射管理</h1><p>配置目标平台字段如何引用主数据字段，不修改商品编码和 SKU 编码。</p></div></div>
+        <div class="bar"><div class="bar-left"></div><div class="bar-right"><span class="muted">自定义规则优先于通用规则</span></div></div>
+        <div class="filters"><select><option>天猫</option><option>京东</option><option>拼多多</option></select><select><option>华东上海天猫店</option><option>华西成都京东店</option></select><input placeholder="搜索平台类目或平台字段"><button class="btn primary">搜索</button></div>
+        <div class="mapping-layout"><aside class="mapping-side"><div class="selected">天猫</div><div class="item">京东</div><div class="item">拼多多</div><div class="item">抖音</div><p class="hint" style="margin:14px 4px 0">同一平台不同渠道可复用同一套平台规则，当前渠道仅用于校验可用性。</p></aside><section class="mapping-main"><div class="row" style="justify-content:space-between;margin-bottom:12px"><div><b>天猫 / ZIPPO/芝宝</b><div class="sub">渠道：华东上海天猫店　状态：已生效</div></div><button class="btn primary" id="newFieldRule" data-modal="fieldRuleModal">新增字段映射</button></div><div class="table-wrap"><table class="field-rule-table"><thead><tr><th>目标平台字段</th><th>规则类型</th><th>主数据来源</th><th>前置条件</th><th>优先级</th><th>状态</th><th>操作</th></tr></thead><tbody><tr><td>商品标题</td><td>拼接</td><td>品牌 + 商品名称</td><td>商品名称包含“打火机”</td><td>1</td><td><span class="tag ready">已生效</span></td><td><button class="link" data-modal="fieldRuleModal">编辑</button></td></tr><tr><td>材质成分</td><td>字典</td><td>SPU / 外壳材质</td><td>—</td><td>2</td><td><span class="tag pending">草稿</span></td><td><button class="link" data-modal="fieldRuleModal">编辑</button></td></tr></tbody></table></div></section></div>
+      </section>
+
+      <section class="view" id="aggregation">
+        <div class="crumb">设置 / 聚合策略</div><div class="head"><div><h1>聚合策略</h1><p>按平台和渠道配置主数据字段组合方式，将符合条件的 SKU 聚合为一条渠道商品行。策略生效后不可修改，如需调整请新建策略。</p></div></div>
+        <div class="bar"><div class="bar-left"><button class="btn primary" data-modal="aggregationModal">新建聚合策略</button></div></div>
+        <div class="filters"><select><option>全部平台</option><option>天猫</option><option>京东</option><option>拼多多</option></select><select><option>全部渠道实例</option><option>华东上海天猫店</option><option>华西成都京东店</option></select><select><option>全部状态</option><option>已生效</option><option>草稿</option><option>已停用</option></select><button class="btn primary">搜索</button></div>
+        <div class="table-wrap"><table><thead><tr><th>平台</th><th>渠道实例</th><th>策略名称</th><th>聚合字段</th><th>连接符</th><th>状态</th><th>操作</th></tr></thead><tbody><tr><td>天猫</td><td>华东上海天猫店</td><td>天猫默认聚合策略</td><td>货号 + 色号</td><td>-</td><td><span class="tag ready">已生效</span></td><td><span class="muted">仅可查看</span></td></tr><tr><td>京东</td><td>华西成都京东店</td><td>京东商品聚合策略</td><td>货号 + 材质</td><td>_</td><td><span class="tag pending">草稿</span></td><td><span class="muted">仅可查看</span></td></tr></tbody></table></div><div class="pagination"><span>每页 10 条，共 1 页</span><button class="page-edge" data-top>置顶</button><div class="pages"><button class="page active">1</button></div><button class="page-edge" data-bottom>置底</button></div>
       </section>
     </main>
   </div>
 
   <div class="modal-backdrop" id="channelModal"><div class="modal"><div class="modal-head"><h2>新增 / 编辑渠道</h2><button class="close" data-close>×</button></div><div class="modal-body"><div class="form-grid"><div class="field span-3"><label>所属组织 <i>*</i></label><select><option>ZIPPO中国 / 华东销售公司 / 电子商务</option></select></div><div class="field"><label>渠道类型 <i>*</i></label><select><option>天猫</option><option>京东</option><option>抖音</option><option>拼多多</option></select></div><div class="field span-2"><label>店铺名称 <i>*</i></label><input value="华东上海天猫店"></div><div class="field"><label>AppKey <i>*</i></label><input value="app_key_demo"></div><div class="field"><label>AppSecret <i>*</i></label><input type="password" value="app_secret_demo"></div><div class="field"><label>店铺ID <i>*</i></label><input value="tmall_100001"></div><div class="field span-3"><label>回调地址 <i>*</i></label><input value="https://pim.zippo.com/channel/callback"></div></div><div class="panel-alert" style="margin-top:18px">启用前需完成平台授权、测试连接并确认店铺身份一致。</div></div><div class="modal-foot"><button class="btn" data-close>取消</button><button class="btn" id="testConnection">测试连接</button><button class="btn primary" id="saveChannel">保存</button></div></div></div>
-  <div class="modal-backdrop" id="ruleModal"><div class="modal wide"><div class="modal-head"><h2>映射规则编辑</h2><button class="close" data-close>×</button></div><div class="modal-body"><div class="form-grid"><div class="field"><label>品牌类目 <i>*</i></label><select><option>品牌打火机 / 煤油打火机</option></select></div><div class="field"><label>渠道 <i>*</i></label><select><option>华东上海天猫店</option></select></div><div class="field"><label>平台类目 <i>*</i></label><select><option>ZIPPO/芝宝</option><option>打火机配件/工具</option><option>煤油</option></select></div><div class="field"><label>条件字段</label><select><option>商品标题</option><option>商品编码</option><option>品牌货品编码</option></select></div><div class="field"><label>判断方式</label><select><option>包含</option><option>等于</option></select></div><div class="field"><label>条件内容</label><input placeholder="例如：油"></div></div><div class="panel-alert" style="margin-top:18px">推荐候选只作参考。请核对目标类目是否属于该店铺当前有效授权类目，再发布规则。</div></div><div class="modal-foot"><button class="btn" data-close>取消</button><button class="btn primary" id="publishRule">发布规则</button></div></div></div>
+  <div class="modal-backdrop" id="aggregationModal"><div class="modal wide"><div class="modal-head"><h2>商品聚合策略</h2><button class="close" data-close>×</button></div><div class="modal-body"><div class="panel-alert">仅允许选择“目标主数据字段”作为聚合字段。聚合字段决定渠道商品行和渠道商品编码，生效后不可直接修改；如需调整，请新建策略。</div><div class="form-grid"><div class="field"><label>平台 <i>*</i></label><select><option>天猫</option><option>京东</option><option>拼多多</option><option>抖音</option></select></div><div class="field span-2"><label>渠道实例 <i>*</i></label><select><option>华东上海天猫店</option><option>华西成都京东店</option></select></div><div class="field span-3"><label>可选主数据字段 <i>*</i></label><span class="hint">来源：目标主数据字段。支持多选；编码字段不在此处修改。</span><input class="field-search" placeholder="搜索主数据字段名称"><div class="token-picker"><label><input type="checkbox" class="aggregation-field" value="货号" checked> 货号</label><label><input type="checkbox" class="aggregation-field" value="色号" checked> 色号</label><label><input type="checkbox" class="aggregation-field" value="图案"> 图案</label><label><input type="checkbox" class="aggregation-field" value="材质"> 材质</label><label><input type="checkbox" class="aggregation-field" value="商品系列"> 商品系列</label><label><input type="checkbox" class="aggregation-field" value="标准中文名称"> 标准中文名称</label><label><input type="checkbox" class="aggregation-field" value="商品卖点"> 商品卖点</label><label><input type="checkbox" class="aggregation-field" value="品牌"> 品牌</label><label><input type="checkbox" class="aggregation-field" value="产地"> 产地</label><label><input type="checkbox" class="aggregation-field" value="工艺"> 工艺</label><label><input type="checkbox" class="aggregation-field" value="适用场景"> 适用场景</label><label><input type="checkbox" class="aggregation-field" value="上市年份季节"> 上市年份季节</label></div></div></div><div class="field"><label>连接符</label><select id="aggregationJoin"><option value="">无连接符</option><option value="-">短横线（-）</option><option value=" ">空格</option><option value="_">下划线（_）</option></select></div><div class="field span-2"><label>当前策略</label><input id="aggregationCurrent" value="货号 + 色号" readonly></div><div class="field span-3"><label>生成预览</label><div class="strategy-preview">渠道商品编码：<b id="aggregationPreview">ZP1001-黑色</b><br><span class="muted">同一渠道下，相同聚合结果只生成一条渠道商品行；主数据版本生效后重新计算。</span></div></div></div></div><div class="modal-foot"><button class="btn" data-close>取消</button><button class="btn primary" id="saveAggregation">保存并生效</button></div></div></div>
+  <div class="modal-backdrop" id="fieldRuleModal"><div class="modal wide"><div class="modal-head"><h2>新增字段映射</h2><button class="close" data-close>×</button></div><div class="modal-body"><div class="panel-alert">先选择平台和渠道，再配置当前平台类目下的目标字段。编码类字段不在映射规则中修改。</div><div class="form-grid"><div class="field"><label>平台 <i>*</i></label><select id="fieldRulePlatform"><option>天猫</option><option>京东</option><option>拼多多</option><option>抖音</option></select></div><div class="field span-2"><label>渠道名称 <i>*</i></label><select id="fieldRuleChannel"><option>华东上海天猫店</option><option>华西成都京东店</option></select><span class="hint">仅展示所选平台下已配置且可用的渠道。</span></div><div class="field span-3"><label>平台类目 <i>*</i></label><select><option>ZIPPO/瑞士军刀/眼镜 / 品牌打火机及配件 / ZIPPO/芝宝</option><option>品牌打火机及配件 / 打火机配件/工具</option></select></div><div class="field span-2"><label>目标平台字段 <i>*</i></label><select><option>商品标题</option><option>材质成分</option><option>商品卖点</option><option>平台销售属性</option></select></div><div class="field"><label>映射规则 <i>*</i></label><select id="fieldRuleType"><option>赋值</option><option>字典</option><option>拼接</option></select></div><div class="field span-3"><label>主数据字段 / 拼接内容 <i>*</i></label><div class="rule-builder"><div class="row"><button class="btn" type="button" data-modal="masterFieldDrawer">+ 字段</button><button class="btn" type="button" data-modal="fixedTextDrawer">+ 固定文本</button><button class="btn" type="button" data-modal="joinerDrawer">+ 连接符</button></div><div class="mapping-token-line" id="mappingTokens"><span class="chip" id="selectedMasterField">SPU / 标准中文名称</span></div><div class="mapping-preview"><span>拼接预览：</span><b id="mappingPreview">煤油打火机</b></div><div class="hint">拼接规则按从左到右的顺序组合主数据字段、固定文本和连接符；赋值、字典规则只选择一个主数据字段。</div></div></div><div class="field span-2"><label>前置条件</label><div class="rule-builder"><div class="row"><span class="chip" id="selectedCondition">商品名称 包含 打火机</span><button class="link" type="button" id="editCondition" data-modal="conditionDrawer">修改</button><button class="link" type="button" id="clearCondition">删除</button></div><button class="btn" type="button" id="addCondition" data-modal="conditionDrawer" style="display:none">+ 添加前置条件</button></div></div><div class="field"><label>优先级 <i>*</i></label><input value="1" type="number" min="1"></div></div></div><div class="modal-foot"><button class="btn" data-close>取消</button><button class="btn primary" id="saveFieldRule">保存并生效</button></div></div></div>
+  <div class="modal-backdrop drawer-backdrop" id="masterFieldDrawer"><div class="drawer"><div class="modal-head"><h2>选择主数据字段</h2><button class="close" data-close>×</button></div><div class="modal-body"><p class="muted">字段来自目标主数据字段配置，展示中文名称。</p><label class="check"><input type="radio" name="masterField" value="SPU / 标准中文名称" checked> SPU / 标准中文名称</label><label class="check"><input type="radio" name="masterField" value="SPU / 商品卖点"> SPU / 商品卖点</label><label class="check"><input type="radio" name="masterField" value="SKU / 外壳材质"> SKU / 外壳材质</label><label class="check"><input type="radio" name="masterField" value="SKU / 色号"> SKU / 色号</label><label class="check"><input type="radio" name="masterField" value="拓展 / 适用场景"> 拓展 / 适用场景</label></div><div class="modal-foot"><button class="btn" data-close>取消</button><button class="btn primary" id="confirmMasterField">确认选择</button></div></div></div>
+  <div class="modal-backdrop drawer-backdrop" id="fixedTextDrawer"><div class="drawer"><div class="modal-head"><h2>添加固定文本</h2><button class="close" data-close>×</button></div><div class="modal-body"><div class="field"><label>固定文本 <i>*</i></label><input id="fixedTextInput" placeholder="例如：ZIPPO、【新品】"></div><p class="hint">固定文本会按当前拼接顺序插入，不参与字段映射。</p></div><div class="modal-foot"><button class="btn" data-close>取消</button><button class="btn primary" id="confirmFixedText">确认添加</button></div></div></div>
+  <div class="modal-backdrop drawer-backdrop" id="joinerDrawer"><div class="drawer"><div class="modal-head"><h2>选择连接符</h2><button class="close" data-close>×</button></div><div class="modal-body"><label class="check"><input type="radio" name="joiner" value=" " checked> 空格</label><label class="check"><input type="radio" name="joiner" value="-"> -</label><label class="check"><input type="radio" name="joiner" value="_"> _</label><label class="check"><input type="radio" name="joiner" value="["> [</label><label class="check"><input type="radio" name="joiner" value="]"> ]</label></div><div class="modal-foot"><button class="btn" data-close>取消</button><button class="btn primary" id="confirmJoiner">确认选择</button></div></div></div>
+  <div class="modal-backdrop drawer-backdrop" id="conditionDrawer"><div class="drawer"><div class="modal-head"><h2>添加前置条件</h2><button class="close" data-close>×</button></div><div class="modal-body"><div class="field"><label>条件字段 <i>*</i></label><select id="conditionField"><option>商品名称</option><option>商品卖点</option><option>品牌货品编码</option></select></div><div class="field" style="margin-top:16px"><label>判断方式 <i>*</i></label><select id="conditionOperator"><option>包含</option><option>等于</option><option>不等于</option></select></div><div class="field" style="margin-top:16px"><label>条件内容 <i>*</i></label><input id="conditionValue" value="打火机"></div></div><div class="modal-foot"><button class="btn" data-close>取消</button><button class="btn primary" id="confirmCondition">确认添加</button></div></div></div>
+  <div class="modal-backdrop" id="ruleModal"><div class="modal wide"><div class="modal-head"><h2>映射规则编辑</h2><button class="close" data-close>×</button></div><div class="modal-body"><div class="form-grid"><div class="field"><label>品牌类目 <i>*</i></label><select><option>品牌打火机 / 煤油打火机</option></select></div><div class="field span-2"><label>渠道 <i>*</i></label><select><option>华东上海天猫店</option></select></div></div><div class="rule-builder" style="margin-top:18px"><div class="row" style="justify-content:space-between"><b>前置条件</b><button class="btn" type="button" data-modal="conditionDrawer">+ 添加前置条件</button></div><div class="row"><span class="chip" id="mappingConditionText">商品标题 包含 油</span><span class="hint">满足条件后，才使用下方的平台类目映射。</span></div></div><div class="rule-builder" style="margin-top:18px"><b>类目映射</b><div class="form-grid" style="margin-top:14px"><div class="field span-2"><label>平台类目 <i>*</i></label><select><option>ZIPPO/芝宝</option><option>打火机配件/工具</option><option>煤油</option></select></div><div class="field"><label>规则优先级 <i>*</i></label><input value="1" type="number" min="1"></div></div><p class="hint" style="margin:12px 0 0">仅可选择当前渠道已授权且当前有效的平台类目；同一平台类目按优先级命中。</p></div><div class="panel-alert" style="margin-top:18px">推荐候选只作参考。请核对目标类目是否属于该店铺当前有效授权类目，再发布规则。</div></div><div class="modal-foot"><button class="btn" data-close>取消</button><button class="btn primary" id="publishRule">发布规则</button></div></div></div>
   <div class="modal-backdrop" id="previewModal"><div class="modal"><div class="modal-head"><h2>商品编码命中预览</h2><button class="close" data-close>×</button></div><div class="modal-body"><div class="field"><label>商品编码</label><input id="previewCode" value="HD-ZP-10001"></div><div class="rule-card" style="margin-top:16px"><div class="muted">命中结果</div><h3 style="margin:8px 0">品牌打火机 / 煤油打火机</h3><div class="rule-detail"><span class="chip">命中条件：商品标题包含“油”</span><span class="chip">平台类目：ZIPPO/芝宝</span></div></div></div><div class="modal-foot"><button class="btn" data-close>关闭</button><button class="btn primary" id="runPreview">重新预览</button></div></div></div>
   <div class="modal-backdrop" id="distributionModal"><div class="modal"><div class="modal-head"><h2>分配至下游渠道</h2><button class="close" data-close>×</button></div><div class="modal-body"><p class="muted" style="margin-top:0">请勾选经销商名下的下游渠道。已失效商品不可分配。</p><label class="check"><input type="checkbox" checked> 华东上海天猫店 <span class="tag ready">可用</span></label><label class="check"><input type="checkbox"> 华东线下门店 <span class="tag ready">可用</span></label><label class="check"><input type="checkbox"> 华东经销商零售商A <span class="tag ready">可用</span></label></div><div class="modal-foot"><button class="btn" data-close>取消分配</button><button class="btn primary" id="confirmDistribution">确认分配</button></div></div></div>
+  <div class="modal-backdrop" id="generateModal"><div class="modal wide"><div class="modal-head"><h2 id="generateTitle">生成渠道商品</h2><button class="close" data-close>×</button></div><div class="modal-body">
+    <div class="row" style="margin-bottom:16px"><span class="tag ready" id="generateCurrentChannel">当前渠道：华东上海天猫店</span><span class="muted">仅展示当前渠道已分发且已生效的 SKU</span></div>
+    <div id="generateStep1">
+      <h3 style="margin:0 0 10px">1. 选择已分发 SKU</h3>
+      <div class="filters" style="padding:10px;margin-bottom:12px;align-items:flex-end"><div style="flex:1;min-width:260px"><textarea id="generateSkuSearch" rows="2" placeholder="请输入一个或多个 SKU 编码，可换行或用逗号分隔"></textarea><div class="hint" style="margin-top:5px">支持批量粘贴 SKU 编码，系统仅匹配当前渠道已分发且已生效的 SKU</div></div><button class="btn primary" id="generateSkuSearchBtn">搜索</button></div>
+      <div class="check"><label><input type="checkbox" class="generate-sku" value="SKU-ZP15001-BLK" checked> <b>SKU-ZP15001-BLK</b><span class="muted">Classic Windproof Lighter · 黑色</span></label></div>
+      <div class="check"><label><input type="checkbox" class="generate-sku" value="SKU-ZP15001-RED" checked> <b>SKU-ZP15001-RED</b><span class="muted">Classic Windproof Lighter · 红色</span></label></div>
+      <div class="check"><label><input type="checkbox" class="generate-sku" value="SKU-ZP218-BLK"> <b>SKU-ZP218-BLK</b><span class="muted">ZP-218 Black Matte Lighter · 黑色</span></label></div>
+      <div class="panel-alert" style="margin:12px 0 0">生成时会再次校验 SKU 是否仍为“已生效”。若 SKU 已停用，将返回本步骤并提供移除选择。</div>
+    </div>
+    <div id="generateStep2" style="display:none">
+      <h3 style="margin:0 0 10px">2. 选择聚合策略和平台类目</h3>
+      <div class="form-grid" style="grid-template-columns:1fr 1fr"><div class="field"><label>聚合策略 <i>*</i></label><select id="generateStrategy"><option value="货号 + 色号">货号 + 色号</option><option value="货号 + 材质">货号 + 材质</option></select><span class="hint">只能选择当前渠道已配置的策略</span></div><div class="field"><label>平台类目 <i>*</i></label><select id="generateCategory"><option>ZIPPO/瑞士军刀/眼镜 / 品牌打火机及配件 / ZIPPO/芝宝</option><option>ZIPPO/瑞士军刀/眼镜 / 品牌打火机及配件 / 打火机配件/工具</option></select><span class="hint">只能选择当前店铺已授权类目</span></div></div>
+      <div class="form-card" style="margin-top:16px;padding:14px"><b>生成预览</b><div class="strategy-preview" style="margin-top:10px"><div>将生成：<b>1 个渠道商品 SPU</b></div><div class="sub" style="color:#bbb">渠道商品编码：502-黑色/红色　·　包含 SKU：2 个</div></div></div>
+      <div class="panel-alert" style="margin-top:12px">确认生成后商品状态为“待审核”，同步状态为“未同步”；请在渠道商品编辑页补齐平台必填字段后再审核同步。</div>
+    </div>
+  </div><div class="modal-foot"><button class="btn" data-close>取消</button><button class="btn" id="generatePrev" style="display:none">上一步</button><button class="btn primary" id="generateNext">下一步</button><button class="btn primary" id="confirmGenerate" style="display:none">确认生成</button></div></div></div>
   <div class="modal-backdrop" id="offlineModal"><div class="modal"><div class="modal-head"><h2>手动下架</h2><button class="close" data-close>×</button></div><div class="modal-body"><div class="field"><label>下架原因 <i>*</i></label><textarea placeholder="请输入本次下架原因"></textarea></div><div class="panel-alert" style="margin-top:16px">批量下架时，所选商品将使用同一个下架原因；执行结果按商品行返回。</div></div><div class="modal-foot"><button class="btn" data-close>取消</button><button class="btn danger" id="confirmOffline">确认下架</button></div></div></div>
+  <div class="modal-backdrop" id="batchDataModal"><div class="modal wide"><div class="modal-head"><h2>批量导入属性</h2><button class="close" data-close>×</button></div><div class="modal-body"><div class="panel-alert">本功能仅用于补充或修改当前渠道已有商品属性，不允许新增商品。导入文件必须使用系统模板。</div><div class="rule-card"><h3>导入规则</h3><p class="muted">文件包含两个 Sheet：SPU属性、SKU属性。商品编码、SKU编码和平台商品ID仅用于匹配，不允许修改。空白单元格不覆盖原值，填写【清空】才会清除字段；已同步商品不允许修改平台类目。导入支持部分成功，失败行保留原数据并返回逐条原因。</p></div><div class="row" style="justify-content:flex-end;gap:8px"><button class="btn" id="downloadImportTemplate">下载导入模板</button><button class="btn primary" id="startBatchImport">选择文件导入</button></div></div><div class="modal-foot"><button class="btn" data-close>关闭</button></div></div></div>
+  <div class="modal-backdrop" id="batchAssetModal"><div class="modal wide"><div class="modal-head"><h2>批量上传资源</h2><button class="close" data-close>×</button></div><div class="modal-body"><div class="panel-alert">本功能仅用于补充或替换当前渠道已有商品的图片、主图视频和详情页图，不创建新商品。请使用渠道商品编码匹配商品，并按文件名标识用途和顺序。</div><div class="rule-card"><h3>资源命名规则</h3><p class="muted"><code>渠道商品编码-主图_1.jpg</code>、<code>渠道商品编码-主图视频_1.mp4</code>、<code>渠道商品编码-详情页图_1.jpg</code>；规格图按配置使用 SKU 编码或销售属性值命名。支持选择压缩包，缺失序号不影响其他坑位，超出平台展示坑位的文件保留至素材空间。</p></div><div class="asset-dropzone" id="batchAssetDropzone">将图片、视频或压缩包拖到这里，或点击选择系统文件<input id="batchAssetInput" type="file" accept="image/*,video/*,.zip,.rar" hidden><span class="hint">成功文件进入待审核；失败文件保留原资源并返回逐条原因。</span></div></div><div class="modal-foot"><button class="btn" data-close>取消</button></div></div></div>
+  <div class="modal-backdrop" id="assetUploadModal"><div class="modal wide"><div class="modal-head"><h2 id="assetUploadTitle">上传图片</h2><button class="close" data-close>×</button></div><div class="modal-body"><div class="panel-alert">当前坑位：<b id="assetUploadTarget">主图 1</b>。上传前会校验文件名、格式、尺寸、比例和平台类目规则。</div><div class="rule-card"><h3>本地上传</h3><label class="asset-dropzone" id="assetDropzone" for="assetFileInput">将图片或视频拖到这里，或点击选择系统文件夹<input id="assetFileInput" type="file" accept="image/*,video/*" hidden><span class="hint">支持从系统文件夹直接拖入；替换时新素材校验通过后才解除旧引用。</span></label></div><div class="rule-card"><h3>从素材空间选择</h3><p class="muted">已有素材不需要重复上传，选择后建立当前商品图片坑位与素材文件的引用关系。</p><button class="btn" id="openAssetLibrary">打开素材空间</button></div><div class="hint">删除图片只解除当前引用，不删除素材空间中的原始文件；所有图片变更保存后进入待审核。</div></div><div class="modal-foot"><button class="btn" data-close>取消</button></div></div></div>
+  <div class="modal-backdrop" id="assetPickerModal"><div class="modal wide"><div class="modal-head"><h2>从素材空间选择</h2><button class="close" data-close>×</button></div><div class="modal-body"><div class="panel-alert">当前选择位置：<b id="assetPickerTarget">主图 1</b>。选择后建立素材引用关系，不复制原始文件。</div><div class="filters"><input placeholder="搜索素材名称或货号"><select><option>全部用途</option><option>主图</option><option>规格图</option><option>详情页图</option></select><button class="btn primary" data-toast="已筛选素材空间">搜索</button></div><div class="asset-grid"><button class="asset" type="button" data-asset-choice="50201-规格图-红色_1.jpg"><b>红色规格图</b><span class="muted">50201-规格图-红色_1.jpg</span></button><button class="asset" type="button" data-asset-choice="50201-主图_1.jpg"><b>商品主图</b><span class="muted">50201-主图_1.jpg</span></button><button class="asset" type="button" data-asset-choice="50201-详情页图_1.jpg"><b>详情页图</b><span class="muted">50201-详情页图_1.jpg</span></button></div></div><div class="modal-foot"><button class="btn" data-close>取消</button></div></div></div>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
   <script>
@@ -396,190 +234,63 @@ aside nav > .mt-6.px-3.py-3.rounded-lg {
     navs.forEach(n=>n.addEventListener('click',()=>go(n.dataset.view))); document.querySelectorAll('[data-view-go]').forEach(b=>b.addEventListener('click',()=>go(b.dataset.viewGo)));
     const toast=document.getElementById('toast'); let timer; function showToast(message){toast.textContent=message;toast.classList.add('show');clearTimeout(timer);timer=setTimeout(()=>toast.classList.remove('show'),2600)}
     document.querySelectorAll('[data-toast]').forEach(b=>b.addEventListener('click',()=>showToast(b.dataset.toast)));
+    document.querySelectorAll('[data-top]').forEach(b=>b.addEventListener('click',()=>window.scrollTo({top:0,behavior:'smooth'})));document.querySelectorAll('[data-bottom]').forEach(b=>b.addEventListener('click',()=>window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'})));
+    document.querySelectorAll('.pages .page').forEach(b=>b.addEventListener('click',()=>{b.closest('.pages').querySelectorAll('.page').forEach(x=>x.classList.remove('active'));b.classList.add('active');showToast(`已切换到第 ${b.textContent} 页`)}));
     document.querySelectorAll('[data-channel-switch]').forEach(s=>s.addEventListener('click',()=>{if(!s.classList.contains('on')){showToast('请先完成授权、测试连接和店铺身份校验后启用渠道');return;}s.classList.remove('on');s.setAttribute('aria-label','渠道未启用');showToast('渠道已停用，后续自动类目拉取将不再执行')}));
     document.querySelectorAll('[data-sku-switch]').forEach(s=>s.addEventListener('click',()=>{const enabled=s.classList.toggle('on');s.setAttribute('aria-label',enabled?'SKU已启用':'SKU已禁用');showToast(enabled?'SKU已启用':'SKU已禁用')}));
     document.querySelectorAll('[data-modal]').forEach(b=>b.addEventListener('click',()=>document.getElementById(b.dataset.modal).classList.add('open'))); document.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click',()=>b.closest('.modal-backdrop').classList.remove('open'))); document.querySelectorAll('.modal-backdrop').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open')}));
     document.getElementById('testConnection').onclick=()=>showToast('测试连接成功：店铺身份校验一致'); document.getElementById('saveChannel').onclick=()=>{document.getElementById('channelModal').classList.remove('open');showToast('渠道配置已保存')};
+    const aggregationPicker=document.querySelector('#aggregationModal .token-picker'); if(aggregationPicker&&!aggregationPicker.querySelector('[value="机型"]')){const modelLabel=document.createElement('label');modelLabel.innerHTML='<input type="checkbox" class="aggregation-field" value="机型"> 机型';aggregationPicker.append(modelLabel)} const aggregationValuePreview=document.createElement('div');aggregationValuePreview.className='field span-3';aggregationValuePreview.innerHTML='<label>已选字段及当前值</label><div class="mapping-preview" id="aggregationValuePreview">请先选择主数据字段</div>';document.getElementById('aggregationPreview').closest('.field').before(aggregationValuePreview);
+    const aggregationFields=document.querySelectorAll('.aggregation-field'); const aggregationJoin=document.getElementById('aggregationJoin'); const aggregationPreview=document.getElementById('aggregationPreview'); const aggregationCurrent=document.getElementById('aggregationCurrent'); function updateAggregationPreview(){const join=aggregationJoin.value;const fields=[...aggregationFields].filter(x=>x.checked).map(x=>x.value);const values={'货号':'50201','色号':'iceblack','图案':'person','材质':'chrome-plated','商品系列':'复古系列','标准中文名称':'502 打火机','商品卖点':'经典防风','品牌':'ZIPPO','产地':'美国','工艺':'Forged gauze','适用场景':'户外','上市年份季节':'2026秋季','机型':'502'};aggregationPreview.textContent=fields.length?fields.map(x=>values[x]||x).join(join):'请选择至少一个主数据字段';aggregationCurrent.value=fields.length?fields.join(' + '):'请选择至少一个主数据字段';document.getElementById('aggregationValuePreview').textContent=fields.length?fields.map(x=>`${x}：${values[x]||'待填写'}`).join('　'): '请先选择主数据字段'} aggregationFields.forEach(x=>x.addEventListener('change',updateAggregationPreview));aggregationJoin.addEventListener('change',updateAggregationPreview);document.querySelector('.field-search').addEventListener('input',e=>{const key=e.target.value.trim();document.querySelectorAll('.token-picker label').forEach(label=>label.style.display=!key||label.textContent.includes(key)?'inline-flex':'none')});updateAggregationPreview();document.getElementById('saveAggregation').onclick=()=>{if(![...aggregationFields].some(x=>x.checked)){showToast('请至少选择一个目标主数据字段');return}document.getElementById('aggregationModal').classList.remove('open');showToast('聚合策略已保存并生效，后续主数据版本生效时执行');};
+    let aggregationOrder=[...aggregationFields].filter(x=>x.checked).map(x=>x.value); aggregationFields.forEach(field=>field.addEventListener('change',()=>{aggregationOrder=aggregationOrder.filter(x=>x!==field.value);if(field.checked)aggregationOrder.push(field.value);const picker=document.querySelector('#aggregationModal .token-picker');const labels=[...picker.querySelectorAll('label')];aggregationOrder.forEach(value=>{const label=labels.find(x=>x.querySelector('input').value===value);if(label)picker.append(label)});labels.filter(x=>!aggregationOrder.includes(x.querySelector('input').value)).forEach(label=>picker.append(label));updateAggregationPreview();}));
+    document.getElementById('clearCondition').onclick=()=>{document.getElementById('selectedCondition').style.display='none';document.getElementById('editCondition').style.display='none';document.getElementById('clearCondition').style.display='none';document.getElementById('addCondition').style.display='inline-block';showToast('前置条件已删除')}; document.getElementById('confirmCondition').addEventListener('click',()=>{const value=document.getElementById('conditionValue').value.trim();if(value){document.getElementById('selectedCondition').style.display='inline-flex';document.getElementById('editCondition').style.display='inline-block';document.getElementById('clearCondition').style.display='inline-block';document.getElementById('addCondition').style.display='none'}});
     document.getElementById('pullStore').onclick=()=>showToast('已创建华东上海天猫店的类目拉取任务，完成后将通知当前操作人'); document.getElementById('acceptAI').onclick=()=>showToast('已采纳符合条件的智能推荐，待处理规则已更新'); document.getElementById('acceptOne').onclick=()=>showToast('推荐已采纳，规则状态已变为已生效'); document.getElementById('publishRule').onclick=()=>{document.getElementById('ruleModal').classList.remove('open');showToast('映射规则已发布')}; document.getElementById('runPreview').onclick=()=>showToast('已按商品编码重新完成命中预览');
+    document.getElementById('fieldRulePlatform').addEventListener('change',e=>{const channel=document.getElementById('fieldRuleChannel');channel.innerHTML=e.target.value==='天猫'?'<option>华东上海天猫店</option>':'<option>华西成都京东店</option>';showToast(`已切换至${e.target.value}，渠道列表已联动`) }); document.getElementById('saveFieldRule').onclick=()=>{document.getElementById('fieldRuleModal').classList.remove('open');showToast('字段映射规则已保存并生效')};
+    const mappingParts=['SPU / 标准中文名称']; function renderMappingParts(){const values={'SPU / 标准中文名称':'煤油打火机','SPU / 商品卖点':'经典防风','SKU / 外壳材质':'镀铬','SKU / 色号':'黑色','拓展 / 适用场景':'户外'};document.getElementById('mappingTokens').innerHTML=mappingParts.map((part,i)=>`<span class="chip mapping-token">${part}<button type="button" class="token-remove" data-index="${i}" aria-label="删除${part}">×</button></span>`).join('');document.getElementById('mappingPreview').textContent=mappingParts.map(x=>values[x]||x).join('')}; renderMappingParts(); document.getElementById('mappingTokens').addEventListener('click',e=>{const remove=e.target.closest('.token-remove');if(!remove)return;mappingParts.splice(Number(remove.dataset.index),1);renderMappingParts();showToast('拼接项已删除')}); document.getElementById('confirmMasterField').onclick=()=>{const selected=document.querySelector('input[name="masterField"]:checked');const ruleType=document.getElementById('fieldRuleType');if(!selected)return;if(mappingParts.length>0&&ruleType.value!=='拼接'){ruleType.value='拼接';showToast('已存在字段，映射规则自动切换为拼接并按点击顺序追加')};mappingParts.push(selected.value);renderMappingParts();document.getElementById('masterFieldDrawer').classList.remove('open');showToast('主数据字段已按顺序添加')}; document.getElementById('confirmFixedText').onclick=()=>{const value=document.getElementById('fixedTextInput').value.trim();if(!value){showToast('请输入固定文本');return}mappingParts.push(value);renderMappingParts();document.getElementById('fixedTextDrawer').classList.remove('open');showToast(`固定文本“${value}”已添加`)}; document.getElementById('confirmJoiner').onclick=()=>{const selected=document.querySelector('input[name="joiner"]:checked');mappingParts.push(selected.value||'空格');renderMappingParts();document.getElementById('joinerDrawer').classList.remove('open');showToast(`连接符“${selected.value||'空格'}”已添加`)}; document.getElementById('confirmCondition').onclick=()=>{const field=document.getElementById('conditionField').value;const operator=document.getElementById('conditionOperator').value;const value=document.getElementById('conditionValue').value.trim();if(!value){showToast('请输入条件内容');return}const conditionText=`${field} ${operator} ${value}`;const selectedCondition=document.getElementById('selectedCondition');if(selectedCondition)selectedCondition.textContent=conditionText;const mappingCondition=document.getElementById('mappingConditionText');if(mappingCondition)mappingCondition.textContent=conditionText;document.getElementById('conditionDrawer').classList.remove('open');showToast('前置条件已回填')};
     const poolChecks=document.querySelectorAll('.pool-check'); function updatePool(){const c=[...poolChecks].filter(x=>x.checked).length;document.querySelector('#pool .bar-right').textContent=`已选择 ${c} 个商品`;document.getElementById('distribute').disabled=!c} poolChecks.forEach(x=>x.addEventListener('change',updatePool)); updatePool(); document.getElementById('distribute').onclick=()=>document.getElementById('distributionModal').classList.add('open');document.getElementById('confirmDistribution').onclick=()=>{document.getElementById('distributionModal').classList.remove('open');showToast('商品已分配至所选下游渠道')};
-    const productChecks=document.querySelectorAll('.product-check'); const all=document.getElementById('productAll'); function updateProducts(){const c=[...productChecks].filter(x=>x.checked).length;document.querySelector('#products .pagination span').textContent=`共 83 条，已选 ${c} 条`;['pullProduct','syncAudit','goOnline','goOffline','changeCategory'].forEach(id=>document.getElementById(id).disabled=!c)} all.addEventListener('change',()=>{productChecks.forEach(x=>x.checked=all.checked);updateProducts()});productChecks.forEach(x=>x.addEventListener('change',updateProducts));updateProducts();document.getElementById('generateProduct').onclick=()=>showToast('已打开商品选择流程：仅面向当前渠道实例');document.getElementById('pullProduct').onclick=()=>showToast('已创建平台拉取任务，可选择全部内容、图片、属性、详情或价格');document.getElementById('syncAudit').onclick=()=>showToast('已创建审核同步任务，结果将按商品行回写');document.getElementById('goOnline').onclick=()=>showToast('已开始批量上架；全部SKU禁用商品将被跳过并返回原因');document.getElementById('goOffline').onclick=()=>document.getElementById('offlineModal').classList.add('open');document.getElementById('changeCategory').onclick=()=>showToast('修改平台类目后，不兼容属性将清空并需重新核对');
-    document.querySelectorAll('[data-edit-tab]').forEach(t=>t.addEventListener('click',()=>{document.querySelectorAll('[data-edit-tab]').forEach(x=>x.classList.toggle('active',x===t));document.querySelectorAll('.edit-pane').forEach(p=>p.style.display=p.id===`edit-${t.dataset.editTab}`?'block':'none')}));document.getElementById('fillDefault').onclick=()=>showToast('已补充未人工修改的默认值');document.getElementById('saveDraft').onclick=()=>showToast('当前内容已保存为草稿');document.getElementById('confirmSave').onclick=()=>showToast('当前资料已确认保存');document.getElementById('submitAudit').onclick=()=>showToast('审核同步已提交；如有问题将汇总到错误面板');
+    const productChecks=document.querySelectorAll('.product-check'); const all=document.getElementById('productAll'); function updateProducts(){const c=[...productChecks].filter(x=>x.checked).length;document.querySelector('#products .pagination span').textContent=`每页 10 条，共 9 页，已选 ${c} 条`;['pullProduct','syncAudit','goOnline','goOffline','changeCategory'].forEach(id=>document.getElementById(id).disabled=!c)} all.addEventListener('change',()=>{productChecks.forEach(x=>x.checked=all.checked);updateProducts()});productChecks.forEach(x=>x.addEventListener('change',updateProducts));updateProducts();const productChannelSelect=document.querySelector('#products .filters select'); const usableAggregationStrategies={'华东上海天猫店':true,'华西成都京东店':false}; const generateModal=document.getElementById('generateModal'); const generateStep1=document.getElementById('generateStep1'); const generateStep2=document.getElementById('generateStep2'); const generateNext=document.getElementById('generateNext'); const generatePrev=document.getElementById('generatePrev'); const confirmGenerate=document.getElementById('confirmGenerate'); function resetGenerate(){generateStep1.style.display='block';generateStep2.style.display='none';generateNext.style.display='inline-block';generatePrev.style.display='none';confirmGenerate.style.display='none'} document.getElementById('generateProduct').onclick=()=>{const channel=productChannelSelect?.value||'华东上海天猫店';if(!usableAggregationStrategies[channel]){showToast('未查到可用的聚合策略，请先完成聚合策略配置后再进行商品分发');return}document.getElementById('generateCurrentChannel').textContent=`当前渠道：${channel}`;resetGenerate();generateModal.classList.add('open')};document.getElementById('generateSkuSearchBtn').onclick=()=>{const keys=document.getElementById('generateSkuSearch').value.split(/[\\n,，\\s]+/).map(x=>x.trim()).filter(Boolean);document.querySelectorAll('.generate-sku').forEach(box=>{box.checked=keys.length?keys.includes(box.value):box.checked});showToast(keys.length?`已按 ${keys.length} 个 SKU 编码完成筛选`:'请输入 SKU 编码后再搜索')};generateNext.onclick=()=>{const selected=[...document.querySelectorAll('.generate-sku')].filter(x=>x.checked);if(!selected.length){showToast('请至少选择一个已生效 SKU');return}const codes=selected.map(x=>x.value);if(codes.includes('SKU-ZP218-BLK')&&(codes.includes('SKU-ZP15001-BLK')||codes.includes('SKU-ZP15001-RED'))){showToast('所选 SKU 按当前聚合策略产生多个聚合结果，请重新选择后再生成');return}generateStep1.style.display='none';generateStep2.style.display='block';generateNext.style.display='none';generatePrev.style.display='inline-block';confirmGenerate.style.display='inline-block'};generatePrev.onclick=()=>{generateStep1.style.display='block';generateStep2.style.display='none';generateNext.style.display='inline-block';generatePrev.style.display='none';confirmGenerate.style.display='none'};confirmGenerate.onclick=()=>{const selected=[...document.querySelectorAll('.generate-sku')].filter(x=>x.checked);if(selected.length>24){showToast('一个渠道商品最多支持 24 个 SKU，请移除多余 SKU');return}generateModal.classList.remove('open');showToast('渠道商品已生成，商品状态为待审核，同步状态为未同步，操作已写入日志')};document.getElementById('pullProduct').onclick=()=>showToast('已创建平台拉取任务，可选择全部内容、图片、属性、详情或价格');document.getElementById('syncAudit').onclick=()=>showToast('已创建审核同步任务，结果将按商品行回写');document.getElementById('goOnline').onclick=()=>showToast('已开始批量上架；全部SKU禁用商品将被跳过并返回原因');document.getElementById('goOffline').onclick=()=>document.getElementById('offlineModal').classList.add('open');document.getElementById('changeCategory').onclick=()=>showToast('修改平台类目后，不兼容属性将清空并需重新核对');
+    document.querySelectorAll('[data-edit-tab]').forEach(t=>t.addEventListener('click',()=>{document.querySelectorAll('[data-edit-tab]').forEach(x=>x.classList.toggle('active',x===t));document.querySelectorAll('.edit-pane').forEach(p=>p.style.display=p.id===`edit-${t.dataset.editTab}`?'block':'none')}));document.getElementById('saveDraft').onclick=()=>showToast('当前内容已保存为草稿');document.getElementById('confirmSave').onclick=()=>showToast('当前资料已确认保存');document.getElementById('submitAudit').onclick=()=>showToast('审核同步已提交；如有问题将汇总到错误面板');
     document.getElementById('resubmit').onclick=()=>showToast('将以当前最新已保存资料重新校验并创建新任务');document.getElementById('confirmOffline').onclick=()=>{document.getElementById('offlineModal').classList.remove('open');showToast('手动下架任务已提交，结果将按商品行返回')};
+    document.getElementById('downloadImportTemplate').onclick=()=>showToast('已生成当前渠道属性导入模板：包含SPU属性和SKU属性两个Sheet');document.getElementById('startBatchImport').onclick=()=>showToast('已打开属性批量导入文件选择；导入前将进行格式、商品匹配和平台类目校验');document.getElementById('exportAttributes').onclick=()=>showToast('已创建当前渠道商品属性导出任务');
+    const batchAssetInput=document.getElementById('batchAssetInput');const batchAssetDropzone=document.getElementById('batchAssetDropzone');function acceptBatchAsset(file){if(!file)return;const valid=file.type.startsWith('image/')||file.type.startsWith('video/')||/\.(zip|rar)$/i.test(file.name);if(!valid){showToast('资源上传失败：仅支持图片、视频或压缩包');return}document.getElementById('batchAssetModal').classList.remove('open');showToast(`已接收资源文件“${file.name}”，正在按渠道商品编码和平台规则校验`)}batchAssetInput.addEventListener('change',event=>acceptBatchAsset(event.target.files[0]));['dragenter','dragover'].forEach(type=>batchAssetDropzone.addEventListener(type,event=>{event.preventDefault();batchAssetDropzone.classList.add('is-dragover')}));['dragleave','drop'].forEach(type=>batchAssetDropzone.addEventListener(type,event=>{event.preventDefault();batchAssetDropzone.classList.remove('is-dragover')}));batchAssetDropzone.addEventListener('drop',event=>acceptBatchAsset(event.dataTransfer.files[0]));
+    let assetPickerTarget='主图 1';let assetUploadMode='upload';let assetUploadTarget=document.getElementById('assetUploadTarget');let assetUploadTitle=document.getElementById('assetUploadTitle');
+    function prepareAssetAction(button){assetPickerTarget=button.dataset.assetSlot||assetPickerTarget;assetUploadMode=button.dataset.assetMode||'upload';document.getElementById('assetPickerTarget').textContent=assetPickerTarget;assetUploadTarget.textContent=assetPickerTarget;assetUploadTitle.textContent=assetUploadMode==='replace'?'替换图片':'上传图片'}
+    document.querySelectorAll('[data-asset-slot]').forEach(button=>button.addEventListener('click',()=>{prepareAssetAction(button);if(assetUploadMode==='delete'){if(button.dataset.assetHasValue==='false'){showToast('当前坑位没有图片可删除');return}if(window.confirm(`确认删除${assetPickerTarget}吗？此操作只解除图片引用，不删除素材空间原文件。`)){showToast(`${assetPickerTarget}已解除引用，保存后进入待审核`)}return;}document.getElementById('assetUploadModal').classList.add('open')}));
+    document.getElementById('openAssetLibrary').addEventListener('click',()=>{document.getElementById('assetUploadModal').classList.remove('open');document.getElementById('assetPickerModal').classList.add('open');document.getElementById('assetPickerTarget').textContent=assetPickerTarget});
+    function acceptLocalAsset(file){if(!file){return}const valid=file.type.startsWith('image/')||file.type.startsWith('video/');if(!valid){showToast('上传失败：仅支持图片或视频文件');return}if(file.size===0){showToast('上传失败：文件内容为空');return}document.getElementById('assetUploadModal').classList.remove('open');showToast(`${assetUploadMode==='replace'?'已校验新素材并替换':'已上传素材'}“${file.name}”至${assetPickerTarget}，保存后进入待审核`)}
+    document.getElementById('assetFileInput').addEventListener('change',event=>acceptLocalAsset(event.target.files[0]));const assetDropzone=document.getElementById('assetDropzone');['dragenter','dragover'].forEach(type=>assetDropzone.addEventListener(type,event=>{event.preventDefault();assetDropzone.classList.add('is-dragover')}));['dragleave','drop'].forEach(type=>assetDropzone.addEventListener(type,event=>{event.preventDefault();assetDropzone.classList.remove('is-dragover')}));assetDropzone.addEventListener('drop',event=>acceptLocalAsset(event.dataTransfer.files[0]));
+    document.querySelectorAll('[data-asset-choice]').forEach(button=>button.addEventListener('click',()=>{document.getElementById('assetPickerModal').classList.remove('open');showToast(`${assetUploadMode==='replace'?'已校验新素材并替换':'已将素材'}“${button.dataset.assetChoice}”${assetUploadMode==='replace'?'至':''}${assetPickerTarget}，保存后进入待审核`)}));
   </script>
-
-<script>
-(function(){
-  function ensureTabs(rootLabel, tabDefs){
-    const bar = document.getElementById('openTabsBar');
-    if(!bar) return;
-    let tabs = tabDefs.slice();
-    let active = tabs[0] && tabs[0].id;
-    function render(){
-      bar.innerHTML = tabs.map(t => {
-        const act = t.id===active ? ' active' : '';
-        return '<button type="button" class="open-tab'+act+'" data-id="'+t.id+'" title="'+t.label+'"><span>'+t.label+'</span><span class="tab-close" data-close="'+t.id+'" title="关闭">✕</span></button>';
-      }).join('');
-      bar.querySelectorAll('.open-tab').forEach(btn=>{
-        btn.addEventListener('click', (e)=>{
-          if(e.target && e.target.getAttribute('data-close')) return;
-          active = btn.getAttribute('data-id');
-          const t = tabs.find(x=>x.id===active);
-          if(t && t.onActivate) t.onActivate();
-          render();
-        });
+  <style>
+    .channel-claim-v2{margin-top:18px}.channel-claim-note{padding:12px 14px;border-left:3px solid var(--red);background:var(--red-bg);color:#7d1527;font-size:12px;margin-bottom:16px}.channel-claim-tabs{display:flex;gap:24px;border-bottom:1px solid var(--line);margin-bottom:16px}.channel-claim-tab{border:0;background:transparent;color:#666;padding:10px 3px;cursor:pointer;font:inherit}.channel-claim-tab.active{color:var(--red);border-bottom:2px solid var(--red);font-weight:600}.channel-claim-pane{display:none}.channel-claim-pane.active{display:block}.channel-claim-filter{display:grid;grid-template-columns:1.05fr 1.35fr .8fr 1.15fr .8fr auto;gap:12px;align-items:end;padding:14px 16px;margin-bottom:10px}.channel-claim-filter .field{margin:0}.channel-claim-filter input,.channel-claim-filter select{width:100%;height:36px}.channel-claim-result{font-size:12px;color:var(--muted);margin:8px 0 12px}.claim-sync-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.claim-sync-grid article{display:grid;gap:5px;padding:14px;border:1px solid var(--line);border-radius:8px}.claim-sync-grid small{color:var(--muted)}@media(max-width:1050px){.channel-claim-filter{grid-template-columns:repeat(3,minmax(150px,1fr))}}@media(max-width:640px){.channel-claim-filter,.claim-sync-grid{grid-template-columns:1fr}}
+  </style>
+  <script>
+    (function(){
+      const root=document.querySelector('#claim .channel-claim-v2');
+      if(!root)return;
+      const toastMessage=message=>typeof showToast==='function'&&showToast(message);
+      const fields=['claimFilterId','claimFilterSku','claimFilterShop','claimFilterVersion'];
+      function filterRows(){
+        const values=Object.fromEntries(fields.map(id=>[id,(document.getElementById(id)?.value||'').trim().toLowerCase()]));
+        const platform=(document.getElementById('claimFilterPlatform')?.value||'').trim();let count=0;
+        root.querySelectorAll('#claimPendingRows tr').forEach(row=>{const text=row.textContent.toLowerCase();const ok=(!values.claimFilterId||text.includes(values.claimFilterId))&&(!values.claimFilterSku||text.includes(values.claimFilterSku))&&(!values.claimFilterShop||text.includes(values.claimFilterShop))&&(!values.claimFilterVersion||text.includes(values.claimFilterVersion))&&(!platform||text.includes(platform));row.hidden=!ok;if(ok)count++});
+        const counter=document.getElementById('claimResultCount');if(counter)counter.textContent=count;
+      }
+      root.addEventListener('click',event=>{
+        const tab=event.target.closest('[data-claim-tab]');
+        if(tab){root.querySelectorAll('.channel-claim-tab').forEach(x=>x.classList.toggle('active',x===tab));root.querySelectorAll('.channel-claim-pane').forEach(x=>x.classList.toggle('active',x.dataset.claimPane===tab.dataset.claimTab));return}
+        if(event.target.closest('[data-claim-refresh]')){filterRows();toastMessage('商品领用列表已刷新');return}
+        if(event.target.closest('[data-claim-reset]')){fields.forEach(id=>{const el=document.getElementById(id);if(el)el.value=''});const select=document.getElementById('claimFilterPlatform');if(select)select.value='';filterRows();toastMessage('已重置商品领用筛选条件');return}
+        const action=event.target.closest('[data-claim-action]')?.dataset.claimAction;if(!action)return;
+        const row=event.target.closest('tr');
+        if(action==='claim'){if(confirm('确认领用该 SKU 吗？领用后将进入经销商商品池，且不可撤回。')){row.dataset.claimStatus='已领用';row.remove();filterRows();toastMessage('领用成功，SKU 已进入经销商商品池')}}
+        if(action==='reject'){const reason=prompt('请输入拒绝原因：');if(reason&&reason.trim()){row.remove();filterRows();const record=document.getElementById('claimRecordRows');if(record)record.insertAdjacentHTML('afterbegin','<tr><td>'+row.cells[0].textContent+'</td><td>'+row.cells[1].querySelector('b').textContent+'</td><td>经销商A运营组</td><td><span class="tag error">已拒绝</span></td><td>'+reason.trim()+'</td><td><button class="link" data-claim-action="redispatch">再次分发</button></td></tr>');toastMessage('已拒绝，记录已保留并通知商品分发专员')}}
+        if(action==='redispatch'){toastMessage('已创建新的待领用分发明细，原拒绝记录已保留')}
       });
-      bar.querySelectorAll('[data-close]').forEach(x=>{
-        x.addEventListener('click', (e)=>{
-          e.stopPropagation();
-          const id = x.getAttribute('data-close');
-          if(tabs.length<=1) return;
-          const i = tabs.findIndex(t=>t.id===id);
-          if(i<0) return;
-          tabs.splice(i,1);
-          if(active===id) active = tabs[Math.max(0,i-1)].id;
-          render();
-        });
-      });
-    }
-    window.__zippoOpenTab = function(id, label, onActivate){
-      let t = tabs.find(x=>x.id===id);
-      if(!t){ t={id,label,onActivate}; tabs.push(t); }
-      else { t.label=label; if(onActivate) t.onActivate=onActivate; }
-      active=id; if(onActivate) onActivate(); render();
-    };
-    render();
-  }
-  window.__zippoEnsureTabs = ensureTabs;
-})();
-</script>
-
-<script>
-document.addEventListener('DOMContentLoaded', function(){
-  if (window.__zippoEnsureTabs) {
-    window.__zippoEnsureTabs('渠道接入', [{ id:'home', label:'渠道接入' }]);
-  }
-  document.querySelectorAll('.pagination, .pager').forEach(function(el){
-    if (el.querySelector('.page-size-select')) return;
-    var span = el.querySelector('span') || el.firstElementChild;
-    var sel = document.createElement('select');
-    sel.className = 'page-size-select';
-    sel.setAttribute('aria-label','每页条数');
-    sel.innerHTML = '<option value="20" selected>20条/页</option><option value="50">50条/页</option><option value="100">100条/页</option>';
-    if (span && span.parentNode === el) el.insertBefore(sel, span.nextSibling);
-    else el.appendChild(sel);
-  });
-});
-</script>
-
-
-<script>
-document.addEventListener('DOMContentLoaded', function(){
-  document.querySelectorAll('.nav button[data-view]').forEach(function(btn){
-    btn.addEventListener('click', function(){
-      var id = btn.getAttribute('data-view');
-      var label = btn.childNodes[0] ? btn.childNodes[0].textContent.trim() : id;
-      if (window.__zippoOpenTab) window.__zippoOpenTab('v-'+id, label || id);
-    });
-  });
-});
-</script>
-
-
-<script>
-/* ZIPPO_MOCK_LIST_PAD: expand first large table to 120 rows + real pager */
-(function(){
-  const TARGET = 120;
-  function padTable(table){
-    if(!table || table.dataset.mockPadded) return;
-    const tb = table.tBodies[0];
-    if(!tb || !tb.rows.length) return;
-    const seed = [...tb.rows].map(r => r.outerHTML);
-    while(tb.rows.length < TARGET){
-      const html = seed[tb.rows.length % seed.length]
-        .replace(/>([^<]{0,40})</, (m,g)=> '>'+g.replace(/(\d+)/, n => String(+n+tb.rows.length))+'<');
-      tb.insertAdjacentHTML('beforeend', html);
-    }
-    table.dataset.mockPadded = '1';
-    wirePager(table);
-  }
-  function wirePager(table){
-    let page=1, size=20;
-    const wrap = table.closest('.table-wrap, .card, .view, section, main') || table.parentElement;
-    let pager = wrap.querySelector('.pager, .pagination');
-    if(!pager){
-      pager = document.createElement('div');
-      pager.className = 'pager pagination';
-      pager.style.cssText = 'display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 0;flex-wrap:wrap';
-      wrap.appendChild(pager);
-    }
-    const all = [...table.tBodies[0].rows];
-    function render(){
-      const pages = Math.max(1, Math.ceil(all.length/size));
-      if(page>pages) page=pages;
-      all.forEach((r,i)=>{ r.style.display = (i>=(page-1)*size && i<page*size) ? '' : 'none'; });
-      pager.innerHTML = '<span>共 '+all.length+' 条 · 第 '+page+'/'+pages+' 页</span>'+
-        '<div style="display:flex;align-items:center;gap:8px">'+
-        '<select aria-label="每页条数"><option value="20">20条/页</option><option value="50">50条/页</option><option value="100">100条/页</option></select>'+
-        '<button type="button" class="pg-prev">上一页</button><button type="button" class="pg-next">下一页</button></div>';
-      const sel = pager.querySelector('select'); sel.value = String(size);
-      sel.onchange = ()=>{ size=+sel.value; page=1; render(); };
-      pager.querySelector('.pg-prev').onclick = ()=>{ page=Math.max(1,page-1); render(); };
-      pager.querySelector('.pg-next').onclick = ()=>{ page=Math.min(pages,page+1); render(); };
-    }
-    render();
-  }
-  document.addEventListener('DOMContentLoaded', function(){
-    document.querySelectorAll('.view .table-wrap table, .workspace table, main table').forEach((tb)=>{
-      padTable(tb);
-    });
-  });
-})();
-</script>
-
+      fields.forEach(id=>document.getElementById(id)?.addEventListener('input',filterRows));document.getElementById('claimFilterPlatform')?.addEventListener('change',filterRows);document.querySelector('[data-claim-sync]')?.addEventListener('click',()=>{root.querySelectorAll('.claim-sync-grid .tag.pending').forEach(tag=>{tag.textContent='已同步';tag.className='tag ready'});toastMessage('已将待同步的主数据更新同步至经销商商品池')});
+      filterRows();
+    })();
+  </script>
 </body>
-
-<script>
-/* ZIPPO_GLOBAL_SHELL_V2 */
-(function(){
-  if(window.__zippoShellV2) return;
-  window.__zippoShellV2 = 1;
-  document.querySelectorAll('.card').forEach(function(card){
-    if(card.querySelector('.table-wrap table')) card.classList.add('has-table');
-  });
-  document.querySelectorAll('.pager, .pagination').forEach(function(p){
-    p.classList.add('zippo-pager-sticky');
-  });
-  function wrapAvatar(el){
-    if(!el || el.closest('.zippo-user-menu')) return;
-    var wrap = document.createElement('div');
-    wrap.className = 'zippo-user-menu';
-    var panel = document.createElement('div');
-    panel.className = 'zippo-user-menu-panel';
-    panel.innerHTML = '<button type="button" data-act="profile">个人中心</button><button type="button" data-act="logout">退出登录</button>';
-    el.parentNode.insertBefore(wrap, el);
-    wrap.appendChild(el);
-    wrap.appendChild(panel);
-    el.style.cursor = 'pointer';
-    el.addEventListener('click', function(e){ e.stopPropagation(); wrap.classList.toggle('open'); });
-    panel.querySelector('[data-act=profile]').onclick = function(){
-      wrap.classList.remove('open');
-      var t=document.getElementById('toast'); if(t){t.textContent='个人中心';t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1600);} else alert('个人中心');
-    };
-    panel.querySelector('[data-act=logout]').onclick = function(){
-      wrap.classList.remove('open');
-      var t=document.getElementById('toast'); if(t){t.textContent='已退出登录';t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1600);} else alert('已退出登录');
-    };
-    document.addEventListener('click', function(){ wrap.classList.remove('open'); });
-  }
-  document.querySelectorAll('[aria-label="账号"], [title="管理员"], .d05-avatar, .d03-avatar, .zippo-avatar-trigger').forEach(wrapAvatar);
-  document.querySelectorAll('.top-right span[title], .global-topbar .top-right > span[style*="border-radius:50%"]').forEach(function(el){
-    if(el.textContent && el.textContent.length<=2) wrapAvatar(el);
-  });
-  document.querySelectorAll('.w-8.h-8.rounded-full, .rounded-full.bg-primary').forEach(function(el){
-    if(el.closest('header') && !el.closest('.zippo-user-menu')) wrapAvatar(el);
-  });
-})();
-</script>
-
 <script src="view-guard.js"></script>
 </html>

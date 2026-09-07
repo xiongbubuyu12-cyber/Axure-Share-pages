@@ -612,7 +612,7 @@ aside nav > .mt-6.px-3.py-3.rounded-lg {
         <div class="px-5 py-4 border-b border-line-soft flex flex-wrap justify-between gap-3">
           <div>
             <h1 class="text-base font-semibold">通知规则配置</h1>
-            <p class="text-xs text-ink-tertiary mt-0.5">一期 7 类必配事件 · 保存后对新事件即时生效 · 无个人偏好过滤</p>
+            <p class="text-xs text-ink-tertiary mt-0.5">一期 8 类必配事件 · 保存后对新事件即时生效 · 无个人偏好过滤 · 接收按组织+当前活跃角色</p>
           </div>
         </div>
         <div class="table-scroll">
@@ -848,8 +848,9 @@ aside nav > .mt-6.px-3.py-3.rounded-lg {
         ['SYSTEM_ALERT','破价预警','商品「Zippo 黑哑漆」渠道售价低于底线','PRICE_BREAK_ALERT',null],
         ['SYSTEM_ALERT','短信通道异常','短信网关连续失败，请排查','CHANNEL_FAULT_ALERT',null],
         ['SYSTEM_ALERT','渠道发布结果','Listing 发布至京东成功','CHANNEL_PUBLISH_RESULT',null],
-        ['SYSTEM_ALERT','设计师申请通知','独立设计师「林创」提交入驻申请','PARTNER_APPLY_NOTICE',null],
-        ['SYSTEM_ALERT','加工商申请通知','加工商「精工制造」提交资质审核','PARTNER_APPLY_NOTICE',null],
+        ['SYSTEM_ALERT','设计师申请通知','独立设计师「林创」提交入驻申请（EXTERNAL）','PARTNER_APPLY_NOTICE',null],
+        ['SYSTEM_ALERT','加工商申请通知','加工商「精工制造」提交资质审核（MANUFACTURER）','PARTNER_APPLY_NOTICE',null],
+        ['SYSTEM','账号开通通知','您的账号已开通，临时密码已送达（操作人已确认弹窗）','ACCOUNT_OPEN_NOTICE',null],
         ['ANNOUNCE','系统公告','本周六 02:00–04:00 平台维护窗口','SYSTEM_ANNOUNCEMENT',null],
         ['ANNOUNCE','系统公告','消息通知模块上线说明','SYSTEM_ANNOUNCEMENT',null],
       ];
@@ -942,6 +943,7 @@ aside nav > .mt-6.px-3.py-3.rounded-lg {
         { id:'R5', eventName:'系统公告', eventType:'SYSTEM_ANNOUNCEMENT', channels:['IN_APP','EMAIL'], silenceMinutes:0, receivers:'全员', smsTplId:'', emailTplId:'ET2' },
         { id:'R6', eventName:'通道异常告警', eventType:'CHANNEL_FAULT_ALERT', channels:['IN_APP'], silenceMinutes:15, receivers:'PLATFORM_ADMIN,BRAND_ADMIN', smsTplId:'', emailTplId:'' },
         { id:'R7', eventName:'设计师/加工商申请通知', eventType:'PARTNER_APPLY_NOTICE', channels:['IN_APP'], silenceMinutes:0, receivers:'品牌审核人', smsTplId:'', emailTplId:'' },
+        { id:'R8', eventName:'账号开通通知', eventType:'ACCOUNT_OPEN_NOTICE', channels:['IN_APP','SMS'], silenceMinutes:0, receivers:'新开通账号', smsTplId:'ST2', emailTplId:'' },
       ];
 
       return {

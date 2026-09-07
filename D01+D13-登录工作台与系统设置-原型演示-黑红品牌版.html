@@ -482,16 +482,13 @@ aside nav > .mt-6.px-3.py-3.rounded-lg {
       <!-- 开户申请：先选身份，再填表 -->
       <div x-show="phase==='apply'" class="bg-white rounded-lg shadow-card login-card p-6 sm:p-8">
         <div class="flex items-center justify-between mb-4">
-          <h1 class="text-lg font-semibold" x-text="apply.step==='choose' ? '申请开户' : (apply.role+'申请开户')"></h1>
-          <button @click="apply.step==='form' ? apply.step='choose' : phase='login'" class="text-xs text-ink-tertiary hover:text-primary" x-text="apply.step==='form'?'返回选择':'返回登录'"></button>
+          <h1 class="text-lg font-semibold">设计师申请开户</h1>
+          <button @click="phase='login'" class="text-xs text-ink-tertiary hover:text-primary">返回登录</button>
         </div>
-        <div x-show="apply.step==='choose'" class="grid grid-cols-2 gap-3">
-          <button @click="pickApplyRole('加工商')" class="h-28 rounded-lg border border-line-soft hover:border-primary hover:bg-primary-bg text-sm font-medium">加工商</button>
-          <button @click="pickApplyRole('设计师')" class="h-28 rounded-lg border border-line-soft hover:border-primary hover:bg-primary-bg text-sm font-medium">设计师</button>
-        </div>
-        <div x-show="apply.step==='form'" class="space-y-3">
+        <p class="text-xs text-ink-3 mb-3">加工商不在此申请：由品牌创建加工商组织并开通管理员后，在组织内扩员。</p>
+        <div class="space-y-3">
           <input x-model="apply.name" class="w-full border border-line rounded-md px-3 py-2 text-sm" placeholder="姓名 *" />
-          <input x-show="apply.role==='加工商'" x-model="apply.company" class="w-full border border-line rounded-md px-3 py-2 text-sm" placeholder="公司/机构 *" />
+          <input x-model="apply.company" class="w-full border border-line rounded-md px-3 py-2 text-sm" placeholder="公司/机构（选填）" />
           <input x-model="apply.mobile" class="w-full border border-line rounded-md px-3 py-2 text-sm" placeholder="手机号 *" />
           <input x-model="apply.email" class="w-full border border-line rounded-md px-3 py-2 text-sm" placeholder="邮箱（选填）" />
           <textarea x-model="apply.note" rows="3" class="w-full border border-line rounded-md px-3 py-2 text-sm" placeholder="申请说明"></textarea>
@@ -518,7 +515,7 @@ aside nav > .mt-6.px-3.py-3.rounded-lg {
         </template>
       </nav>
       <div class="flex items-center gap-2 shrink-0">
-        <select x-model="role" @change="onRoleChange()" class="hidden md:block border border-white/20 rounded-md px-2 py-1.5 text-xs bg-black text-white max-w-[150px]" title="演示：切换角色预览（正式环境由 D12 分配）" aria-label="演示角色">
+        <select x-model="role" @change="onRoleChange()" class="hidden md:block border border-white/20 rounded-md px-2 py-1.5 text-xs bg-black text-white max-w-[150px]" title="切换当前角色（产品能力：立即刷新菜单/权限；演示可用此下拉模拟多角色）" aria-label="当前角色">
           <option value="PLATFORM_ADMIN">平台管理员</option>
           <option value="BRAND_ADMIN">品牌管理员</option>
           <option value="BRAND_OPERATOR">品牌业务</option>
@@ -749,7 +746,7 @@ aside nav > .mt-6.px-3.py-3.rounded-lg {
                 </div>
                 <input x-show="userRoles.length>6" x-model="roleQuery" class="w-full border border-line-soft rounded px-2 py-1 text-xs" placeholder="搜索已分配角色" />
               </div>
-              <p class="text-[11px] text-ink-tertiary mt-1">一人一组织；顶栏角色切换仅用于原型预览</p>
+              <p class="text-[11px] text-ink-tertiary mt-1">一人一组织；顶栏可切换当前角色并立即刷新（会话仅当前角色生效，非权限并集）</p>
             </div>
           </div>
         </section>
@@ -2165,7 +2162,7 @@ aside nav > .mt-6.px-3.py-3.rounded-lg {
 <script>
 const DEFAULT_LOGIN_BG = "data:image/svg+xml," + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice"><defs><linearGradient id="a" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0A0A0A"/><stop offset=".55" stop-color="#1C0A10"/><stop offset="1" stop-color="#5A0A18"/></linearGradient><radialGradient id="b" cx=".18" cy=".12" r=".72"><stop offset="0" stop-color="#C8102E" stop-opacity=".5"/><stop offset="1" stop-color="#C8102E" stop-opacity="0"/></radialGradient></defs><rect width="1920" height="1080" fill="url(#a)"/><rect width="1920" height="1080" fill="url(#b)"/><rect x="0" y="860" width="1920" height="220" fill="#0A0A0A" opacity=".4"/></svg>');
 function mkOrgs() {
-  const head = ['品牌总部','华东经销商','华南经销商','华北经销商','西南经销商','西北经销商','华中经销商','东北经销商','外部合作'];
+  const head = ['品牌总部','华东经销商','华南经销商','华北经销商','西南经销商','西北经销商','华中经销商','东北经销商','某某五金制品厂','外部合作'];
   const cities = ['上海','杭州','南京','苏州','宁波','无锡','合肥','济南','青岛','福州','厦门','广州','深圳','珠海','佛山','东莞','南宁','成都','重庆','昆明','西安','郑州','武汉','长沙','南昌','沈阳','大连','哈尔滨','天津','北京','石家庄','太原'];
   const kinds = ['零售商','经销商','专卖店'];
   const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -2676,7 +2673,7 @@ function app() {
         DISTRIBUTOR_ADMIN:'华东经销商',
         DISTRIBUTOR:'华东经销商',
         RETAILER_ADMIN:'上海零售商A',
-        MANUFACTURER:'外部合作',
+        MANUFACTURER:'某某五金制品厂',
         DESIGNER:'外部合作',
       })[this.role];
     },
@@ -2685,7 +2682,7 @@ function app() {
     get isPlatformAdmin() { return this.role === 'PLATFORM_ADMIN'; },
     get isLogOrgAdmin() { return this.canUnlock; },
     get canGlobalLayout() { return this.canSettings; },
-    get canUnlock() { return ['BRAND_ADMIN','PLATFORM_ADMIN','DISTRIBUTOR_ADMIN','RETAILER_ADMIN'].includes(this.role); },
+    get canUnlock() { return ['BRAND_ADMIN','PLATFORM_ADMIN','DISTRIBUTOR_ADMIN','RETAILER_ADMIN','MANUFACTURER'].includes(this.role); },
     get showSysNav() { return this.menus.some(i => i.g==='sys' && i.show()); },
     get wbPairGridClass() {
       const n = (this.showWidget('待办事项') ? 1 : 0) + (this.showWidget('未读公告') ? 1 : 0);
@@ -2725,8 +2722,11 @@ function app() {
           {id:'RETAILER_ADMIN',label:'零售商管理员',kind:'预设'},
           {id:'custom-shop',label:'店长',kind:'自定义'},
         ],
+        '某某五金制品厂': [
+          {id:'MANUFACTURER',label:'加工商组织管理员',kind:'预设'},
+          {id:'custom-mfg',label:'工艺对接岗',kind:'自定义'},
+        ],
         '外部合作': [
-          {id:'MANUFACTURER',label:'加工商',kind:'预设'},
           {id:'DESIGNER',label:'设计师',kind:'预设'},
         ],
       };
@@ -3040,8 +3040,8 @@ function app() {
     addAiModel() {
       this.aiModels.push({scene:'新场景',provider:'OpenAI',model:'',base:'',key:'',temp:0.3});
     },
-    openApply() { this.apply = { step:'choose', role:'', name:'', company:'', mobile:'', email:'', note:'', ok:false, no:'' }; this.phase='apply'; },
-    pickApplyRole(role) { this.apply.role = role; this.apply.step = 'form'; this.apply.ok = false; },
+    openApply() { this.apply = { step:'form', role:'设计师', name:'', company:'', mobile:'', email:'', note:'', ok:false, no:'' }; this.phase='apply'; },
+    pickApplyRole(role) { if (role!=='设计师') { this.toast('本期仅支持设计师申请开户','error'); return; } this.apply.role = role; this.apply.step = 'form'; this.apply.ok = false; },
     setLoginBg(e) {
       const f = e.target.files && e.target.files[0];
       if (!f) return;
@@ -3904,7 +3904,7 @@ function app() {
     },
     submitApply() {
       if (!this.apply.name || !this.apply.mobile) { this.toast('姓名与手机号必填','error'); return; }
-      if (this.apply.role==='加工商' && !this.apply.company) { this.toast('加工商须填写公司/机构','error'); return; }
+      if (this.apply.role!=='设计师') { this.toast('本期仅支持设计师申请开户','error'); return; }
       this.apply.ok = true; this.apply.no = 'REG20260814' + String(Math.floor(Math.random()*90)+10);
       this.toast('申请已提交，待品牌在组织权限中审核');
     },
