@@ -5599,9 +5599,6 @@ aside nav > .mt-6.px-3.py-3.rounded-lg {
             <button type="button" class="proto-nav-item" data-shell-route="pw" data-pw-view="list">
               <span class="ui-icon">📋</span><span>提报管理</span>
             </button>
-            <button type="button" class="proto-nav-item" data-shell-route="pw" data-pw-view="approval">
-              <span class="ui-icon">✅</span><span>审批工作台</span>
-            </button>
             <button type="button" class="proto-nav-item" data-shell-route="pw" data-pw-view="pool">
               <span class="ui-icon">🗂</span><span>商品池协同</span>
             </button>
@@ -5635,22 +5632,8 @@ aside nav > .mt-6.px-3.py-3.rounded-lg {
             </button>
           </div>
         </details>
-        <details class="nav-group" open>
-          <summary class="nav-l1">系统管理<span class="nav-chev">›</span></summary>
-          <div class="nav-l2-wrap">
-            <button type="button" class="proto-nav-item" data-shell-route="insight" data-insight-route="strategy">
-              <span class="ui-icon">⚙</span><span>筛选与策略配置</span>
-            </button>
-            <button type="button" class="proto-nav-item" data-shell-route="insight" data-insight-route="usage">
-              <span class="ui-icon">📊</span><span>AI 使用量</span>
-            </button>
-            <button type="button" class="proto-nav-item" data-shell-route="insight" data-insight-route="profile">
-              <span class="ui-icon">👤</span><span>个人中心</span>
-            </button>
-            <nav id="d02-insight-nav" hidden></nav>
-            <nav id="module-nav" hidden aria-hidden="true"></nav>
-          </div>
-        </details>
+        <nav id="d02-insight-nav" hidden></nav>
+        <nav id="module-nav" hidden aria-hidden="true"></nav>
       </nav>
     </aside>
     <div class="d02-main-region">
@@ -5688,9 +5671,9 @@ aside nav > .mt-6.px-3.py-3.rounded-lg {
   <script>
 
 const rows=[{no:'PW20260823102400123',name:'曜石龙纹系列',code:'LSD-00402',time:'2026-08-23 10:24',update:'2026-08-23 10:26',status:'审批中',node:'法务初审',thumb:'red'},{no:'PW20260822160800234',name:'黑曜火焰图案',code:'-',time:'2026-08-22 16:08',update:'2026-08-22 16:08',status:'草稿',node:'-',thumb:'dark'},{no:'PW20260821093200345',name:'城市夜行者',code:'LSE-00388',time:'2026-08-21 09:32',update:'2026-08-22 09:15',status:'已创主档',node:'终级审批',thumb:''},{no:'PW20260820110500456',name:'复古徽章限定款',code:'-',time:'2026-08-20 11:05',update:'2026-08-21 18:20',status:'审批结束',node:'未通过',thumb:'dark'}];
-const requestedView=new URLSearchParams(location.search).get('view');let currentView=['pool','form','detail','approval'].includes(requestedView)?requestedView:'list';let formMode='new';let submissionRole='dealer';
-function navigateView(view){currentView=view;const url=new URL(location.href);url.search=view==='list'?'':'?view='+view;url.hash='';history.pushState({view},'',url);closeModal('detail-modal');closeModal('form-modal');closeModal('sku-confirm-modal');if(document.getElementById('copyright-transfer-modal'))closeModal('copyright-transfer-modal');if(window.D02Shell){const map={list:['pw-list','提报管理'],approval:['pw-approval','审批工作台'],pool:['pw-pool','商品池协同'],form:['pw-list','提报管理'],detail:['pw-list','提报管理']};const m=map[view]||map.list;window.D02Shell.openPwTab(m[0],m[1],view);}else{render();}}
-window.addEventListener('popstate',()=>{const view=new URLSearchParams(location.search).get('view');currentView=['pool','form','detail','approval'].includes(view)?view:'list';render()});
+const requestedView=new URLSearchParams(location.search).get('view');let currentView=['pool','form','detail'].includes(requestedView)?requestedView:'list';let formMode='new';let submissionRole='dealer';
+function navigateView(view){if(view==='approval')view='list';currentView=view;const url=new URL(location.href);url.search=view==='list'?'':'?view='+view;url.hash='';history.pushState({view},'',url);closeModal('detail-modal');closeModal('form-modal');closeModal('sku-confirm-modal');if(document.getElementById('copyright-transfer-modal'))closeModal('copyright-transfer-modal');if(window.D02Shell){const map={list:['pw-list','提报管理'],pool:['pw-pool','商品池协同'],form:['pw-list','提报管理'],detail:['pw-list','提报管理']};const m=map[view]||map.list;window.D02Shell.openPwTab(m[0],m[1],view);}else{render();}}
+window.addEventListener('popstate',()=>{const view=new URLSearchParams(location.search).get('view');currentView=['pool','form','detail'].includes(view)?view:'list';render()});
 function statusTag(s){const c=s==='审批中'?'red':(s==='审批结束'||s==='已创主档')?'green':s==='草稿'?'gray':'orange';return `<span class="tag ${c}">${s}</span>`}
 function render(){if(currentView==='form'){openForm();return}if(currentView==='detail'){openDetail();return}if(currentView==='approval'){renderApproval();return}if(currentView==='pool'){renderPool();return}renderList()}
 const poolRows=[{id:'P001',no:'PW20260818102000123',name:'星影鎏金',pool:'未选中',refs:[],submit:'2026-08-18 10:20',update:'2026-08-19 09:15',approval:'审批结束（通过）',type:'LSD（新品）',material:'LSD-00402',sku:'未创建',push:'未推送',source:'华东经销商',org:'华东经销商',process:'电镀 + 激光雕刻',base:'205/207',listed:'否',blackBox:'是',sample:false,order:false,sampleQty:0,orderQty:0}, {id:'P002',no:'PW20260816143000234',name:'山河如画',pool:'未选中',refs:['官旗'],submit:'2026-08-16 14:30',update:'2026-08-19 10:42',approval:'审批结束（通过）',type:'LSE（爆品）',material:'LSE-00403',sku:'SKU-10000403',push:'推送成功',source:'华南经销商',org:'华南经销商',process:'蚀刻 + 上色',base:'205',listed:'否',blackBox:'否',sample:true,order:true,sampleQty:2,orderQty:120}, {id:'P003',no:'PW20260815110800345',name:'都市几何',pool:'未选中',refs:['经销商'],submit:'2026-08-15 11:08',update:'2026-08-18 16:20',approval:'审批结束（通过，已补充资料）',type:'LOT（定制）',material:'LOT-00404',sku:'未创建',push:'未推送',source:'华西经销商',org:'华西经销商',process:'丝印',base:'207',listed:'是',blackBox:'否',sample:true,order:true,sampleQty:1,orderQty:60}, {id:'P004',no:'PW20260814094000456',name:'黑曜徽章',pool:'待定',refs:[],submit:'2026-08-14 09:40',update:'2026-08-18 13:10',approval:'审批结束（通过）',type:'LSD（新品）',material:'LSD-00401',sku:'未创建',push:'未推送',source:'华东经销商',org:'华东经销商',process:'雕刻',base:'205/207',listed:'否',blackBox:'是',sample:false,order:false,sampleQty:0,orderQty:0}];
@@ -7400,7 +7383,7 @@ normalizeSubmissionModuleName();
   const sidebar = document.getElementById("d02-sidebar");
   const crumb = document.getElementById("pw-breadcrumb");
 
-  const PW_LABEL = { list: "提报管理", approval: "审批工作台", pool: "商品池协同" };
+  const PW_LABEL = { list: "提报管理", pool: "商品池协同" };
 
   function renderTabs() {
     tabBar.innerHTML = tabs.map((t) =>
