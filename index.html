@@ -49,7 +49,7 @@
       { id: 'd12', code: 'D12', title: '组织权限', desc: '组织与权限' },
     ];
     document.getElementById('list').innerHTML = modules.map(m => `
-      <a class="card" href="viewer.html?id=${m.id}">
+      <a class="card" href="viewer/?id=${m.id}">
         <span class="code">${m.code}</span>
         <div class="title">${m.title}</div>
         <div class="desc">${m.desc}</div>

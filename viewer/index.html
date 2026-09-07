@@ -18,30 +18,30 @@
 </head>
 <body>
   <div class="bar">
-    <a href="index.html">← 返回目录</a>
+    <a href="../">← 返回目录</a>
     <span class="title" id="title">加载中…</span>
   </div>
   <iframe id="frame" title="原型预览" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals"></iframe>
-  <script src="view-guard.js"></script>
+  <script src="../view-guard.js"></script>
   <script>
     var modules = {
-      d01: { title: '登录工作台与系统设置', file: 'D01+D13-登录工作台与系统设置-原型演示-黑红品牌版.html' },
-      d02: { title: '选品中心', file: 'D02-选品中心-原型演示-黑红品牌版.html' },
-      d03: { title: '灵感创意', file: 'D03-灵感创意-原型演示-黑红品牌版.html' },
-      d04: { title: '工艺知识库', file: 'D04-工艺知识库-原型演示-黑红品牌版.html' },
-      d05: { title: '价格管理', file: 'D05-价格管理-原型演示-黑红品牌版.html' },
-      d06: { title: '商品管理', file: 'D06-商品管理-原型演示-黑红品牌版.html' },
-      d07: { title: '素材管理', file: 'D07-素材管理-原型演示-黑红品牌版.html' },
-      d08: { title: '渠道管理', file: 'D08-渠道管理-原型演示-黑红品牌版.html' },
-      d09: { title: '退市管理', file: 'D09-退市管理-原型演示-黑红品牌版.html' },
-      d10: { title: '消息通知', file: 'D10-消息通知-原型演示-黑红品牌版.html' },
-      d11: { title: '审批中心', file: 'D11-审批中心-原型演示-黑红品牌版.html' },
-      d12: { title: '组织权限', file: 'D12-组织权限-原型演示-黑红品牌版.html' }
+      d01: { title: '登录工作台与系统设置', file: '../D01+D13-登录工作台与系统设置-原型演示-黑红品牌版.html' },
+      d02: { title: '选品中心', file: '../D02-选品中心-原型演示-黑红品牌版.html' },
+      d03: { title: '灵感创意', file: '../D03-灵感创意-原型演示-黑红品牌版.html' },
+      d04: { title: '工艺知识库', file: '../D04-工艺知识库-原型演示-黑红品牌版.html' },
+      d05: { title: '价格管理', file: '../D05-价格管理-原型演示-黑红品牌版.html' },
+      d06: { title: '商品管理', file: '../D06-商品管理-原型演示-黑红品牌版.html' },
+      d07: { title: '素材管理', file: '../D07-素材管理-原型演示-黑红品牌版.html' },
+      d08: { title: '渠道管理', file: '../D08-渠道管理-原型演示-黑红品牌版.html' },
+      d09: { title: '退市管理', file: '../D09-退市管理-原型演示-黑红品牌版.html' },
+      d10: { title: '消息通知', file: '../D10-消息通知-原型演示-黑红品牌版.html' },
+      d11: { title: '审批中心', file: '../D11-审批中心-原型演示-黑红品牌版.html' },
+      d12: { title: '组织权限', file: '../D12-组织权限-原型演示-黑红品牌版.html' }
     };
     var id = (new URLSearchParams(location.search).get('id') || '').toLowerCase();
     var mod = modules[id];
     if (!mod) {
-      location.replace('index.html');
+      location.replace('../');
     } else {
       document.getElementById('title').textContent = mod.title;
       sessionStorage.setItem('pim-viewer', '1');
