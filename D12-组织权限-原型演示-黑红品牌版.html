@@ -8,6 +8,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <!-- 修订 2026-09-02：当前角色切换；方案 D：加工商独立组织+双能力 capabilities；外部合作仅设计师 -->
   <!-- 修订 2026-09-02b：去掉组织管理员↔业务角色互斥校验与文案，对齐「不强制互斥 / 配置期扩权」；中段扫尾：补加工商菜单模板 Tab/数据与 tplKey，顶栏/树/审核 toast 与加工商独立组织一致 -->
+  <!-- 修订 2026-09-09：① 树节点旁↑↓删除（保留详情区上移/下移）② 外部合作可改名 ③ 类型级→组织级菜单模板+设计师模板 ④ 去一级标题下备注 ⑤ 经销商/零售商模块全开、子菜单默认部分隐藏（组织架构/原始数据等） -->
+  <!-- 修订 2026-09-09c：① 默认不展示项置灰不可选（如原始数据）② 菜单「PW提报」更名为「商品提报」 -->
 <title>D12 组织权限 · 多组织管理 · 黑红品牌版原型</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
@@ -45,6 +47,13 @@
     .drawer-panel { animation: slideIn .2s ease; }
     @keyframes slideIn { from { transform: translateX(12px); opacity: .6; } to { transform: none; opacity: 1; } }
     .check-row:hover { background: #F7F7F7; }
+    .tree-node { cursor: grab; user-select: none; transition: background .12s, box-shadow .12s, opacity .12s; }
+    .tree-node:active { cursor: grabbing; }
+    .tree-node.is-dragging { opacity: .45; background: #FDE8EC !important; }
+    .tree-node.is-drop-target { outline: 2px solid #C8102E; outline-offset: -2px; background: #FDE8EC !important; }
+    .tree-node.is-drop-before { box-shadow: inset 0 2px 0 #C8102E; }
+    .tree-node.is-drop-after { box-shadow: inset 0 -2px 0 #C8102E; }
+    .tree-drag-hint { font-size: 11px; color: #8A8A8A; margin: -4px 0 10px; }
   
     /* §2.2 已打开页面 Tab */
     .open-tab {
@@ -296,10 +305,9 @@ aside nav > .mt-6.px-3.py-3.rounded-lg {
           <div class="px-5 py-4 flex flex-wrap items-center justify-between gap-3 border-b border-line-soft">
             <div>
               <h1 class="text-base font-semibold">组织架构</h1>
-              <p class="text-xs text-ink-tertiary mt-0.5">左树右详情 · 经销商/加工商平级可排序 · 零售商可排序 · 加工商独立组织 · 外部合作仅设计师 · 双能力可标</p>
             </div>
             <div class="flex flex-wrap gap-2">
-              <button x-show="canEditOrg" @click="openMenuTemplate()" class="px-3 py-1.5 text-sm rounded-md border border-line hover:bg-fill">菜单模板</button>
+              <button x-show="canEditOrg" @click="openMenuTemplate()" class="px-3 py-1.5 text-sm rounded-md border border-line hover:bg-fill">组织级菜单模板</button>
               <button x-show="canEditOrg" @click="toast('已触发全平台组织树导出')" class="px-3 py-1.5 text-sm rounded-md border border-line hover:bg-fill">导出组织树</button>
               <button x-show="canEditOrg" @click="openOrgModal('create')" class="px-3 py-1.5 text-sm rounded-md bg-primary text-white hover:bg-primary-hover">新建组织</button>
             </div>
@@ -307,6 +315,7 @@ aside nav > .mt-6.px-3.py-3.rounded-lg {
           <div class="grid lg:grid-cols-12 min-h-[calc(100vh-14rem)]">
             <div class="lg:col-span-4 border-r border-line-soft p-4 tree-scroll">
               <input x-model="orgKeyword" type="text" placeholder="搜索组织名称…" class="w-full mb-3 border border-line rounded-md px-3 py-2 text-sm" />
+              <p class="tree-drag-hint" x-show="canEditOrg">按住拖拽调整顺序（类飞书知识库）；零售商可拖到其他经销商下</p>
               <template x-for="node in filteredOrgTree" :key="node.id">
                 <div>
                   <button @click="selectOrg(node)" class="w-full text-left px-2 py-1.5 rounded text-sm flex items-center gap-1"
@@ -320,40 +329,50 @@ aside nav > .mt-6.px-3.py-3.rounded-lg {
                     <div>
                       <template x-for="c in node.children" :key="c.id">
                         <div>
-                          <div class="flex items-center gap-0.5 rounded"
-                            :class="selectedOrg && selectedOrg.id===c.id ? 'bg-primary-bg' : 'hover:bg-fill'"
-                            :style="`padding-left:${8 + c.depth*14}px`">
-                            <button @click="selectOrg(c)" class="flex-1 text-left py-1.5 text-sm flex items-center gap-1 min-w-0"
-                              :class="selectedOrg && selectedOrg.id===c.id ? 'text-primary font-medium' : ''">
-                              <span class="text-ink-tertiary w-3 shrink-0" x-text="c.children && c.children.length ? (c.open?'▼':'▶') : '·'" @click.stop="c.open=!c.open"></span>
-                              <span class="truncate" x-text="c.name"></span>
-                              <span class="ml-auto text-[10px] px-1 rounded shrink-0" :class="c.status==='启用'?'bg-success-bg text-success':'bg-fill text-ink-tertiary'" x-text="c.status"></span>
-                            </button>
-                            <template x-if="canEditOrg && c.type==='DISTRIBUTOR'">
-                              <span class="flex shrink-0 pr-1">
-                                <button type="button" @click.stop="moveOrg(c,'up')" class="px-1 text-[10px] text-ink-tertiary hover:text-primary" title="上移">↑</button>
-                                <button type="button" @click.stop="moveOrg(c,'down')" class="px-1 text-[10px] text-ink-tertiary hover:text-primary" title="下移">↓</button>
-                              </span>
-                            </template>
+                          <div class="tree-node w-full text-left py-1.5 text-sm flex items-center gap-1 rounded"
+                            :class="{
+                              'bg-primary-bg text-primary font-medium': selectedOrg && selectedOrg.id===c.id,
+                              'hover:bg-fill': !(selectedOrg && selectedOrg.id===c.id),
+                              'is-dragging': dragId===c.id,
+                              'is-drop-target': dropTargetId===c.id && dropMode==='into',
+                              'is-drop-before': dropTargetId===c.id && dropMode==='before',
+                              'is-drop-after': dropTargetId===c.id && dropMode==='after'
+                            }"
+                            :style="`padding-left:${8 + c.depth*14}px`"
+                            :draggable="canEditOrg && (c.type==='DISTRIBUTOR' || c.type==='MANUFACTURER' || c.type==='RETAILER')"
+                            @dragstart="onOrgDragStart($event, c)"
+                            @dragend="onOrgDragEnd()"
+                            @dragover.prevent="onOrgDragOver($event, c)"
+                            @dragleave="onOrgDragLeave(c)"
+                            @drop.prevent="onOrgDrop($event, c)"
+                            @click="selectOrg(c)">
+                            <span class="text-ink-tertiary w-3 shrink-0" x-text="c.children && c.children.length ? (c.open?'▼':'▶') : '·'" @click.stop="c.open=!c.open"></span>
+                            <span class="truncate" x-text="c.name"></span>
+                            <span class="ml-auto text-[10px] px-1 rounded shrink-0" :class="c.status==='启用'?'bg-success-bg text-success':'bg-fill text-ink-tertiary'" x-text="c.status"></span>
                           </div>
                           <template x-if="c.open && c.children">
                             <div>
                               <template x-for="g in c.children" :key="g.id">
-                                <div class="flex items-center gap-0.5 rounded"
-                                  :class="selectedOrg && selectedOrg.id===g.id ? 'bg-primary-bg' : 'hover:bg-fill'"
-                                  :style="`padding-left:${8 + g.depth*14}px`">
-                                  <button @click="selectOrg(g)" class="flex-1 text-left py-1.5 text-sm flex items-center gap-1 min-w-0"
-                                    :class="selectedOrg && selectedOrg.id===g.id ? 'text-primary font-medium' : ''">
-                                    <span class="w-3 text-ink-tertiary shrink-0">·</span>
-                                    <span class="truncate" x-text="g.name"></span>
-                                    <span class="ml-auto text-[10px] shrink-0" x-text="g.typeLabel"></span>
-                                  </button>
-                                  <template x-if="canEditOrg && g.type==='RETAILER'">
-                                    <span class="flex shrink-0 pr-1">
-                                      <button type="button" @click.stop="moveOrg(g,'up')" class="px-1 text-[10px] text-ink-tertiary hover:text-primary" title="上移">↑</button>
-                                      <button type="button" @click.stop="moveOrg(g,'down')" class="px-1 text-[10px] text-ink-tertiary hover:text-primary" title="下移">↓</button>
-                                    </span>
-                                  </template>
+                                <div class="tree-node w-full text-left py-1.5 text-sm flex items-center gap-1 rounded"
+                                  :class="{
+                                    'bg-primary-bg text-primary font-medium': selectedOrg && selectedOrg.id===g.id,
+                                    'hover:bg-fill': !(selectedOrg && selectedOrg.id===g.id),
+                                    'is-dragging': dragId===g.id,
+                                    'is-drop-target': dropTargetId===g.id && dropMode==='into',
+                                    'is-drop-before': dropTargetId===g.id && dropMode==='before',
+                                    'is-drop-after': dropTargetId===g.id && dropMode==='after'
+                                  }"
+                                  :style="`padding-left:${8 + g.depth*14}px`"
+                                  :draggable="canEditOrg && g.type==='RETAILER'"
+                                  @dragstart="onOrgDragStart($event, g)"
+                                  @dragend="onOrgDragEnd()"
+                                  @dragover.prevent="onOrgDragOver($event, g)"
+                                  @dragleave="onOrgDragLeave(g)"
+                                  @drop.prevent="onOrgDrop($event, g)"
+                                  @click="selectOrg(g)">
+                                  <span class="w-3 text-ink-tertiary shrink-0">·</span>
+                                  <span class="truncate" x-text="g.name"></span>
+                                  <span class="ml-auto text-[10px] px-1 rounded shrink-0" :class="g.status==='启用'?'bg-success-bg text-success':'bg-fill text-ink-tertiary'" x-text="g.status"></span>
                                 </div>
                               </template>
                             </div>
@@ -364,8 +383,7 @@ aside nav > .mt-6.px-3.py-3.rounded-lg {
                   </template>
                 </div>
               </template>
-            </div>
-            <div class="lg:col-span-8 p-5 detail-scroll" x-show="selectedOrg">
+            </div>            <div class="lg:col-span-8 p-5 detail-scroll" x-show="selectedOrg">
               <div class="flex flex-wrap items-start justify-between gap-3 mb-4">
                 <div>
                   <div class="text-lg font-semibold" x-text="selectedOrg && selectedOrg.name"></div>
@@ -377,9 +395,7 @@ aside nav > .mt-6.px-3.py-3.rounded-lg {
                   </div>
                 </div>
                 <div class="flex flex-wrap gap-2" x-show="canEditOrg">
-                  <button @click="openOrgModal('edit')" class="px-3 py-1.5 text-sm rounded-md border border-line hover:bg-fill" x-show="selectedOrg && selectedOrg.type!=='EXTERNAL' && selectedOrg.type!=='BRAND'">编辑</button>
-                  <button @click="moveOrg(selectedOrg,'up')" class="px-3 py-1.5 text-sm rounded-md border border-line hover:bg-fill" x-show="selectedOrg && (selectedOrg.type==='DISTRIBUTOR' || selectedOrg.type==='MANUFACTURER' || selectedOrg.type==='RETAILER')">上移</button>
-                  <button @click="moveOrg(selectedOrg,'down')" class="px-3 py-1.5 text-sm rounded-md border border-line hover:bg-fill" x-show="selectedOrg && (selectedOrg.type==='DISTRIBUTOR' || selectedOrg.type==='MANUFACTURER' || selectedOrg.type==='RETAILER')">下移</button>
+                  <button @click="openOrgModal('edit')" class="px-3 py-1.5 text-sm rounded-md border border-line hover:bg-fill" x-show="selectedOrg && selectedOrg.type!=='BRAND'">编辑</button>
                   <button @click="toggleOrgStatus()" class="px-3 py-1.5 text-sm rounded-md border border-line hover:bg-fill" x-show="selectedOrg && selectedOrg.type!=='BRAND'" x-text="selectedOrg && selectedOrg.status==='启用'?'停用':'启用'"></button>
                   <button @click="confirmDeleteOrg()" class="px-3 py-1.5 text-sm rounded-md border border-primary/30 text-primary hover:bg-primary-bg" x-show="selectedOrg && selectedOrg.type!=='EXTERNAL' && selectedOrg.type!=='BRAND'">删除</button>
                 </div>
@@ -401,10 +417,11 @@ aside nav > .mt-6.px-3.py-3.rounded-lg {
                   <p class="text-xs text-ink-tertiary mb-3" x-text="selectedOrg && selectedOrg.inheritMode==='INHERIT' ? '默认继承：只读预览，随类型模板自动更新；个别组织差异化请取消默认后在模板范围内单独调整' : '单独维护：仅可在类型模板已开放范围内勾选；缩小前须先清角色冲突'"></p>
                   <div class="space-y-2">
                     <template x-for="m in orgMenuPreview" :key="m.code">
-                      <label class="flex items-center gap-2 text-sm check-row px-2 py-1.5 rounded" :class="!canEditMenuPolicy || !m.inTemplate ? 'opacity-50' : ''">
-                        <input type="checkbox" class="rounded border-line text-primary focus:ring-primary" :disabled="!canEditMenuPolicy || !m.inTemplate" x-model="m.checked" />
+                      <label class="flex items-center gap-2 text-sm check-row px-2 py-1.5 rounded" :class="!canEditMenuPolicy || !m.inTemplate || m.locked ? 'opacity-50' : ''">
+                        <input type="checkbox" class="rounded border-line text-primary focus:ring-primary" :disabled="!canEditMenuPolicy || !m.inTemplate || m.locked" x-model="m.checked" />
                         <span x-text="m.name"></span>
-                        <span x-show="!m.inTemplate" class="text-[10px] text-ink-tertiary">（超出模板不可选）</span>
+                        <span x-show="m.locked" class="text-[10px] text-ink-tertiary" x-text="m.hint || '不可选'"></span>
+                        <span x-show="!m.locked && !m.inTemplate" class="text-[10px] text-ink-tertiary">（超出模板不可选）</span>
                       </label>
                     </template>
                   </div>
@@ -415,7 +432,7 @@ aside nav > .mt-6.px-3.py-3.rounded-lg {
                 </div>
                 <div class="p-4 text-sm text-ink-secondary" x-show="selectedOrg && (selectedOrg.type==='BRAND' || selectedOrg.type==='EXTERNAL')">
                   <span x-show="selectedOrg && selectedOrg.type==='BRAND'">品牌根节点：下属经销商、加工商均为平级；外部合作仅挂设计师。同主体双能力挂在单一组织节点上。</span>
-                  <span x-show="selectedOrg && selectedOrg.type==='EXTERNAL'">外部合作节点：系统预置，不可「新建组织」创建；**仅挂设计师**；加工商请建独立加工商组织；不走类型模板继承。</span>
+                  <span x-show="selectedOrg && selectedOrg.type==='EXTERNAL'">外部合作节点：系统预置，不可「新建组织」创建；仅挂设计师；名称可修改；菜单默认跟随「设计师模板」；加工商请建独立加工商组织。</span>
                 </div>
               </div>
               <div class="mt-4">
@@ -727,11 +744,11 @@ aside nav > .mt-6.px-3.py-3.rounded-lg {
     <div class="absolute inset-0 bg-black/45" @click="orgModalOpen=false"></div>
     <div class="relative bg-white rounded-lg shadow-card border border-line-soft w-full max-w-lg p-5">
       <div class="flex items-center justify-between mb-4">
-        <div class="text-base font-semibold" x-text="orgModalMode==='create'?'新建组织':'编辑组织'"></div>
+        <div class="text-base font-semibold" x-text="orgModalMode==='create'?'新建组织':(orgForm.type==='EXTERNAL'?'编辑外部合作':'编辑组织')"></div>
         <button @click="orgModalOpen=false" class="text-ink-tertiary hover:text-ink">×</button>
       </div>
       <div class="space-y-3 text-sm">
-        <label class="block space-y-1"><span class="text-xs text-ink-secondary">组织类型</span>
+        <label class="block space-y-1" x-show="orgForm.type!=='EXTERNAL'"><span class="text-xs text-ink-secondary">组织类型</span>
           <div class="flex gap-4 pt-1">
             <label class="flex items-center gap-1.5"><input type="radio" value="DISTRIBUTOR" x-model="orgForm.type" :disabled="orgModalMode==='edit'" />经销商</label>
             <label class="flex items-center gap-1.5"><input type="radio" value="MANUFACTURER" x-model="orgForm.type" :disabled="orgModalMode==='edit'" />加工商</label>
@@ -739,7 +756,10 @@ aside nav > .mt-6.px-3.py-3.rounded-lg {
           </div>
           <p class="text-[11px] text-ink-tertiary mt-1" x-show="orgModalMode==='create'">外部合作（仅设计师）为系统预置，不在此创建；同主体双能力可在经销商上标注能力</p>
         </label>
-        <label class="block space-y-1"><span class="text-xs text-ink-secondary">上级组织</span>
+        <div class="text-xs text-ink-tertiary bg-fill rounded px-3 py-2" x-show="orgForm.type==='EXTERNAL'">
+          类型固定为「外部合作」；仅可修改显示名称（系统预置节点，不可删除/新建）
+        </div>
+        <label class="block space-y-1" x-show="orgForm.type!=='EXTERNAL'"><span class="text-xs text-ink-secondary">上级组织</span>
           <select x-model="orgForm.parent" class="w-full border border-line rounded-md px-3 py-2 bg-white" :disabled="orgModalMode==='edit'">
             <option>品牌总部</option>
             <template x-for="d in distributorNames" :key="d"><option x-text="d"></option></template>
@@ -747,7 +767,7 @@ aside nav > .mt-6.px-3.py-3.rounded-lg {
         </label>
         <label class="block space-y-1"><span class="text-xs text-ink-secondary">组织名称 *</span>
           <input x-model="orgForm.name" class="w-full border border-line rounded-md px-3 py-2" /></label>
-        <label class="block space-y-1"><span class="text-xs text-ink-secondary">负责人</span>
+        <label class="block space-y-1" x-show="orgForm.type!=='EXTERNAL'"><span class="text-xs text-ink-secondary">负责人</span>
           <input x-model="orgForm.owner" class="w-full border border-line rounded-md px-3 py-2" placeholder="自由文本" /></label>
         <div class="text-xs text-ink-tertiary bg-fill rounded px-3 py-2" x-show="orgModalMode==='create'">
           提示：新建后将默认继承「<span x-text="orgForm.type==='RETAILER'?'零售商':(orgForm.type==='MANUFACTURER'?'加工商':'经销商')"></span>模板」菜单；个别组织差异化由品牌在模板范围内单独调整
@@ -768,27 +788,45 @@ aside nav > .mt-6.px-3.py-3.rounded-lg {
     <div class="absolute inset-0 bg-black/45" @click="menuTplOpen=false"></div>
     <div class="absolute right-0 top-0 h-full w-full max-w-md bg-white shadow-card border-l border-line drawer-panel flex flex-col">
       <div class="px-5 py-4 border-b border-line-soft flex items-center justify-between">
-        <div class="font-semibold">类型级菜单模板</div>
+        <div class="font-semibold">组织级菜单模板</div>
         <button @click="menuTplOpen=false" class="text-ink-tertiary text-xl leading-none">×</button>
       </div>
-      <div class="px-5 pt-3 flex gap-4 border-b border-line-soft">
-        <button @click="menuTplTab='DISTRIBUTOR'" class="pb-2.5 text-sm relative" :class="menuTplTab==='DISTRIBUTOR'?'text-primary font-semibold':'text-ink-secondary'">
+      <div class="px-5 pt-3 flex gap-3 border-b border-line-soft overflow-x-auto">
+        <button @click="menuTplTab='DISTRIBUTOR'" class="pb-2.5 text-sm relative whitespace-nowrap" :class="menuTplTab==='DISTRIBUTOR'?'text-primary font-semibold':'text-ink-secondary'">
           经销商模板<span x-show="menuTplTab==='DISTRIBUTOR'" class="absolute left-0 right-0 -bottom-px h-0.5 bg-primary"></span>
         </button>
-        <button @click="menuTplTab='RETAILER'" class="pb-2.5 text-sm relative" :class="menuTplTab==='RETAILER'?'text-primary font-semibold':'text-ink-secondary'">
+        <button @click="menuTplTab='RETAILER'" class="pb-2.5 text-sm relative whitespace-nowrap" :class="menuTplTab==='RETAILER'?'text-primary font-semibold':'text-ink-secondary'">
           零售商模板<span x-show="menuTplTab==='RETAILER'" class="absolute left-0 right-0 -bottom-px h-0.5 bg-primary"></span>
         </button>
-        <button @click="menuTplTab='MANUFACTURER'" class="pb-2.5 text-sm relative" :class="menuTplTab==='MANUFACTURER'?'text-primary font-semibold':'text-ink-secondary'">
+        <button @click="menuTplTab='MANUFACTURER'" class="pb-2.5 text-sm relative whitespace-nowrap" :class="menuTplTab==='MANUFACTURER'?'text-primary font-semibold':'text-ink-secondary'">
           加工商模板<span x-show="menuTplTab==='MANUFACTURER'" class="absolute left-0 right-0 -bottom-px h-0.5 bg-primary"></span>
         </button>
+        <button @click="menuTplTab='DESIGNER'" class="pb-2.5 text-sm relative whitespace-nowrap" :class="menuTplTab==='DESIGNER'?'text-primary font-semibold':'text-ink-secondary'">
+          设计师模板<span x-show="menuTplTab==='DESIGNER'" class="absolute left-0 right-0 -bottom-px h-0.5 bg-primary"></span>
+        </button>
       </div>
-      <div class="flex-1 overflow-y-auto p-5 space-y-2">
-        <p class="text-xs text-ink-tertiary mb-3">新建对应类型组织默认继承本模板；仍走默认继承的组织将随保存自动更新。AI 不单独成模块，模块内 AI 入口由各业务域按权限技术隐藏。</p>
+      <div class="flex-1 overflow-y-auto p-5 space-y-3">
         <template x-for="m in currentTemplateMenus" :key="m.code">
-          <label class="flex items-center gap-2 text-sm check-row px-2 py-2 rounded border border-transparent hover:border-line-soft">
-            <input type="checkbox" class="rounded border-line text-primary" x-model="m.checked" />
-            <span x-text="m.name"></span>
-          </label>
+          <div class="rounded-md border border-line-soft overflow-hidden">
+            <label class="flex items-center gap-2 text-sm font-medium check-row px-3 py-2 bg-fill/60" :class="m.brandExclusive ? 'opacity-50' : ''">
+              <input type="checkbox" class="rounded border-line text-primary" x-model="m.checked" :disabled="!!m.brandExclusive" @change="syncModuleChildren(m)" />
+              <span x-text="m.name"></span>
+              <span class="text-[10px] text-primary font-normal" x-show="m.brandExclusive">品牌专属不可选</span>
+            </label>
+            <div class="px-3 py-2 space-y-1.5 border-t border-line-soft" x-show="m.children && m.children.length">
+              <template x-for="c in (m.children || [])" :key="c.code">
+                <label class="flex items-center gap-2 text-sm check-row px-2 py-1 rounded" :class="(!m.checked || c.brandExclusive || c.defaultLocked) ? 'opacity-40' : ''">
+                  <input type="checkbox" class="rounded border-line text-primary"
+                    x-model="c.checked"
+                    :disabled="!m.checked || !!c.brandExclusive || !!c.defaultLocked" />
+                  <span x-text="c.name"></span>
+                  <span class="text-[10px] text-primary" x-show="c.brandExclusive">品牌专属不可选</span>
+                  <span class="text-[10px] text-ink-tertiary" x-show="!c.brandExclusive && c.defaultLocked" x-text="c.defaultHiddenHint || '默认不展示'"></span>
+                  <span class="text-[10px] text-ink-tertiary" x-show="!c.brandExclusive && !c.defaultLocked && c.defaultHiddenHint" x-text="c.defaultHiddenHint"></span>
+                </label>
+              </template>
+            </div>
+          </div>
         </template>
       </div>
       <div class="px-5 py-4 border-t border-line-soft flex justify-end gap-2">
@@ -941,6 +979,143 @@ function orgApp() {
   };
   const defRange = defaultMonthRange();
   const icon = (d) => `<svg class="w-4 h-4 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="2" d="${d}"/></svg>`;
+  /** 组织级菜单模板：按功能清单/Business Context 全局域扫描；brandExclusive=品牌专属不可勾选 */
+  const cloneMenus = (list) => JSON.parse(JSON.stringify(list));
+  const GLOBAL_MENU_CATALOG = [
+    { code: 'selection', name: '选品中心', children: [
+      { code: 'selection.hotword', name: '热词看板' },
+      { code: 'selection.report', name: '商品提报' },
+      { code: 'selection.insight', name: '热点设计洞察' },
+    ]},
+    { code: 'inspiration', name: '灵感创意库', children: [
+      { code: 'inspiration.square', name: '灵感广场' },
+      { code: 'inspiration.submit', name: '我的提交' },
+      { code: 'inspiration.template', name: '产品模板库' },
+    ]},
+    { code: 'craft', name: '工艺知识库', children: [
+      { code: 'craft.manual', name: '工艺手册' },
+      { code: 'craft.query', name: '工艺查询' },
+      { code: 'craft.suggest', name: '改进建议' },
+    ]},
+    { code: 'product', name: '商品管理', children: [
+      { code: 'product.list', name: '商品列表' },
+      { code: 'product.raw', name: '原始数据', defaultLocked: true, defaultHiddenHint: '默认不展示' },
+      { code: 'product.group', name: '群组与模块' },
+    ]},
+    { code: 'price', name: '价格管理', children: [
+      { code: 'price.policy', name: '价格策略' },
+      { code: 'price.monitor', name: '破价监控' },
+      { code: 'price.adjust', name: '调价单' },
+    ]},
+    { code: 'asset', name: '素材空间', children: [
+      { code: 'asset.lib', name: '素材库' },
+      { code: 'asset.space', name: '空间管理' },
+    ]},
+    { code: 'channel', name: '渠道管理', children: [
+      { code: 'channel.list', name: '渠道列表' },
+      { code: 'channel.listing', name: 'Listing管理' },
+      { code: 'channel.map', name: '类目映射' },
+    ]},
+    { code: 'delist', name: '退市管理', children: [
+      { code: 'delist.apply', name: '退市申请' },
+      { code: 'delist.exec', name: '退市执行' },
+    ]},
+    { code: 'message', name: '消息中心', children: [
+      { code: 'message.notice', name: '通知中心' },
+      { code: 'message.rule', name: '通知规则', brandExclusive: true },
+      { code: 'message.channel', name: '发送通道', brandExclusive: true },
+    ]},
+    { code: 'approval', name: '审批中心', children: [
+      { code: 'approval.todo', name: '我的审批' },
+      { code: 'approval.mine', name: '我发起的' },
+      { code: 'approval.query', name: '审批单查询', brandExclusive: true },
+    ]},
+    { code: 'org', name: '多组织管理', children: [
+      { code: 'org.arch', name: '组织架构', brandExclusive: true },
+      { code: 'org.role', name: '角色管理' },
+      { code: 'org.account', name: '账号管理' },
+      { code: 'org.scope', name: '账户数据范围' },
+    ]},
+    { code: 'settings', name: '系统设置', brandExclusive: true, children: [
+      { code: 'settings.basic', name: '基础配置', brandExclusive: true },
+      { code: 'settings.flow', name: '审批配置', brandExclusive: true },
+      { code: 'settings.enum', name: '枚举管理', brandExclusive: true },
+    ]},
+  ];
+  const buildTplFromCatalog = (opts = {}) => {
+    const { moduleCodes, childChecks, openAllModules } = opts;
+    return cloneMenus(GLOBAL_MENU_CATALOG)
+      .filter(m => !moduleCodes || moduleCodes.includes(m.code))
+      .map(m => {
+        const brandMod = !!m.brandExclusive;
+        let checked = brandMod ? false : (openAllModules !== false);
+        if (moduleCodes && !openAllModules) checked = true;
+        const children = (m.children || []).map(c => {
+          const brand = !!(c.brandExclusive || brandMod);
+          const lockedOff = !!(c.defaultLocked && !brand);
+          let cChecked = false;
+          if (!brand && !lockedOff) {
+            if (childChecks && childChecks[c.code] !== undefined) cChecked = !!childChecks[c.code];
+            else if (c.defaultHiddenHint) cChecked = false;
+            else cChecked = checked;
+          }
+          return {
+            ...c,
+            brandExclusive: brand,
+            defaultLocked: lockedOff || !!c.defaultLocked,
+            checked: cChecked,
+            defaultHiddenHint: brand ? undefined : (c.defaultHiddenHint || (lockedOff ? '默认不展示' : undefined)),
+          };
+        });
+        return { ...m, brandExclusive: brandMod, checked: brandMod ? false : checked, children };
+      });
+  };
+  const menuTplDealerRetailer = () => buildTplFromCatalog({
+    openAllModules: true,
+    childChecks: {
+      'product.raw': false,
+      'message.notice': true,
+      'org.role': true,
+      'org.account': true,
+      'org.scope': true,
+    },
+  });
+  const menuTplManufacturer = () => buildTplFromCatalog({
+    openAllModules: false,
+    moduleCodes: ['selection', 'product', 'craft', 'asset', 'org', 'message', 'approval'],
+    childChecks: {
+      'selection.report': true,
+      'selection.hotword': false,
+      'selection.insight': false,
+      'product.list': true,
+      'product.raw': false,
+      'product.group': false,
+      'craft.manual': true,
+      'craft.query': true,
+      'craft.suggest': true,
+      'asset.lib': true,
+      'asset.space': false,
+      'message.notice': true,
+      'org.role': true,
+      'org.account': true,
+      'org.scope': true,
+      'approval.todo': true,
+      'approval.mine': false,
+    },
+  }).map(m => {
+    if (['selection', 'product', 'craft', 'asset', 'org', 'message', 'approval'].includes(m.code) && !m.brandExclusive) m.checked = true;
+    return m;
+  });
+  const menuTplDesigner = () => buildTplFromCatalog({
+    moduleCodes: ['selection', 'message'],
+    openAllModules: false,
+    childChecks: {
+      'selection.hotword': true,
+      'selection.report': false,
+      'selection.insight': true,
+      'message.notice': true,
+    },
+  }).map(m => ({ ...m, checked: !m.brandExclusive }));
   const distributors = ['华东经销商','华南经销商','华北经销商','西南经销商','华中经销商','西北经销商','东北经销商','华东二区经销商'];
   const retailersOf = (d, n) => Array.from({length: n}, (_, i) => ({
     id: d + '-r' + (i+1), name: d.replace('经销商','') + '零售商' + String.fromCharCode(65+i), type: 'RETAILER', typeLabel: '零售商',
@@ -969,7 +1144,7 @@ function orgApp() {
     });
     children.push({
       id: 'ext', name: '外部合作', type: 'EXTERNAL', typeLabel: '外部合作', depth: 1, status: '启用',
-      owner: '—', childCount: 0, memberCount: 28, inherit: '—', inheritMode: 'INHERIT', open: false, children: []
+      owner: '—', childCount: 0, memberCount: 28, inherit: '默认继承「设计师模板」', inheritMode: 'INHERIT', open: false, children: []
     });
     return [{
       id: 'brand', name: '品牌总部', type: 'BRAND', typeLabel: '品牌', depth: 0, status: '启用',
@@ -1062,28 +1237,12 @@ function orgApp() {
     orgModalOpen: false, orgModalMode: 'create',
     orgForm: { type: 'DISTRIBUTOR', parent: '品牌总部', name: '', owner: '' },
     menuTplOpen: false, menuTplTab: 'DISTRIBUTOR',
+    dragId: null, dropTargetId: null, dropMode: null,
     menuTemplates: {
-      DISTRIBUTOR: [
-        { code: 'selection', name: '选品中心', checked: true },
-        { code: 'product', name: '商品管理', checked: true },
-        { code: 'price', name: '价格管理', checked: true },
-        { code: 'asset', name: '素材空间', checked: false },
-        { code: 'channel', name: '渠道管理', checked: true },
-      ],
-      RETAILER: [
-        { code: 'selection', name: '选品中心', checked: false },
-        { code: 'product', name: '商品管理', checked: true },
-        { code: 'price', name: '价格管理', checked: false },
-        { code: 'asset', name: '素材空间', checked: true },
-        { code: 'channel', name: '渠道管理', checked: true },
-      ],
-      MANUFACTURER: [
-        { code: 'selection', name: '选品中心', checked: true },
-        { code: 'product', name: '商品管理', checked: true },
-        { code: 'price', name: '价格管理', checked: false },
-        { code: 'asset', name: '素材空间', checked: true },
-        { code: 'channel', name: '渠道管理', checked: false },
-      ],
+      DISTRIBUTOR: menuTplDealerRetailer(),
+      RETAILER: menuTplDealerRetailer(),
+      MANUFACTURER: menuTplManufacturer(),
+      DESIGNER: menuTplDesigner(),
     },
     roles: [...makeRoles('品牌总部'), ...makeRoles('华东经销商'), ...makeRoles('华南经销商')],
     roleFilters: { keyword: '', type: '', start: defRange.start, end: defRange.end },
@@ -1265,78 +1424,222 @@ function orgApp() {
     refreshOrgMenuPreview() {
       if (!this.selectedOrg) return;
       const tplKey = this.selectedOrg.type === 'RETAILER' ? 'RETAILER'
-        : (this.selectedOrg.type === 'MANUFACTURER' ? 'MANUFACTURER' : 'DISTRIBUTOR');
+        : (this.selectedOrg.type === 'MANUFACTURER' ? 'MANUFACTURER'
+        : (this.selectedOrg.type === 'EXTERNAL' ? 'DESIGNER' : 'DISTRIBUTOR'));
       const tpl = this.menuTemplates[tplKey] || this.menuTemplates.DISTRIBUTOR;
       const custom = this.selectedOrg.inheritMode === 'CUSTOM';
-      this.orgMenuPreview = tpl.map(m => {
-        const inTemplate = !!m.checked;
+      const flat = [];
+      tpl.forEach(m => {
+        const inTemplate = !!m.checked && !m.brandExclusive;
         const checked = custom
           ? !!(this.selectedOrg._customMenus && this.selectedOrg._customMenus[m.code])
-          : !!m.checked;
-        return { code: m.code, name: m.name, inTemplate, checked };
+          : !!m.checked && !m.brandExclusive;
+        flat.push({ code: m.code, name: m.name, inTemplate, checked, level: 0, locked: !!m.brandExclusive });
+        (m.children || []).forEach(c => {
+          const locked = !!(c.brandExclusive || c.defaultLocked);
+          const cin = inTemplate && !!c.checked && !locked;
+          const cChecked = custom
+            ? !!(this.selectedOrg._customMenus && this.selectedOrg._customMenus[c.code])
+            : cin;
+          flat.push({
+            code: c.code,
+            name: '　' + c.name,
+            inTemplate: cin,
+            checked: cChecked,
+            level: 1,
+            locked,
+            hint: locked ? (c.brandExclusive ? '品牌专属不可选' : (c.defaultHiddenHint || '默认不展示')) : '',
+          });
+        });
       });
+      this.orgMenuPreview = flat;
     },
     openMenuTemplate() { this.menuTplOpen = true; },
     saveMenuTemplate() {
       this.menuTplOpen = false;
       this.refreshOrgMenuPreview();
-      this.toast('模板已保存并同步默认继承组织');
+      this.toast('组织级菜单模板已保存并同步默认继承组织');
+    },
+    syncModuleChildren(m) {
+      if (!m || !m.children) return;
+      if (!m.checked) m.children.forEach(c => { if (!c.brandExclusive && !c.defaultLocked) c.checked = false; });
+      else m.children.forEach(c => {
+        if (c.brandExclusive || c.defaultLocked) c.checked = false;
+      });
+    },
+    findOrgRef(id) {
+      const brand = this.orgTree[0];
+      if (!brand) return null;
+      if (brand.id === id) return { node: brand, parent: null, list: null };
+      for (const d of brand.children || []) {
+        if (d.id === id) return { node: d, parent: brand, list: brand.children };
+        for (const r of d.children || []) {
+          if (r.id === id) return { node: r, parent: d, list: d.children };
+        }
+      }
+      return null;
+    },
+    onOrgDragStart(e, node) {
+      if (!this.canEditOrg) return;
+      if (!['DISTRIBUTOR', 'MANUFACTURER', 'RETAILER'].includes(node.type)) return;
+      this.dragId = node.id;
+      this.dropTargetId = null;
+      this.dropMode = null;
+      try {
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', node.id);
+      } catch (_) {}
+    },
+    onOrgDragEnd() {
+      this.dragId = null;
+      this.dropTargetId = null;
+      this.dropMode = null;
+    },
+    onOrgDragLeave(node) {
+      if (this.dropTargetId === node.id) {
+        this.dropTargetId = null;
+        this.dropMode = null;
+      }
+    },
+    onOrgDragOver(e, target) {
+      if (!this.dragId || this.dragId === target.id) return;
+      const src = this.findOrgRef(this.dragId);
+      if (!src) return;
+      const rect = e.currentTarget.getBoundingClientRect();
+      const y = e.clientY - rect.top;
+      const ratio = y / Math.max(rect.height, 1);
+      let mode = 'after';
+      if (src.node.type === 'RETAILER' && target.type === 'DISTRIBUTOR') {
+        mode = 'into';
+      } else if (src.node.type === 'RETAILER' && target.type === 'RETAILER') {
+        mode = ratio < 0.5 ? 'before' : 'after';
+      } else if ((src.node.type === 'DISTRIBUTOR' || src.node.type === 'MANUFACTURER')
+        && target.type === src.node.type) {
+        mode = ratio < 0.5 ? 'before' : 'after';
+      } else {
+        return;
+      }
+      this.dropTargetId = target.id;
+      this.dropMode = mode;
+      e.dataTransfer.dropEffect = 'move';
+    },
+    onOrgDrop(e, target) {
+      if (!this.dragId || this.dragId === target.id) return;
+      const srcInfo = this.findOrgRef(this.dragId);
+      const tgtInfo = this.findOrgRef(target.id);
+      if (!srcInfo || !tgtInfo) return;
+      const src = srcInfo.node;
+      const mode = this.dropMode || 'after';
+
+      if (src.type === 'RETAILER' && target.type === 'DISTRIBUTOR' && mode === 'into') {
+        // 跨经销商：挂到目标经销商末尾
+        const fromList = srcInfo.list;
+        const idx = fromList.findIndex(x => x.id === src.id);
+        if (idx < 0) return;
+        const [item] = fromList.splice(idx, 1);
+        srcInfo.parent.childCount = fromList.length;
+        item.depth = 2;
+        if (!target.children) target.children = [];
+        target.children.push(item);
+        target.open = true;
+        target.childCount = target.children.length;
+        this.toast('已将「' + item.name + '」移至「' + target.name + '」下');
+      } else if (src.type === 'RETAILER' && target.type === 'RETAILER') {
+        const fromList = srcInfo.list;
+        const toParent = tgtInfo.parent;
+        const toList = tgtInfo.list;
+        const fromIdx = fromList.findIndex(x => x.id === src.id);
+        if (fromIdx < 0) return;
+        const [item] = fromList.splice(fromIdx, 1);
+        if (srcInfo.parent !== toParent) {
+          srcInfo.parent.childCount = fromList.length;
+          toParent.childCount = (toParent.children || []).length + 1;
+          item.depth = 2;
+          toParent.open = true;
+        }
+        let toIdx = toList.findIndex(x => x.id === target.id);
+        if (toIdx < 0) toIdx = toList.length;
+        if (mode === 'after') toIdx += 1;
+        // 若同源同表且 fromIdx < toIdx，splice 后索引已前移
+        if (fromList === toList && fromIdx < toIdx) toIdx -= 1;
+        toList.splice(toIdx, 0, item);
+        toParent.childCount = toList.length;
+        this.toast(srcInfo.parent === toParent
+          ? '已调整零售商顺序'
+          : ('已将「' + item.name + '」移至「' + toParent.name + '」下'));
+      } else if ((src.type === 'DISTRIBUTOR' || src.type === 'MANUFACTURER') && target.type === src.type) {
+        const brand = this.orgTree[0];
+        const peers = brand.children.filter(c => c.type === src.type);
+        const others = brand.children.filter(c => c.type !== src.type);
+        const fromIdx = peers.findIndex(x => x.id === src.id);
+        const toIdxRaw = peers.findIndex(x => x.id === target.id);
+        if (fromIdx < 0 || toIdxRaw < 0) return;
+        const [item] = peers.splice(fromIdx, 1);
+        let toIdx = toIdxRaw;
+        if (fromIdx < toIdxRaw) toIdx -= 1;
+        if (mode === 'after') toIdx += 1;
+        peers.splice(toIdx, 0, item);
+        // 保持 EXTERNAL 等在末段：经销商/加工商按类型块重排，再拼回其余节点（EXTERNAL 置后）
+        const ext = others.filter(c => c.type === 'EXTERNAL');
+        const mid = others.filter(c => c.type !== 'EXTERNAL');
+        if (src.type === 'DISTRIBUTOR') {
+          const mfgs = brand.children.filter(c => c.type === 'MANUFACTURER');
+          brand.children = [...peers, ...mfgs, ...ext];
+        } else {
+          const dists = brand.children.filter(c => c.type === 'DISTRIBUTOR');
+          brand.children = [...dists, ...peers, ...ext];
+        }
+        this.toast('已调整' + (src.type === 'DISTRIBUTOR' ? '经销商' : '加工商') + '展示顺序');
+      } else {
+        this.toast('不支持该放置位置', 'error');
+      }
+      if (this.selectedOrg && this.selectedOrg.id === src.id) this.selectedOrg = this.findOrgRef(src.id)?.node || this.selectedOrg;
+      this.onOrgDragEnd();
     },
     openOrgModal(mode) {
       this.orgModalMode = mode;
       if (mode === 'create') this.orgForm = { type: 'DISTRIBUTOR', parent: '品牌总部', name: '', owner: '' };
       else {
-        if (this.selectedOrg.type === 'EXTERNAL' || this.selectedOrg.type === 'BRAND') {
-          this.toast('外部合作/品牌根节点不可通过本弹窗编辑类型', 'error'); return;
+        if (this.selectedOrg.type === 'BRAND') {
+          this.toast('品牌根节点不可编辑', 'error'); return;
         }
-        this.orgForm = { type: this.selectedOrg.type, parent: '品牌总部', name: this.selectedOrg.name, owner: this.selectedOrg.owner };
+        this.orgForm = {
+          type: this.selectedOrg.type,
+          parent: '品牌总部',
+          name: this.selectedOrg.name,
+          owner: this.selectedOrg.owner || '',
+        };
       }
       this.orgModalOpen = true;
     },
     saveOrg() {
       if (!this.orgForm.name.trim()) { this.toast('请填写组织名称', 'error'); return; }
-      if (this.orgForm.type === 'EXTERNAL') { this.toast('不可创建外部合作节点（系统预置）', 'error'); return; }
+      if (this.orgModalMode === 'create' && this.orgForm.type === 'EXTERNAL') {
+        this.toast('不可创建外部合作节点（系统预置）', 'error'); return;
+      }
+      if (this.orgModalMode === 'edit' && this.orgForm.type === 'EXTERNAL') {
+        const brand = this.orgTree[0];
+        const ext = brand && brand.children && brand.children.find(c => c.type === 'EXTERNAL');
+        if (ext) {
+          ext.name = this.orgForm.name.trim();
+          if (this.selectedOrg && this.selectedOrg.id === ext.id) this.selectedOrg.name = ext.name;
+        }
+        this.orgModalOpen = false;
+        this.toast('外部合作名称已更新');
+        return;
+      }
       if (this.orgForm.type === 'RETAILER' && this.orgForm.parent === '品牌总部') {
         this.toast('零售商上级须为经销商', 'error'); return;
       }
       if (this.orgForm.type === 'MANUFACTURER' && this.orgForm.parent !== '品牌总部') {
         this.toast('加工商须挂在品牌下', 'error'); return;
       }
+      if (this.orgModalMode === 'edit' && this.selectedOrg) {
+        this.selectedOrg.name = this.orgForm.name.trim();
+        this.selectedOrg.owner = this.orgForm.owner;
+      }
       this.orgModalOpen = false;
       this.toast(this.orgModalMode === 'create' ? '组织已创建（默认继承模板）' : '组织已更新');
-    },
-    moveOrg(node, dir) {
-      if (!node || !this.canEditOrg) return;
-      if (node.type !== 'DISTRIBUTOR' && node.type !== 'RETAILER' && node.type !== 'MANUFACTURER') {
-        this.toast('仅同级经销商/加工商或同经销商下零售商可调整顺序', 'error'); return;
-      }
-      const brand = this.orgTree[0];
-      let siblings = null;
-      if (node.type === 'DISTRIBUTOR' || node.type === 'MANUFACTURER') {
-        siblings = brand.children.filter(c => c.type === node.type);
-      } else {
-        const parent = brand.children.find(d => d.children && d.children.some(r => r.id === node.id));
-        if (!parent) { this.toast('未找到上级经销商', 'error'); return; }
-        siblings = parent.children;
-      }
-      const idx = siblings.findIndex(s => s.id === node.id);
-      if (idx < 0) return;
-      const swap = dir === 'up' ? idx - 1 : idx + 1;
-      if (swap < 0 || swap >= siblings.length) {
-        this.toast(dir === 'up' ? '已在最前' : '已在最后'); return;
-      }
-      const item = siblings.splice(idx, 1)[0];
-      siblings.splice(swap, 0, item);
-      if (node.type === 'DISTRIBUTOR') {
-        const ext = brand.children.find(c => c.type === 'EXTERNAL');
-        brand.children = [...siblings];
-        if (ext) brand.children.push(ext);
-      } else {
-        // 触发零售商列表刷新
-        const parent = brand.children.find(d => d.children && d.children.some(r => r.id === node.id));
-        if (parent) parent.children = [...siblings];
-      }
-      this.toast('已调整展示顺序（经销商平级 / 同经销商下零售商）');
     },
     toggleOrgStatus() {
       const next = this.selectedOrg.status === '启用' ? '停用' : '启用';
@@ -1345,6 +1648,8 @@ function orgApp() {
         ? '停用后下属账号将停用且无法登录，期间不可启用账号。'
         : '启用组织后，下属账号仍为停用，须再手动启用。';
       this.confirmAction = () => {
+        const ref = this.findOrgRef(this.selectedOrg.id);
+        if (ref && ref.node) ref.node.status = next;
         this.selectedOrg.status = next;
         this.toast('组织已' + next);
       };
@@ -1369,11 +1674,12 @@ function orgApp() {
     },
     restoreInherit() {
       this.confirmTitle = '恢复默认继承？';
-      this.confirmMsg = '将丢弃单独维护结果，重新跟随类型模板。';
+      this.confirmMsg = '将丢弃单独维护结果，重新跟随组织级菜单模板。';
       this.confirmAction = () => {
         this.selectedOrg.inheritMode = 'INHERIT';
         const tplName = this.selectedOrg.type === 'RETAILER' ? '零售商模板'
-          : (this.selectedOrg.type === 'MANUFACTURER' ? '加工商模板' : '经销商模板');
+          : (this.selectedOrg.type === 'MANUFACTURER' ? '加工商模板'
+          : (this.selectedOrg.type === 'EXTERNAL' ? '设计师模板' : '经销商模板'));
         this.selectedOrg.inherit = '默认继承「' + tplName + '」';
         this.selectedOrg._customMenus = null;
         this.refreshOrgMenuPreview();
