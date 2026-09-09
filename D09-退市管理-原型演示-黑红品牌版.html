@@ -6,10 +6,11 @@
 
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>D09 退市管理 · 黑红品牌版原型 V1.4</title>
+  <title>D09 退市管理 · 黑红品牌版原型 V1.5</title>
   <!--
     修订记录：
-    V1.4 | 2026-09-03 | 用户确认：全局开关与商品到期强制改为排斥；增补申请单「紧急/限期下架」；依据 20260825&26 评审相关材料
+    V1.5 | 2026-09-09 | 去SPU仅SKU；删申请备注/审核流程Tab；退市配置去说明与示意区
+    V1.4 | 2026-09-03 | 路径互斥 + 紧急/限期下架
     V1.3 | 2026-09-03 | IP 到期强制下架示意 + 原因「IP授权到期」
     V1.2 | 2026-08-15 | HCI P0 清零等
   -->
@@ -347,14 +348,6 @@ aside nav > .mt-6.px-3.py-3.rounded-lg {
             </button>
           </div>
         </details>
-        <details class="nav-group" open>
-          <summary class="nav-l1">审批中心<span class="nav-chev">▾</span></summary>
-          <div class="nav-l2-wrap">
-            <button @click="go('flowPage'); mobileNav=false" class="w-full flex items-center gap-2 px-3 py-2.5 text-sm transition border-l-[3px] border-transparent" :class="page==='flowPage' ? 'nav-active bg-[#2d2d2d] text-white font-medium border-l-primary' : 'text-[#E8E8E8] hover:bg-[#2d2d2d] hover:text-white'">
-              <span>审核流程</span>
-            </button>
-          </div>
-        </details>
         <details class="nav-group" open x-show="canDelist">
           <summary class="nav-l1">系统设置<span class="nav-chev">▾</span></summary>
           <div class="nav-l2-wrap">
@@ -388,7 +381,6 @@ aside nav > .mt-6.px-3.py-3.rounded-lg {
           <div class="px-5 py-4 border-b border-line-soft flex items-start justify-between gap-4">
             <div>
               <h1 class="text-base font-semibold">退市申请</h1>
-              <p class="mt-1 text-xs text-ink-tertiary">本页为<strong>申请页面</strong>：新建退市<strong>申请单</strong>（可关联多 SPU/SKU）。按 SKU 关联时，所属 SPU 下全部 SKU 纳入本单。</p>
             </div>
             <button @click="openNewForm()" class="shrink-0 px-3 py-1.5 text-sm rounded-md bg-primary text-white hover:bg-primary-hover">新建申请</button>
           </div>
@@ -415,7 +407,7 @@ aside nav > .mt-6.px-3.py-3.rounded-lg {
               <input type="date" x-model="filters.apply.timeEnd" class="block w-40 border border-line rounded-md px-2 py-1.5 text-sm bg-white" />
             </label>
             <label class="text-xs text-ink-secondary space-y-1"><span>关键词</span>
-              <input x-model="filters.apply.keyword" type="text" placeholder="申请单号 / SPU / SKU / 申请人" class="block w-56 border border-line rounded-md px-2 py-1.5 text-sm" />
+              <input x-model="filters.apply.keyword" type="text" placeholder="申请单号 / SKU / 申请人" class="block w-56 border border-line rounded-md px-2 py-1.5 text-sm" />
             </label>
             <button @click="searchWithLoading()" class="px-3 py-1.5 text-sm rounded-md bg-primary text-white hover:bg-primary-hover">搜索</button>
             <button @click="filters.apply={status:'',reason:'',keyword:'',timeStart:'',timeEnd:''}; applyPage=1" class="px-3 py-1.5 text-sm rounded-md border border-line hover:bg-fill">重置</button>
@@ -454,7 +446,7 @@ aside nav > .mt-6.px-3.py-3.rounded-lg {
                   <template x-for="row in pagedForms" :key="row.id">
                     <tr class="border-t border-line-soft hover:bg-primary-bg/40">
                       <td class="px-4 py-3 font-medium whitespace-nowrap" x-text="row.formNo"></td>
-                      <td class="px-4 py-3 text-ink-secondary" x-text="row.skuCount + ' SKU · ' + row.spuCount + ' SPU'"></td>
+                      <td class="px-4 py-3 text-ink-secondary" x-text="row.skuCount + ' SKU'"></td>
                       <td class="px-4 py-3" x-text="row.reason"></td>
                       <td class="px-4 py-3 text-ink-secondary whitespace-nowrap" x-text="row.planDate"></td>
                       <td class="px-4 py-3" x-text="row.applicant"></td>
@@ -506,12 +498,11 @@ aside nav > .mt-6.px-3.py-3.rounded-lg {
             <div class="lg:col-span-3"><span class="text-ink-tertiary">补充说明</span> · <span x-text="currentForm.note || '—'"></span></div>
           </div>
           <div class="px-5 pb-5">
-            <h2 class="text-sm font-semibold mb-2">关联 SKU 明细（申请单维度展开）</h2>
+            <h2 class="text-sm font-semibold mb-2">关联 SKU 明细</h2>
             <div class="table-wrap border border-line-soft rounded-md">
               <table class="w-full text-sm">
                 <thead class="bg-fill text-xs text-ink-secondary">
                   <tr>
-                    <th class="text-left px-3 py-2 font-medium">SPU</th>
                     <th class="text-left px-3 py-2 font-medium">SKU</th>
                     <th class="text-left px-3 py-2 font-medium">名称</th>
                     <th class="text-left px-3 py-2 font-medium">当前状态</th>
@@ -520,7 +511,6 @@ aside nav > .mt-6.px-3.py-3.rounded-lg {
                 <tbody>
                   <template x-for="line in currentFormLines" :key="line.id">
                     <tr class="border-t border-line-soft">
-                      <td class="px-3 py-2" x-text="line.spuCode"></td>
                       <td class="px-3 py-2 font-medium" x-text="line.skuCode"></td>
                       <td class="px-3 py-2" x-text="line.name"></td>
                       <td class="px-3 py-2"><span class="text-xs px-2 py-0.5 rounded border" :class="skuStatusClass(line.status)" x-text="skuStatusLabel(line.status)"></span></td>
@@ -549,15 +539,12 @@ aside nav > .mt-6.px-3.py-3.rounded-lg {
 
           <div class="p-5 space-y-5">
             <div class="flex flex-wrap items-center gap-4">
-              <div class="text-sm font-medium">关联方式</div>
-              <label class="flex items-center gap-2 text-sm"><input type="radio" value="SPU" x-model="applyForm.mode" class="text-primary" /><span>按 SPU</span></label>
-              <label class="flex items-center gap-2 text-sm"><input type="radio" value="SKU" x-model="applyForm.mode" class="text-primary" /><span>按 SKU</span></label>
+              <div class="text-sm font-medium">商品明细</div>
               <div class="ml-auto flex gap-2">
                 <button @click="openImport()" class="px-3 py-1.5 text-sm rounded-md border border-line hover:bg-fill">批量导入</button>
-                <button @click="openPicker()" class="px-3 py-1.5 text-sm rounded-md bg-white text-ink border-r border-line-soft hover:bg-black" x-text="applyForm.lines.length ? '更换' : '选择商品'"></button>
+                <button @click="openPicker()" class="px-3 py-1.5 text-sm rounded-md bg-primary text-white hover:bg-primary-hover" x-text="applyForm.lines.length ? '更换' : '选择商品'"></button>
               </div>
             </div>
-            <p class="text-xs text-ink-tertiary -mt-3">面向万级商品：弹窗筛选选择，或批量导入编码；按 SKU 时展开所属 SPU 下全部 SKU，系统自动过滤非已发布。退市原因在「系统设置 → 枚举管理」维护。</p>
 
             <div>
               <div class="flex items-center justify-between mb-2">
@@ -569,7 +556,6 @@ aside nav > .mt-6.px-3.py-3.rounded-lg {
                 <table x-show="applyForm.lines.length" class="w-full text-sm">
                   <thead class="bg-fill text-xs text-ink-secondary">
                     <tr>
-                      <th class="text-left px-3 py-2 font-medium">SPU</th>
                       <th class="text-left px-3 py-2 font-medium">SKU</th>
                       <th class="text-left px-3 py-2 font-medium">名称</th>
                       <th class="text-left px-3 py-2 font-medium">品牌</th>
@@ -580,7 +566,6 @@ aside nav > .mt-6.px-3.py-3.rounded-lg {
                   <tbody>
                     <template x-for="(l, idx) in applyForm.lines" :key="l.skuCode">
                       <tr class="border-t border-line-soft hover:bg-primary-bg/30">
-                        <td class="px-3 py-2" x-text="l.spuCode"></td>
                         <td class="px-3 py-2 font-medium" x-text="l.skuCode"></td>
                         <td class="px-3 py-2" x-text="l.name"></td>
                         <td class="px-3 py-2 text-ink-secondary" x-text="l.brand"></td>
@@ -611,12 +596,11 @@ aside nav > .mt-6.px-3.py-3.rounded-lg {
               </label>
               <label class="flex items-center gap-2 text-sm lg:col-span-2">
                 <input type="checkbox" x-model="applyForm.urgentDeadline" class="rounded border-line text-primary" />
-                <span>紧急/限期下架（路径三 · 与全局开关、商品到期强制互斥）</span>
+                <span>紧急/限期下架</span>
               </label>
               <label class="block text-sm space-y-1" x-show="applyForm.urgentDeadline">
                 <span>限期下架日 <span class="text-primary">*</span></span>
                 <input type="date" x-model="applyForm.deadlineDate" class="w-full border rounded-md px-3 py-2 text-sm" :class="errors.deadlineDate ? 'border-primary' : 'border-line'" />
-                <span class="text-xs text-ink-tertiary">通过后商品立即已退市；渠道下架按该日定时，不走路径一立即下架。</span>
                 <span class="text-xs text-primary" x-show="errors.deadlineDate" x-text="errors.deadlineDate"></span>
               </label>
               <label class="block text-sm space-y-1 lg:col-span-2">
@@ -629,11 +613,6 @@ aside nav > .mt-6.px-3.py-3.rounded-lg {
               </label>
             </div>
 
-            <div class="rounded-md border border-line-soft bg-fill p-3 text-xs text-ink-secondary leading-relaxed space-y-1">
-              <div>· 提交后按配置进入退市审批或免审落定</div>
-              <div>· 退市不等于渠道下架。三条路径<strong>互斥</strong>：① 审批通过后看系统设置开关（当前 <span class="text-ink" x-text="settings.autoUnlist ? '开启' : '关闭'"></span>）；② 商品勾选「到期强制下架」按授权到期日定时；③ 本单勾选「紧急/限期下架」按限期日定时。</div>
-              <div>· 预计退市时间仅作计划记录</div>
-            </div>
           </div>
         </div>
       </section>
@@ -643,7 +622,6 @@ aside nav > .mt-6.px-3.py-3.rounded-lg {
         <div class="bg-white rounded-lg shadow-card border border-line-soft">
           <div class="px-5 py-4 border-b border-line-soft">
             <h1 class="text-base font-semibold">退市执行</h1>
-            <p class="mt-1 text-xs text-ink-tertiary">申请单内被申请商品的 <strong>SKU 维度</strong>台账。审批通过后直接已退市；正常展示 <span class="text-primary">已退市 / 复活中</span>。复活成功后该行自动消失。</p>
           </div>
           <div class="p-4 flex flex-wrap gap-3 items-end border-b border-line-soft bg-fill/50">
             <label class="text-xs text-ink-secondary space-y-1"><span>商品状态</span>
@@ -660,7 +638,7 @@ aside nav > .mt-6.px-3.py-3.rounded-lg {
               </select>
             </label>
             <label class="text-xs text-ink-secondary space-y-1"><span>关键词</span>
-              <input x-model="filters.exec.keyword" placeholder="申请单号 / SPU / SKU / 名称" class="block w-56 border border-line rounded-md px-2 py-1.5 text-sm" />
+              <input x-model="filters.exec.keyword" placeholder="申请单号 / SKU / 名称" class="block w-56 border border-line rounded-md px-2 py-1.5 text-sm" />
             </label>
             <button @click="searchWithLoading()" class="px-3 py-1.5 text-sm rounded-md bg-primary text-white hover:bg-primary-hover">搜索</button>
             <button @click="filters.exec={status:'',reason:'',keyword:''}; execPage=1" class="px-3 py-1.5 text-sm rounded-md border border-line hover:bg-fill">重置</button>
@@ -681,7 +659,6 @@ aside nav > .mt-6.px-3.py-3.rounded-lg {
                   <thead class="bg-fill text-ink-secondary text-xs">
                     <tr>
                       <th class="text-left font-medium px-4 py-3">申请单号</th>
-                      <th class="text-left font-medium px-4 py-3">SPU</th>
                       <th class="text-left font-medium px-4 py-3">SKU</th>
                       <th class="text-left font-medium px-4 py-3">名称</th>
                       <th class="text-left font-medium px-4 py-3">原因</th>
@@ -695,7 +672,6 @@ aside nav > .mt-6.px-3.py-3.rounded-lg {
                     <template x-for="row in pagedExec" :key="row.id">
                       <tr class="border-t border-line-soft hover:bg-primary-bg/40">
                         <td class="px-4 py-3 whitespace-nowrap text-ink-secondary" x-text="row.formNo"></td>
-                        <td class="px-4 py-3" x-text="row.spuCode"></td>
                         <td class="px-4 py-3 font-medium" x-text="row.skuCode"></td>
                         <td class="px-4 py-3" x-text="row.name"></td>
                         <td class="px-4 py-3 text-ink-secondary" x-text="row.reason"></td>
@@ -750,7 +726,6 @@ aside nav > .mt-6.px-3.py-3.rounded-lg {
             · 落定 <span x-text="currentSku.settledAt || '—'"></span>
           </div>
           <div class="p-5 grid sm:grid-cols-2 gap-3 text-sm opacity-80">
-            <div class="flex justify-between border-b border-line-soft py-1.5"><span class="text-ink-tertiary">SPU</span><span x-text="currentSku.spuCode"></span></div>
             <div class="flex justify-between border-b border-line-soft py-1.5"><span class="text-ink-tertiary">SKU</span><span x-text="currentSku.skuCode"></span></div>
             <div class="flex justify-between border-b border-line-soft py-1.5"><span class="text-ink-tertiary">名称</span><span x-text="currentSku.name"></span></div>
             <div class="flex justify-between border-b border-line-soft py-1.5"><span class="text-ink-tertiary">系列</span><span x-text="currentSku.series"></span></div>
@@ -830,8 +805,7 @@ aside nav > .mt-6.px-3.py-3.rounded-lg {
       <!-- 系统设置：渠道下架；退市原因统一到 D13 枚举管理 -->
       <section x-show="page==='settings' && canDelist" class="space-y-4">
         <div class="bg-white rounded-lg shadow-card border border-line-soft p-5">
-          <h1 class="text-base font-semibold">退市通过后自动渠道下架</h1>
-          <p class="mt-1 text-xs text-ink-tertiary mb-5">商品退市状态与渠道上下架是两套字段。<strong>三条路径互斥</strong>：① 本开关（退市通过后，仅对未走②③的商品）；② 商品级「到期强制下架」（按授权到期日定时）；③ 申请单「紧急/限期下架」（按限期下架日定时）。审批中不提前下架；下架失败不回滚商品生命周期，记失败日志。</p>
+          <h1 class="text-base font-semibold mb-5">退市通过后自动渠道下架</h1>
           <label class="flex items-center gap-3 mb-4">
             <input type="checkbox" x-model="settings.autoUnlist" class="rounded border-line text-primary focus:ring-primary" />
             <span class="text-sm font-medium">开启：退市审批通过后自动触发渠道下架（路径一）</span>
@@ -850,47 +824,6 @@ aside nav > .mt-6.px-3.py-3.rounded-lg {
           <button @click="saveSettings()" class="px-4 py-2 text-sm rounded-md bg-primary text-white hover:bg-primary-hover">保存下架配置</button>
         </div>
 
-        <div class="bg-white rounded-lg shadow-card border border-line-soft p-5">
-          <h1 class="text-base font-semibold">IP / 商品 · 到期强制下架（示意）</h1>
-          <p class="mt-1 text-xs text-ink-tertiary mb-4">字段在<strong>商品管理</strong>维护：是否 IP 产品、授权到期日、到期强制下架（默认不勾）。勾选后按授权到期日<strong>定时</strong>请求渠道下架；与路径一（全局开关）<strong>排斥</strong>——该商品退市通过时不再走开关下架。本页仅演示只读预览。</p>
-          <div class="table-wrap border border-line-soft rounded-md">
-            <table class="w-full text-sm">
-              <thead class="bg-fill text-xs text-ink-secondary">
-                <tr>
-                  <th class="text-left px-3 py-2 font-medium">SKU</th>
-                  <th class="text-left px-3 py-2 font-medium">IP</th>
-                  <th class="text-left px-3 py-2 font-medium">授权到期日</th>
-                  <th class="text-left px-3 py-2 font-medium">到期强制下架</th>
-                  <th class="text-left px-3 py-2 font-medium">定时说明</th>
-                </tr>
-              </thead>
-              <tbody>
-                <template x-for="row in ipUnlistDemo" :key="row.sku">
-                  <tr class="border-t border-line-soft">
-                    <td class="px-3 py-2 font-medium" x-text="row.sku"></td>
-                    <td class="px-3 py-2" x-text="row.isIp ? '是' : '否'"></td>
-                    <td class="px-3 py-2" x-text="row.expire || '—'"></td>
-                    <td class="px-3 py-2" x-text="row.force ? '是' : '否（默认）'"></td>
-                    <td class="px-3 py-2 text-ink-secondary text-xs" x-text="row.hint"></td>
-                  </tr>
-                </template>
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <div class="bg-white rounded-lg shadow-card border border-line-soft p-5">
-          <h1 class="text-base font-semibold">退市原因</h1>
-          <p class="mt-1 text-xs text-ink-tertiary mb-4">原因枚举已统一到 <strong>系统设置 → 枚举管理 → 退市原因</strong> 维护（新增/编辑/启停、「需补充说明」）。本域申请与筛选仅消费已启用项；历史单保留快照。本页不提供重复配置入口。</p>
-          <div class="flex flex-wrap gap-2 mb-3">
-            <template x-for="r in reasonCatalog" :key="r.id">
-              <span class="text-xs px-2 py-1 rounded border"
-                :class="r.enabled ? 'bg-success-bg text-success border-success/20' : 'bg-fill text-ink-tertiary border-line'"
-                x-text="r.name + (r.requireNote ? '（需说明）' : '') + (r.enabled ? '' : ' · 停用')"></span>
-            </template>
-          </div>
-          <p class="text-xs text-ink-tertiary">上表为同源只读预览（演示数据）。请到 D01+D13 原型「枚举管理」做增删启停。</p>
-        </div>
       </section>
 
       <!-- D11 审核流程 -->
@@ -900,7 +833,6 @@ aside nav > .mt-6.px-3.py-3.rounded-lg {
             <div>
               <div class="text-xs text-ink-tertiary mb-1">审批中心 · 审核流程（D11 统一模式）</div>
               <h1 class="text-base font-semibold" x-text="(flowDoc && flowDoc.title) || '请从申请单或执行行进入进度'"></h1>
-              <p class="mt-1 text-xs text-ink-tertiary">退市/复活审批流均可在系统设置审批流引擎配置。本域不自建第二套时间轴。</p>
             </div>
             <button x-show="flowFrom" @click="go(flowFrom)" class="text-sm text-primary hover:underline">返回来源页</button>
           </div>
@@ -949,7 +881,7 @@ aside nav > .mt-6.px-3.py-3.rounded-lg {
     <div class="relative w-full max-w-4xl max-h-[90vh] bg-white rounded-lg shadow-card border border-line-soft modal-enter flex flex-col" data-modal="picker">
       <div class="px-5 py-4 border-b border-line-soft flex items-center justify-between bg-white text-ink border-r border-line-soft rounded-t-lg">
         <div>
-          <div id="picker-title" class="font-semibold" x-text="applyForm.mode==='SPU' ? '选择 SPU' : '选择 SKU'"></div>
+          <div id="picker-title" class="font-semibold">选择 SKU</div>
           <div class="text-xs text-white/55">演示商品库约 <span x-text="catalogTotalHint"></span> 条 · 请用品牌/分类/关键词筛选</div>
         </div>
         <button type="button" @click="closePicker()" class="text-white/70 hover:text-white text-xl leading-none" aria-label="关闭">×</button>
@@ -975,31 +907,7 @@ aside nav > .mt-6.px-3.py-3.rounded-lg {
         <span class="text-xs text-ink-tertiary ml-auto">已勾选 <span class="text-primary font-medium" x-text="pickerCheckedCount"></span></span>
       </div>
       <div class="flex-1 overflow-y-auto table-wrap min-h-[280px]">
-        <table x-show="applyForm.mode==='SPU'" class="w-full text-sm">
-          <thead class="bg-fill text-xs text-ink-secondary sticky top-0">
-            <tr>
-              <th class="text-left px-3 py-2 font-medium w-10"></th>
-              <th class="text-left px-3 py-2 font-medium">编码</th>
-              <th class="text-left px-3 py-2 font-medium">名称</th>
-              <th class="text-left px-3 py-2 font-medium">品牌</th>
-              <th class="text-left px-3 py-2 font-medium">分类</th>
-              <th class="text-left px-3 py-2 font-medium">SKU 数</th>
-            </tr>
-          </thead>
-          <tbody>
-            <template x-for="row in pagedPickerSpus" :key="row.code">
-              <tr class="border-t border-line-soft hover:bg-primary-bg/30">
-                <td class="px-3 py-2"><input type="checkbox" :value="row.code" x-model="picker.selectedSpus" class="rounded text-primary" /></td>
-                <td class="px-3 py-2 font-medium" x-text="row.code"></td>
-                <td class="px-3 py-2" x-text="row.name"></td>
-                <td class="px-3 py-2 text-ink-secondary" x-text="row.brand"></td>
-                <td class="px-3 py-2 text-ink-secondary" x-text="row.category"></td>
-                <td class="px-3 py-2 text-ink-secondary" x-text="row.skus.length"></td>
-              </tr>
-            </template>
-          </tbody>
-        </table>
-        <table x-show="applyForm.mode==='SKU'" class="w-full text-sm">
+        <table class="w-full text-sm">
           <thead class="bg-fill text-xs text-ink-secondary sticky top-0">
             <tr>
               <th class="text-left px-3 py-2 font-medium w-10"></th>
@@ -1021,10 +929,10 @@ aside nav > .mt-6.px-3.py-3.rounded-lg {
             </template>
           </tbody>
         </table>
-        <div x-show="(applyForm.mode==='SPU' ? filteredPickerSpus.length : filteredPickerSkus.length)===0" class="py-12 text-center text-sm text-ink-tertiary">无匹配商品，请调整筛选条件</div>
+        <div x-show="filteredPickerSkus.length===0" class="py-12 text-center text-sm text-ink-tertiary">无匹配商品，请调整筛选条件</div>
       </div>
       <div class="px-4 py-3 border-t border-line-soft flex items-center justify-between text-xs text-ink-tertiary">
-        <span>筛选结果 <span x-text="applyForm.mode==='SPU' ? filteredPickerSpus.length : filteredPickerSkus.length"></span> 条 · 每页 <span x-text="pickerPageSize"></span></span>
+        <span>筛选结果 <span x-text="filteredPickerSkus.length"></span> 条 · 每页 <span x-text="pickerPageSize"></span></span>
         <div class="flex gap-2 items-center">
           <button @click="pickerPage=Math.max(1,pickerPage-1)" class="px-2 py-1 border border-line rounded hover:bg-fill">上一页</button>
           <span x-text="pickerPage + ' / ' + pickerMaxPage"></span>
@@ -1051,7 +959,7 @@ aside nav > .mt-6.px-3.py-3.rounded-lg {
       </div>
       <div class="p-5 space-y-3 flex-1 overflow-y-auto">
         <div class="flex items-center justify-between text-xs text-ink-tertiary">
-          <span>模板示例：<code class="bg-fill px-1 rounded" x-text="applyForm.mode==='SPU' ? 'SPU2001' : 'SKU2007-A'"></code></span>
+          <span>模板示例：<code class="bg-fill px-1 rounded">SKU2007-A</code></span>
           <button @click="fillImportSample()" class="text-primary hover:underline">填入示例</button>
         </div>
         <textarea x-model="importText" rows="8" class="w-full border border-line rounded-md px-3 py-2 text-sm font-mono" placeholder="每行一个编码…"></textarea>
@@ -1219,7 +1127,7 @@ aside nav > .mt-6.px-3.py-3.rounded-lg {
             skuLines.push(line);
           });
         });
-        const spuSet = new Set(lines.map(l => l.spuCode));
+        const spuSet = new Set();
         forms.push({
           id: 'f' + i,
           formNo, status, reason, planDate, applicant, submittedAt,
@@ -1312,7 +1220,7 @@ aside nav > .mt-6.px-3.py-3.rounded-lg {
         ],
         channelOptions,
         settings: { autoUnlist: false, channels: ['天猫旗舰','京东自营'] },
-        applyForm: { mode: 'SPU', lines: [], reason: '', note: '', planDate: '2026-08-14', urgentDeadline: false, deadlineDate: '' },
+        applyForm: { mode: 'SKU', lines: [], reason: '', note: '', planDate: '2026-08-14', urgentDeadline: false, deadlineDate: '' },
         picker: { brand: '', category: '', keyword: '', selectedSpus: [], selectedSkus: [] },
         importOpen: false,
         importText: '',
@@ -1363,7 +1271,7 @@ aside nav > .mt-6.px-3.py-3.rounded-lg {
               const k = f.keyword.trim();
               const lines = this.skuLines.filter(l => l.formNo === r.formNo);
               const hit = r.formNo.includes(k) || r.applicant.includes(k) ||
-                lines.some(l => l.skuCode.includes(k) || l.spuCode.includes(k) || l.name.includes(k));
+                lines.some(l => l.skuCode.includes(k) || l.name.includes(k));
               if (!hit) return false;
             }
             return true;
@@ -1380,7 +1288,7 @@ aside nav > .mt-6.px-3.py-3.rounded-lg {
             if (f.reason && r.reason !== f.reason) return false;
             if (f.keyword) {
               const k = f.keyword.trim();
-              if (![r.formNo, r.spuCode, r.skuCode, r.name].some(x => x.includes(k))) return false;
+              if (![r.formNo, r.skuCode, r.name].some(x => x.includes(k))) return false;
             }
             return true;
           });
@@ -1420,7 +1328,7 @@ aside nav > .mt-6.px-3.py-3.rounded-lg {
             if (p.category && s.category !== p.category) return false;
             if (p.keyword) {
               const k = p.keyword.trim();
-              if (![s.skuCode, s.name, s.spuCode].some(x => x.includes(k))) return false;
+              if (![s.skuCode, s.name].some(x => x.includes(k))) return false;
             }
             return true;
           });
@@ -1434,11 +1342,11 @@ aside nav > .mt-6.px-3.py-3.rounded-lg {
           return this.filteredPickerSkus.slice(s, s + this.pickerPageSize);
         },
         get pickerMaxPage() {
-          const n = this.applyForm.mode === 'SPU' ? this.filteredPickerSpus.length : this.filteredPickerSkus.length;
+          const n = this.filteredPickerSkus.length;
           return Math.max(1, Math.ceil(n / this.pickerPageSize));
         },
         get pickerCheckedCount() {
-          return this.applyForm.mode === 'SPU' ? this.picker.selectedSpus.length : this.picker.selectedSkus.length;
+          return this.picker.selectedSkus.length;
         },
         countForm(s) { return this.forms.filter(f => f.status === s).length; },
         formStatusLabel(s) { return { PENDING:'退市中', APPROVED:'已通过', REJECTED:'已驳回', CANCELLED:'已撤销' }[s] || s; },
@@ -1545,7 +1453,7 @@ aside nav > .mt-6.px-3.py-3.rounded-lg {
         },
         openNewForm() {
           this.editingFormId = null;
-          this.applyForm = { mode: 'SPU', lines: [], reason: '', note: '', planDate: '2026-08-14', urgentDeadline: false, deadlineDate: '' };
+          this.applyForm = { mode: 'SKU', lines: [], reason: '', note: '', planDate: '2026-08-14', urgentDeadline: false, deadlineDate: '' };
           this.errors = {};
           this.markEditClean();
           this.page = 'applyEdit';
@@ -1559,7 +1467,7 @@ aside nav > .mt-6.px-3.py-3.rounded-lg {
               brand: (cat && cat.brand) || 'ZIPPO', category: (cat && cat.category) || '打火机',
             };
           });
-          this.applyForm = { mode: 'SPU', lines, reason: row.reason, note: row.note || '', planDate: row.planDate, urgentDeadline: !!row.urgentDeadline, deadlineDate: row.deadlineDate || '' };
+          this.applyForm = { mode: 'SKU', lines, reason: row.reason, note: row.note || '', planDate: row.planDate, urgentDeadline: !!row.urgentDeadline, deadlineDate: row.deadlineDate || '' };
           this.errors = {};
           this.markEditClean();
           this.page = 'applyEdit';
@@ -1586,9 +1494,7 @@ aside nav > .mt-6.px-3.py-3.rounded-lg {
           this.focusModal('import');
         },
         fillImportSample() {
-          this.importText = this.applyForm.mode === 'SPU'
-            ? 'SPU2001\nSPU2007\nSPU9999'
-            : 'SKU2007-A\nSKU2001-B\nSKU0000-X';
+          this.importText = 'SKU2007-A\nSKU2001-B\nSKU0000-X';
           this.importResult = null;
         },
         onImportFile(e) {
@@ -1607,17 +1513,13 @@ aside nav > .mt-6.px-3.py-3.rounded-lg {
           const errors = [];
           const map = new Map();
           uniq.forEach(code => {
-            if (this.applyForm.mode === 'SPU') {
-              const spu = this.catalogSpus.find(s => s.code === code);
-              if (!spu) { errors.push(code + '：SPU 不存在'); return; }
-              this.collectDelistableFromSpu(spu, map);
-            } else {
-              const hit = this.catalogSkuFlat.find(s => s.skuCode === code);
-              if (!hit) { errors.push(code + '：SKU 不存在'); return; }
-              const spu = this.catalogSpus.find(s => s.code === hit.spuCode);
-              if (!spu) { errors.push(code + '：所属 SPU 异常'); return; }
-              this.collectDelistableFromSpu(spu, map);
-            }
+            const hit = this.catalogSkuFlat.find(s => s.skuCode === code);
+            if (!hit) { errors.push(code + '：SKU 不存在'); return; }
+            if (!this.isDelistableSku(hit)) { errors.push(code + '：非已发布，已跳过'); return; }
+            map.set(hit.skuCode, {
+              skuCode: hit.skuCode, name: hit.name, series: hit.series,
+              brand: hit.brand, category: hit.category,
+            });
           });
           const ok = uniq.length - errors.length;
           return { ok: Math.max(0, ok), fail: errors.length, errors, lines: Array.from(map.values()) };
@@ -1665,24 +1567,15 @@ aside nav > .mt-6.px-3.py-3.rounded-lg {
         confirmPicker() {
           const map = new Map();
           let filtered = 0;
-          if (this.applyForm.mode === 'SPU') {
-            this.picker.selectedSpus.forEach(code => {
-              const spu = this.catalogSpus.find(s => s.code === code);
-              if (!spu) return;
-              filtered += this.collectDelistableFromSpu(spu, map);
+          this.picker.selectedSkus.forEach(skuCode => {
+            const hit = this.catalogSkuFlat.find(s => s.skuCode === skuCode);
+            if (!hit) return;
+            if (!this.isDelistableSku(hit)) { filtered += 1; return; }
+            map.set(hit.skuCode, {
+              skuCode: hit.skuCode, name: hit.name, series: hit.series,
+              brand: hit.brand, category: hit.category,
             });
-          } else {
-            const spuCodes = new Set();
-            this.picker.selectedSkus.forEach(skuCode => {
-              const hit = this.catalogSkuFlat.find(s => s.skuCode === skuCode);
-              if (hit) spuCodes.add(hit.spuCode);
-            });
-            spuCodes.forEach(code => {
-              const spu = this.catalogSpus.find(s => s.code === code);
-              if (!spu) return;
-              filtered += this.collectDelistableFromSpu(spu, map);
-            });
-          }
+          });
           this.applyForm.lines = Array.from(map.values());
           this.closePicker();
           this.errors.lines = '';
@@ -1836,7 +1729,7 @@ aside nav > .mt-6.px-3.py-3.rounded-lg {
         },
         submitForm() {
           this.errors = {};
-          if (!this.applyForm.lines.length) this.errors.lines = '请至少关联一个 SPU 或 SKU';
+          if (!this.applyForm.lines.length) this.errors.lines = '请至少关联一个 SKU';
           if (!this.applyForm.reason) this.errors.reason = '请选择退市原因';
           if (this.reasonRequiresNote && !(this.applyForm.note || '').trim()) this.errors.note = '该原因须填写补充说明';
           if (!this.applyForm.planDate) this.errors.planDate = '请填写预计退市时间';
@@ -1860,7 +1753,7 @@ aside nav > .mt-6.px-3.py-3.rounded-lg {
                 this.forms = this.forms.filter(f => f.id !== this.editingFormId);
               }
             }
-            const spuSet = new Set(lines.map(l => l.spuCode));
+            const spuSet = new Set();
             this.forms.unshift({
               id: 'f-new-' + Date.now(),
               formNo, status: 'PENDING', reason: this.applyForm.reason, planDate: this.applyForm.planDate,
