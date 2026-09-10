@@ -1,206 +1,11 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="D02 选品中心 · PW 提报（经销商/加工商）+ 热点灵感引擎 · 黑红品牌版合并原型（2026-09-07）" />
-  <title>D02 选品中心 · 黑红品牌版原型</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="AI-PIM选品中心·热点设计洞察完整模块高保真交互原型">
+  <title>热点设计洞察｜选品中心高保真原型</title>
   <style>
-/* === Shell chrome === */
-:root {
-  --color-primary: #C8102E;
-  --color-primary-hover: #A00D25;
-  --color-primary-active: #7A0A1C;
-  --color-primary-bg: #FDE8EC;
-  --color-success: #2F6B3A;
-  --color-success-bg: #EAF5EC;
-  --color-warning: #8A6A1A;
-  --color-warning-bg: #F7F1DE;
-  --color-danger: #DC2626;
-  --color-danger-bg: #FEF2F2;
-  --color-ink: #0A0A0A;
-  --color-ink-secondary: #4A4A4A;
-  --color-ink-tertiary: #8A8A8A;
-  --color-ink-disabled: #B8B8B8;
-  --color-line: #D4D4D4;
-  --color-line-soft: #EBEBEB;
-  --color-bg-page: #EDEDED;
-  --color-bg-fill: #F7F7F7;
-  --color-brand-black: #0A0A0A;
-  --color-brand-white: #FFFFFF;
-  --shadow-1: 0 1px 2px rgba(0,0,0,.06), 0 1px 4px rgba(0,0,0,.04);
-  --shadow-2: 0 4px 12px rgba(0,0,0,.08);
-  --shadow-focus: 0 0 0 2px rgba(200,16,46,.25);
-  --header-h: 56px;
-  --proto-nav-w: 240px;
-  --ink: #0A0A0A;
-  --muted: #8A8A8A;
-  --line: #EBEBEB;
-  --danger: #C8102E;
-  --danger-soft: #FDE8EC;
-  --success: #2F6B3A;
-  --success-soft: #EAF5EC;
-  --warn: #8A6A1A;
-  --warn-soft: #F7F1DE;
-  --shadow: 0 4px 12px rgba(0,0,0,.08);
-  --brand-red-5: #C8102E;
-  --brand-red-6: #C8102E;
-  --brand-red-7: #A00D25;
-  --brand-red-1: #FDE8EC;
-}
-* { box-sizing: border-box; }
-html, body { height: 100%; margin: 0; }
-body { background: var(--color-bg-page); color: var(--color-ink); font-family: -apple-system, "PingFang SC", "Microsoft YaHei", system-ui, sans-serif; font-size: 14px; }
-button, input, select, textarea { font: inherit; }
-button { cursor: pointer; }
-button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible { outline: none; box-shadow: var(--shadow-focus); }
-.brand-stripe { height: 4px; background: linear-gradient(90deg, var(--color-brand-black) 0 72%, var(--color-primary) 72% 100%); }
-.d02-app-shell { display: flex; height: calc(100vh - var(--header-h) - 4px); overflow: hidden; }
-.proto-sidebar { width: var(--proto-nav-w); background: #0A0A0A; border-right: 0; flex-shrink: 0; overflow-y: auto; color: #cfcfcf; }
-.proto-nav-group { padding: 8px 12px 4px; font-size: 11px; font-weight: 600; color: #8f8f8f; letter-spacing: .04em; }
-.proto-nav-item { display: flex; align-items: center; gap: 8px; width: 100%; text-align: left; padding: 8px 12px; min-height: 40px; border-radius: 4px; font-size: 13px; color: #cfcfcf; transition: background .15s, color .15s; border: 0; background: transparent; border-left: 3px solid transparent; }
-.proto-nav-item:hover { background: #2d2d2d; color: #fff; }
-.proto-nav-item.active { background: #2d2d2d; color: #fff; font-weight: 600; border-left-color: var(--color-primary); }
-.proto-nav-item .ui-icon { width: 18px; text-align: center; opacity: .75; font-style: normal; flex-shrink: 0; }
-.proto-nav-item em.nav-count { margin-left: auto; font-style: normal; font-size: 11px; padding: 1px 6px; border-radius: 10px; background: #434343; color: #fff; }
-.proto-nav-item.active em.nav-count { background: #C8102E; color: #fff; }
-.open-tab { display: inline-flex; align-items: center; gap: 6px; max-width: 180px; padding: 6px 10px; font-size: 13px; border-radius: 4px; color: rgba(255,255,255,.72); white-space: nowrap; border: 0; background: transparent; border-bottom: 2px solid transparent; }
-.open-tab:hover { color: #fff; background: rgba(255,255,255,.08); }
-.open-tab.active { color: #fff; font-weight: 600; border-bottom-color: var(--color-primary); background: rgba(200,16,46,.18); }
-.open-tab .tab-close { opacity: .55; font-size: 12px; padding: 2px 4px; border-radius: 3px; border: 0; background: transparent; color: inherit; }
-.open-tab .tab-close:hover { opacity: 1; background: rgba(255,255,255,.15); }
-.d02-header { height: var(--header-h); background: var(--color-brand-black); color: #fff; position: sticky; top: 0; z-index: 50; }
-.d02-header-inner { display: flex; align-items: center; height: 100%; padding: 0 16px 0 24px; gap: 12px; }
-.d02-logo { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
-.d02-logo-mark { width: 32px; height: 32px; border-radius: 4px; background: var(--color-primary); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; }
-.d02-logo-text { font-size: 15px; font-weight: 700; letter-spacing: .04em; }
-.d02-header-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
-.d02-icon-btn { width: 32px; height: 32px; border: 0; border-radius: 4px; background: transparent; color: rgba(255,255,255,.7); }
-.d02-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--color-primary); color: #fff; font-size: 12px; font-weight: 600; display: flex; align-items: center; justify-content: center; }
-.d02-role { border: 1px solid rgba(255,255,255,.2); border-radius: 6px; padding: 4px 8px; font-size: 12px; background: rgba(0,0,0,.4); color: #fff; max-width: 130px; }
-
-
-/* === PW scoped CSS (from latest 商品提报) === */
-:root{--ink:#0A0A0A;--muted:#737373;--line:#e6e6e6;--soft:#f6f6f6;--panel:#fff;--danger:#C8102E;--danger-soft:#fff1f2;--success:#16734b;--success-soft:#e9f7ef;--warn:#9a5a00;--warn-soft:#fff7e6;--shadow:0 14px 38px rgba(0,0,0,.12);font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif}
-@keyframes fade{0%,100%{opacity:0;transform:translateY(8px)}15%,80%{opacity:1;transform:none}}
-*{box-sizing:border-box}
-#pw-panel button, #pw-root button, #pw-panel input, #pw-root input, #pw-panel select, #pw-root select, #pw-panel textarea, #pw-root textarea{font:inherit}
-#pw-panel button, #pw-root button{cursor:pointer}
-#pw-panel .app, #pw-root .app{min-height:100vh;display:flex}
-#pw-panel .user, #pw-root .user{margin-top:auto;padding:16px;border-top:1px solid #343434;color:#ccc;font-size:12px}
-#pw-panel .avatar, #pw-root .avatar{display:inline-flex;width:28px;height:28px;border-radius:50%;background:#fff;color:#222;align-items:center;justify-content:center;font-weight:700;margin-right:8px}
-#pw-panel .main, #pw-root .main{flex:1;min-width:0}
-#pw-panel .top, #pw-root .top{height:70px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 30px}
-#pw-panel .crumb, #pw-root .crumb{color:var(--muted);font-size:13px}
-#pw-panel .crumb strong, #pw-root .crumb strong{color:var(--ink);font-weight:600}
-#pw-panel .top-right, #pw-root .top-right{display:flex;align-items:center;gap:18px;color:var(--muted)}
-#pw-panel .top-right .bell, #pw-root .top-right .bell{font-size:18px}
-#pw-panel .content, #pw-root .content{padding:26px 30px 50px;max-width:1600px;margin:auto}
-#pw-panel .page-title, #pw-root .page-title{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:22px}
-#pw-panel .page-title h1, #pw-root .page-title h1{font-size:25px;margin:0 0 7px;letter-spacing:-.4px}
-#pw-panel .page-title p, #pw-root .page-title p{margin:0;color:var(--muted)}
-#pw-panel .actions, #pw-root .actions{display:flex;gap:10px}
-#pw-panel .btn, #pw-root .btn{border:1px solid #cfcfcf;background:#fff;color:#333;border-radius:5px;height:36px;padding:0 15px}
-#pw-panel .btn:hover, #pw-root .btn:hover{border-color:#9d9d9d}
-#pw-panel .btn.primary, #pw-root .btn.primary{background:var(--danger);border-color:var(--danger);color:#fff;font-weight:600}
-#pw-panel .btn.primary:hover, #pw-root .btn.primary:hover{background:#a80d27}
-#pw-panel .btn.ghost, #pw-root .btn.ghost{border-color:transparent;background:transparent}
-#pw-panel .btn.danger, #pw-root .btn.danger{color:var(--danger);border-color:#e3b0b8;background:#fff7f8}
-#pw-panel .btn.small, #pw-root .btn.small{height:30px;padding:0 10px;font-size:12px}
-#pw-panel .filter, #pw-root .filter{background:#fff;border:1px solid var(--line);border-radius:7px;padding:18px 20px 15px;box-shadow:0 2px 8px rgba(0,0,0,.025)}
-#pw-panel .filter-grid, #pw-root .filter-grid{display:grid;grid-template-columns:1.5fr 1.5fr 1.2fr auto;gap:15px;align-items:end}
-#pw-panel .field label, #pw-root .field label{display:block;font-size:12px;color:#555;margin-bottom:7px}
-#pw-panel .required:after, #pw-root .required:after{content:' *';color:var(--danger)}
-#pw-panel .control, #pw-root .control{width:100%;height:36px;border:1px solid #d8d8d8;border-radius:5px;padding:0 11px;outline:none;background:#fff;color:#333}
-#pw-panel .control:focus, #pw-root .control:focus{border-color:var(--danger);box-shadow:0 0 0 2px rgba(200,16,46,.12)}
-#pw-panel .filter-actions, #pw-root .filter-actions{display:flex;gap:8px}
-#pw-panel .stats, #pw-root .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:18px 0}
-#pw-panel .stat, #pw-root .stat{background:#fff;border:1px solid var(--line);border-radius:7px;padding:18px 20px;position:relative;overflow:hidden}
-#pw-panel .stat:after, #pw-root .stat:after{content:'';position:absolute;right:0;top:0;width:4px;height:100%;background:var(--danger)}
-#pw-panel .stat:nth-child(2):after, #pw-root .stat:nth-child(2):after{background:#222}
-#pw-panel .stat:nth-child(3):after, #pw-root .stat:nth-child(3):after{background:#999}
-#pw-panel .stat span, #pw-root .stat span{color:var(--muted);font-size:12px}
-#pw-panel .stat strong, #pw-root .stat strong{display:block;font-size:27px;margin-top:9px}
-#pw-panel .table-card, #pw-root .table-card{background:#fff;border:1px solid var(--line);border-radius:7px;overflow:hidden}
-#pw-panel .table-head, #pw-root .table-head{padding:15px 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line)}
-#pw-panel .table-head strong, #pw-root .table-head strong{font-size:15px}
-#pw-panel .table-head span, #pw-root .table-head span{color:var(--muted);font-size:12px}
-#pw-panel .table-wrap, #pw-root .table-wrap{overflow:auto}
-#pw-panel table, #pw-root table{width:100%;border-collapse:collapse;min-width:1050px}
-#pw-panel th, #pw-root th{background:#fafafa;color:#666;font-size:12px;font-weight:600;text-align:left;height:42px;padding:0 15px;border-bottom:1px solid var(--line);white-space:nowrap}
-#pw-panel td, #pw-root td{padding:14px 15px;border-bottom:1px solid #eee;white-space:nowrap;vertical-align:middle}
-#pw-panel tbody tr:hover, #pw-root tbody tr:hover{background:#fffafa}
-#pw-panel .thumb, #pw-root .thumb{width:42px;height:42px;border:1px solid #ddd;border-radius:5px;background:linear-gradient(135deg,#eee,#c9c9c9);display:inline-flex;align-items:center;justify-content:center;color:#fff;font-size:11px}
-#pw-panel .thumb.red, #pw-root .thumb.red{background:linear-gradient(135deg,#b6112b,#241b1d)}
-#pw-panel .thumb.dark, #pw-root .thumb.dark{background:linear-gradient(135deg,#181818,#7a7a7a)}
-#pw-panel .link, #pw-root .link{color:var(--danger);font-weight:600;text-decoration:none}
-#pw-panel .sub, #pw-root .sub{display:block;color:var(--muted);font-size:11px;margin-top:4px}
-#pw-panel .tag, #pw-root .tag{display:inline-flex;align-items:center;padding:4px 8px;border-radius:4px;font-size:12px;border:1px solid transparent}
-#pw-panel .tag.gray, #pw-root .tag.gray{background:#f1f1f1;color:#555;border-color:#e4e4e4}
-#pw-panel .tag.red, #pw-root .tag.red{background:var(--danger-soft);color:var(--danger);border-color:#f2c1c8}
-#pw-panel .tag.green, #pw-root .tag.green{background:var(--success-soft);color:var(--success);border-color:#b9e7cc}
-#pw-panel .tag.orange, #pw-root .tag.orange{background:var(--warn-soft);color:var(--warn);border-color:#f1d19b}
-#pw-panel .pager, #pw-root .pager{padding:15px 18px;display:flex;justify-content:space-between;align-items:center;color:var(--muted);font-size:12px}
-#pw-panel .pages, #pw-root .pages{display:flex;gap:6px}
-#pw-panel .pages button, #pw-root .pages button{width:28px;height:28px;border:1px solid var(--line);background:#fff;border-radius:4px}
-#pw-panel .pages button.active, #pw-root .pages button.active{background:var(--ink);color:#fff;border-color:var(--ink)}
-#pw-panel .modal-backdrop, #pw-root .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.46);z-index:20;display:none;align-items:center;justify-content:center}
-#pw-panel .modal-backdrop.show, #pw-root .modal-backdrop.show{display:flex}
-#pw-panel .modal, #pw-root .modal{background:#fff;border-radius:8px;box-shadow:var(--shadow);width:min(1120px,calc(100vw - 60px));max-height:calc(100vh - 50px);overflow:auto}
-#pw-panel .modal-header, #pw-root .modal-header{height:62px;padding:0 26px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between}
-#pw-panel .modal-header h2, #pw-root .modal-header h2{font-size:18px;margin:0}
-#pw-panel .close, #pw-root .close{border:0;background:transparent;font-size:22px;color:#777}
-#pw-panel .modal-body, #pw-root .modal-body{padding:22px 26px}
-#pw-panel .modal-footer, #pw-root .modal-footer{padding:16px 26px;border-top:1px solid var(--line);display:flex;justify-content:flex-end;gap:10px}
-#pw-panel .stepper, #pw-root .stepper{display:flex;align-items:center;margin-bottom:24px}
-#pw-panel .step, #pw-root .step{display:flex;align-items:center;gap:8px;color:#888}
-#pw-panel .step .num, #pw-root .step .num{width:25px;height:25px;border-radius:50%;border:1px solid #bbb;display:inline-flex;align-items:center;justify-content:center;font-size:12px}
-#pw-panel .step.active, #pw-root .step.active{color:var(--ink);font-weight:600}
-#pw-panel .step.active .num, #pw-root .step.active .num{background:var(--danger);color:#fff;border-color:var(--danger)}
-#pw-panel .step.done .num, #pw-root .step.done .num{background:#222;color:#fff;border-color:#222}
-#pw-panel .step-line, #pw-root .step-line{width:58px;border-top:1px dashed #ccc;margin:0 12px}
-#pw-panel .section, #pw-root .section{border:1px solid var(--line);border-radius:6px;margin-bottom:15px}
-#pw-panel .section-title, #pw-root .section-title{padding:11px 14px;background:#fafafa;border-bottom:1px solid var(--line);font-weight:600;font-size:13px}
-#pw-panel .section-title:before, #pw-root .section-title:before{content:'';display:inline-block;width:3px;height:14px;background:var(--danger);vertical-align:-2px;margin-right:8px}
-#pw-panel .form-grid, #pw-root .form-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;padding:16px}
-#pw-panel .span-2, #pw-root .span-2{grid-column:span 2}
-#pw-panel .span-3, #pw-root .span-3{grid-column:span 3}
-#pw-panel .readonly, #pw-root .readonly{background:#f6f6f6;color:#777}
-#pw-panel .upload, #pw-root .upload{border:1px dashed #c9c9c9;border-radius:5px;min-height:84px;padding:12px;display:flex;gap:10px;align-items:center;background:#fcfcfc}
-#pw-panel .upload button, #pw-root .upload button{border:1px solid #ccc;background:#fff;border-radius:4px;height:30px;padding:0 11px}
-#pw-panel .upload em, #pw-root .upload em{font-style:normal;color:#888;font-size:12px}
-#pw-panel .help, #pw-root .help{color:#999;font-size:12px;margin-left:4px}
-#pw-panel .notice, #pw-root .notice{padding:11px 13px;background:#fff8e9;border:1px solid #f1d7a4;border-radius:5px;color:#7b5600;font-size:12px}
-#pw-panel .detail, #pw-root .detail{display:grid;grid-template-columns:1.25fr .75fr;gap:18px}
-#pw-panel .detail-card, #pw-root .detail-card{background:#fff;border:1px solid var(--line);border-radius:7px;overflow:hidden}
-#pw-panel .detail-card h3, #pw-root .detail-card h3{font-size:15px;margin:0;padding:16px 18px;border-bottom:1px solid var(--line)}
-#pw-panel .detail-body, #pw-root .detail-body{padding:18px}
-#pw-panel .kv, #pw-root .kv{display:grid;grid-template-columns:repeat(3,1fr);gap:15px 20px}
-#pw-panel .kv-item label, #pw-root .kv-item label{display:block;color:#888;font-size:12px;margin-bottom:5px}
-#pw-panel .kv-item strong, #pw-root .kv-item strong{font-weight:500}
-#pw-panel .evidence, #pw-root .evidence{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-#pw-panel .evidence-card, #pw-root .evidence-card{border:1px solid var(--line);border-radius:5px;padding:13px}
-#pw-panel .evidence-card h4, #pw-root .evidence-card h4{margin:0 0 9px;font-size:13px}
-#pw-panel .evidence-card p, #pw-root .evidence-card p{color:#666;font-size:12px;line-height:1.7;margin:0}
-#pw-panel .evidence-card .result, #pw-root .evidence-card .result{margin-bottom:8px}
-#pw-panel .timeline, #pw-root .timeline{position:relative;padding-left:23px}
-#pw-panel .timeline:before, #pw-root .timeline:before{content:'';position:absolute;left:5px;top:4px;bottom:4px;border-left:1px solid #ddd}
-#pw-panel .event, #pw-root .event{position:relative;margin-bottom:21px}
-#pw-panel .event:before, #pw-root .event:before{content:'';position:absolute;left:-22px;top:3px;width:9px;height:9px;border-radius:50%;background:#aaa;border:2px solid #fff;box-shadow:0 0 0 1px #aaa}
-#pw-panel .event.current:before, #pw-root .event.current:before{background:var(--danger);box-shadow:0 0 0 1px var(--danger)}
-#pw-panel .event strong, #pw-root .event strong{display:block;font-size:13px}
-#pw-panel .event small, #pw-root .event small{color:#999}
-#pw-panel .event p, #pw-root .event p{margin:6px 0 0;color:#666;font-size:12px}
-#pw-panel .columns-menu, #pw-root .columns-menu{position:absolute;right:18px;top:56px;background:#fff;border:1px solid var(--line);box-shadow:var(--shadow);border-radius:6px;padding:14px;width:210px;z-index:5;display:none}
-#pw-panel .columns-menu.show, #pw-root .columns-menu.show{display:block}
-#pw-panel .columns-menu label, #pw-root .columns-menu label{display:flex;gap:8px;align-items:center;margin:9px 0;font-size:12px}
-#pw-panel .toast, #pw-root .toast{position:fixed;right:28px;bottom:28px;background:#222;color:#fff;padding:12px 17px;border-radius:5px;box-shadow:var(--shadow);z-index:40;display:none}
-#pw-panel .toast.show, #pw-root .toast.show{display:block;animation:fade 2.6s both}
-@media(max-width:960px){#pw-panel .content, #pw-root .content{padding:20px}#pw-panel .filter-grid, #pw-root .filter-grid{grid-template-columns:1fr 1fr}#pw-panel .detail, #pw-root .detail{grid-template-columns:1fr}#pw-panel .form-grid, #pw-root .form-grid{grid-template-columns:1fr 1fr}#pw-panel .span-3, #pw-root .span-3{grid-column:span 2}}
-#pw-root .toast,#pw-panel .toast{position:fixed;right:22px;bottom:22px;background:#171717;color:#fff;padding:12px 16px;border-radius:6px;display:none;z-index:50}
-#pw-root .toast.show,#pw-panel .toast.show{display:block;animation:fade 2.6s both}
-/* === Insight / 热词看板 CSS === */
-
 /* globals.css */
 :root {
   --brand-red-1: #fff1f1;
@@ -360,8 +165,24 @@ button:disabled {
 }
 
 
+/* === D02 商品提报 overlay (2026-09-09) === */
+#pw-panel.module-main {
+  display: none;
+  padding: 0;
+  background: #f4f4f4;
+}
+#pw-panel.active { display: block; }
+#module-view.pw-hidden { display: none !important; }
+#pw-root .modal-backdrop { z-index: 80; }
+#pw-root .toast { z-index: 90; }
+#pw-panel .content { padding: 8px 24px 40px; max-width: 1600px; }
 
 
+
+#pw-panel *, #pw-root *{box-sizing:border-box}#pw-panel button, #pw-root button, #pw-panel input, #pw-root input, #pw-panel select, #pw-root select, #pw-panel textarea, #pw-root textarea{font:inherit}#pw-panel button, #pw-root button{cursor:pointer}#pw-panel .app, #pw-root .app{min-height:100vh;display:flex}#pw-panel .side, #pw-root .side{width:232px;background:#141414;color:#fff;display:flex;flex-direction:column}#pw-panel .brand, #pw-root .brand{height:70px;padding:20px 22px;border-bottom:1px solid #343434;font-weight:700;letter-spacing:.5px}#pw-panel .brand b, #pw-root .brand b{display:inline-flex;width:27px;height:27px;background:var(--danger);align-items:center;justify-content:center;margin-right:10px;font-size:15px}#pw-panel .nav, #pw-root .nav{padding:20px 12px}#pw-panel .nav-label, #pw-root .nav-label{font-size:11px;color:#8f8f8f;padding:0 12px 10px}#pw-panel .nav a, #pw-root .nav a{display:flex;align-items:center;gap:11px;padding:12px;border-radius:6px;color:#cfcfcf;text-decoration:none;margin:3px 0}#pw-panel .nav a.active, #pw-root .nav a.active{background:#2a2a2a;color:#fff;border-left:3px solid var(--danger);padding-left:9px}#pw-panel .nav i, #pw-root .nav i{width:18px;text-align:center;color:#aaa;font-style:normal}#pw-panel .user, #pw-root .user{margin-top:auto;padding:16px;border-top:1px solid #343434;color:#ccc;font-size:12px}#pw-panel .avatar, #pw-root .avatar{display:inline-flex;width:28px;height:28px;border-radius:50%;background:#fff;color:#222;align-items:center;justify-content:center;font-weight:700;margin-right:8px}#pw-panel .main, #pw-root .main{flex:1;min-width:0}#pw-panel .top, #pw-root .top{height:70px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 30px}#pw-panel .crumb, #pw-root .crumb{color:var(--muted);font-size:13px}#pw-panel .crumb strong, #pw-root .crumb strong{color:var(--ink);font-weight:600}#pw-panel .top-right, #pw-root .top-right{display:flex;align-items:center;gap:18px;color:var(--muted)}#pw-panel .top-right .bell, #pw-root .top-right .bell{font-size:18px}#pw-panel .content, #pw-root .content{padding:26px 30px 50px;max-width:1600px;margin:auto}#pw-panel .page-title, #pw-root .page-title{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:22px}#pw-panel .page-title h1, #pw-root .page-title h1{font-size:25px;margin:0 0 7px;letter-spacing:-.4px}#pw-panel .page-title p, #pw-root .page-title p{margin:0;color:var(--muted)}#pw-panel .actions, #pw-root .actions{display:flex;gap:10px}#pw-panel .btn, #pw-root .btn{border:1px solid #cfcfcf;background:#fff;color:#333;border-radius:5px;height:36px;padding:0 15px}#pw-panel .btn:hover, #pw-root .btn:hover{border-color:#9d9d9d}#pw-panel .btn.primary, #pw-root .btn.primary{background:var(--danger);border-color:var(--danger);color:#fff;font-weight:600}#pw-panel .btn.primary:hover, #pw-root .btn.primary:hover{background:#a80d27}#pw-panel .btn.ghost, #pw-root .btn.ghost{border-color:transparent;background:transparent}#pw-panel .btn.danger, #pw-root .btn.danger{color:var(--danger);border-color:#e3b0b8;background:#fff7f8}#pw-panel .btn.small, #pw-root .btn.small{height:30px;padding:0 10px;font-size:12px}#pw-panel .filter, #pw-root .filter{background:#fff;border:1px solid var(--line);border-radius:7px;padding:18px 20px 15px;box-shadow:0 2px 8px rgba(0,0,0,.025)}#pw-panel .filter-grid, #pw-root .filter-grid{display:grid;grid-template-columns:1.5fr 1.5fr 1.2fr auto;gap:15px;align-items:end}#pw-panel .field label, #pw-root .field label{display:block;font-size:12px;color:#555;margin-bottom:7px}#pw-panel .required:after, #pw-root .required:after{content:' *';color:var(--danger)}#pw-panel .control, #pw-root .control{width:100%;height:36px;border:1px solid #d8d8d8;border-radius:5px;padding:0 11px;outline:none;background:#fff;color:#333}#pw-panel .control:focus, #pw-root .control:focus{border-color:var(--danger);box-shadow:0 0 0 2px rgba(200,16,46,.12)}#pw-panel .filter-actions, #pw-root .filter-actions{display:flex;gap:8px}#pw-panel .stats, #pw-root .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:18px 0}#pw-panel .stat, #pw-root .stat{background:#fff;border:1px solid var(--line);border-radius:7px;padding:18px 20px;position:relative;overflow:hidden}#pw-panel .stat:after, #pw-root .stat:after{content:'';position:absolute;right:0;top:0;width:4px;height:100%;background:var(--danger)}#pw-panel .stat:nth-child(2):after, #pw-root .stat:nth-child(2):after{background:#222}#pw-panel .stat:nth-child(3):after, #pw-root .stat:nth-child(3):after{background:#999}#pw-panel .stat span, #pw-root .stat span{color:var(--muted);font-size:12px}#pw-panel .stat strong, #pw-root .stat strong{display:block;font-size:27px;margin-top:9px}#pw-panel .table-card, #pw-root .table-card{background:#fff;border:1px solid var(--line);border-radius:7px;overflow:hidden}#pw-panel .table-head, #pw-root .table-head{padding:15px 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line)}#pw-panel .table-head strong, #pw-root .table-head strong{font-size:15px}#pw-panel .table-head span, #pw-root .table-head span{color:var(--muted);font-size:12px}#pw-panel .table-wrap, #pw-root .table-wrap{overflow:auto}#pw-panel table, #pw-root table{width:100%;border-collapse:collapse;min-width:1050px}#pw-panel th, #pw-root th{background:#fafafa;color:#666;font-size:12px;font-weight:600;text-align:left;height:42px;padding:0 15px;border-bottom:1px solid var(--line);white-space:nowrap}#pw-panel td, #pw-root td{padding:14px 15px;border-bottom:1px solid #eee;white-space:nowrap;vertical-align:middle}#pw-panel tbody tr:hover, #pw-root tbody tr:hover{background:#fffafa}#pw-panel .thumb, #pw-root .thumb{width:42px;height:42px;border:1px solid #ddd;border-radius:5px;background:linear-gradient(135deg,#eee,#c9c9c9);display:inline-flex;align-items:center;justify-content:center;color:#fff;font-size:11px}#pw-panel .thumb.red, #pw-root .thumb.red{background:linear-gradient(135deg,#b6112b,#241b1d)}#pw-panel .thumb.dark, #pw-root .thumb.dark{background:linear-gradient(135deg,#181818,#7a7a7a)}#pw-panel .link, #pw-root .link{color:var(--danger);font-weight:600;text-decoration:none}#pw-panel .sub, #pw-root .sub{display:block;color:var(--muted);font-size:11px;margin-top:4px}#pw-panel .tag, #pw-root .tag{display:inline-flex;align-items:center;padding:4px 8px;border-radius:4px;font-size:12px;border:1px solid transparent}#pw-panel .tag.gray, #pw-root .tag.gray{background:#f1f1f1;color:#555;border-color:#e4e4e4}#pw-panel .tag.red, #pw-root .tag.red{background:var(--danger-soft);color:var(--danger);border-color:#f2c1c8}#pw-panel .tag.green, #pw-root .tag.green{background:var(--success-soft);color:var(--success);border-color:#b9e7cc}#pw-panel .tag.orange, #pw-root .tag.orange{background:var(--warn-soft);color:var(--warn);border-color:#f1d19b}#pw-panel .pager, #pw-root .pager{padding:15px 18px;display:flex;justify-content:space-between;align-items:center;color:var(--muted);font-size:12px}#pw-panel .pages, #pw-root .pages{display:flex;gap:6px}#pw-panel .pages button, #pw-root .pages button{width:28px;height:28px;border:1px solid var(--line);background:#fff;border-radius:4px}#pw-panel .pages button.active, #pw-root .pages button.active{background:var(--ink);color:#fff;border-color:var(--ink)}#pw-panel .modal-backdrop, #pw-root .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.46);z-index:20;display:none;align-items:center;justify-content:center}#pw-panel .modal-backdrop.show, #pw-root .modal-backdrop.show{display:flex}#pw-panel .modal, #pw-root .modal{background:#fff;border-radius:8px;box-shadow:var(--shadow);width:min(1120px,calc(100vw - 60px));max-height:calc(100vh - 50px);overflow:auto}#pw-panel .modal-header, #pw-root .modal-header{height:62px;padding:0 26px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between}#pw-panel .modal-header h2, #pw-root .modal-header h2{font-size:18px;margin:0}#pw-panel .close, #pw-root .close{border:0;background:transparent;font-size:22px;color:#777}#pw-panel .modal-body, #pw-root .modal-body{padding:22px 26px}#pw-panel .modal-footer, #pw-root .modal-footer{padding:16px 26px;border-top:1px solid var(--line);display:flex;justify-content:flex-end;gap:10px}#pw-panel .stepper, #pw-root .stepper{display:flex;align-items:center;margin-bottom:24px}#pw-panel .step, #pw-root .step{display:flex;align-items:center;gap:8px;color:#888}#pw-panel .step .num, #pw-root .step .num{width:25px;height:25px;border-radius:50%;border:1px solid #bbb;display:inline-flex;align-items:center;justify-content:center;font-size:12px}#pw-panel .step.active, #pw-root .step.active{color:var(--ink);font-weight:600}#pw-panel .step.active .num, #pw-root .step.active .num{background:var(--danger);color:#fff;border-color:var(--danger)}#pw-panel .step.done .num, #pw-root .step.done .num{background:#222;color:#fff;border-color:#222}#pw-panel .step-line, #pw-root .step-line{width:58px;border-top:1px dashed #ccc;margin:0 12px}#pw-panel .section, #pw-root .section{border:1px solid var(--line);border-radius:6px;margin-bottom:15px}#pw-panel .section-title, #pw-root .section-title{padding:11px 14px;background:#fafafa;border-bottom:1px solid var(--line);font-weight:600;font-size:13px}#pw-panel .section-title:before, #pw-root .section-title:before{content:'';display:inline-block;width:3px;height:14px;background:var(--danger);vertical-align:-2px;margin-right:8px}#pw-panel .form-grid, #pw-root .form-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;padding:16px}#pw-panel .span-2, #pw-root .span-2{grid-column:span 2}#pw-panel .span-3, #pw-root .span-3{grid-column:span 3}#pw-panel .readonly, #pw-root .readonly{background:#f6f6f6;color:#777}#pw-panel .upload, #pw-root .upload{border:1px dashed #c9c9c9;border-radius:5px;min-height:84px;padding:12px;display:flex;gap:10px;align-items:center;background:#fcfcfc}#pw-panel .upload button, #pw-root .upload button{border:1px solid #ccc;background:#fff;border-radius:4px;height:30px;padding:0 11px}#pw-panel .upload em, #pw-root .upload em{font-style:normal;color:#888;font-size:12px}#pw-panel .help, #pw-root .help{color:#999;font-size:12px;margin-left:4px}#pw-panel .notice, #pw-root .notice{padding:11px 13px;background:#fff8e9;border:1px solid #f1d7a4;border-radius:5px;color:#7b5600;font-size:12px}#pw-panel .detail, #pw-root .detail{display:grid;grid-template-columns:1.25fr .75fr;gap:18px}#pw-panel .detail-card, #pw-root .detail-card{background:#fff;border:1px solid var(--line);border-radius:7px;overflow:hidden}#pw-panel .detail-card h3, #pw-root .detail-card h3{font-size:15px;margin:0;padding:16px 18px;border-bottom:1px solid var(--line)}#pw-panel .detail-body, #pw-root .detail-body{padding:18px}#pw-panel .kv, #pw-root .kv{display:grid;grid-template-columns:repeat(3,1fr);gap:15px 20px}#pw-panel .kv-item label, #pw-root .kv-item label{display:block;color:#888;font-size:12px;margin-bottom:5px}#pw-panel .kv-item strong, #pw-root .kv-item strong{font-weight:500}#pw-panel .evidence, #pw-root .evidence{display:grid;grid-template-columns:1fr 1fr;gap:12px}#pw-panel .evidence-card, #pw-root .evidence-card{border:1px solid var(--line);border-radius:5px;padding:13px}#pw-panel .evidence-card h4, #pw-root .evidence-card h4{margin:0 0 9px;font-size:13px}#pw-panel .evidence-card p, #pw-root .evidence-card p{color:#666;font-size:12px;line-height:1.7;margin:0}#pw-panel .evidence-card .result, #pw-root .evidence-card .result{margin-bottom:8px}#pw-panel .timeline, #pw-root .timeline{position:relative;padding-left:23px}#pw-panel .timeline:before, #pw-root .timeline:before{content:'';position:absolute;left:5px;top:4px;bottom:4px;border-left:1px solid #ddd}#pw-panel .event, #pw-root .event{position:relative;margin-bottom:21px}#pw-panel .event:before, #pw-root .event:before{content:'';position:absolute;left:-22px;top:3px;width:9px;height:9px;border-radius:50%;background:#aaa;border:2px solid #fff;box-shadow:0 0 0 1px #aaa}#pw-panel .event.current:before, #pw-root .event.current:before{background:var(--danger);box-shadow:0 0 0 1px var(--danger)}#pw-panel .event strong, #pw-root .event strong{display:block;font-size:13px}#pw-panel .event small, #pw-root .event small{color:#999}#pw-panel .event p, #pw-root .event p{margin:6px 0 0;color:#666;font-size:12px}#pw-panel .columns-menu, #pw-root .columns-menu{position:absolute;right:18px;top:56px;background:#fff;border:1px solid var(--line);box-shadow:var(--shadow);border-radius:6px;padding:14px;width:210px;z-index:5;display:none}#pw-panel .columns-menu.show, #pw-root .columns-menu.show{display:block}#pw-panel .columns-menu label, #pw-root .columns-menu label{display:flex;gap:8px;align-items:center;margin:9px 0;font-size:12px}#pw-panel .toast, #pw-root .toast{position:fixed;right:28px;bottom:28px;background:#222;color:#fff;padding:12px 17px;border-radius:5px;box-shadow:var(--shadow);z-index:40;display:none}#pw-panel .toast.show, #pw-root .toast.show{display:block;animation:pw-fade 2.6s both}@keyframes pw-fade{0%,100%{opacity:0;transform:translateY(8px)}15%,80%{opacity:1;transform:none}}@media(max-width:960px){#pw-panel .side, #pw-root .side{width:66px}#pw-panel .brand, #pw-root .brand{padding:20px 17px}#pw-panel .brand span, #pw-root .brand span, #pw-panel .nav-label, #pw-root .nav-label, #pw-panel .nav a span, #pw-root .nav a span, #pw-panel .user div:last-child, #pw-root .user div:last-child{display:none}#pw-panel .nav a, #pw-root .nav a{justify-content:center}#pw-panel .content, #pw-root .content{padding:20px}#pw-panel .filter-grid, #pw-root .filter-grid{grid-template-columns:1fr 1fr}#pw-panel .detail, #pw-root .detail{grid-template-columns:1fr}#pw-panel .form-grid, #pw-root .form-grid{grid-template-columns:1fr 1fr}#pw-panel .span-3, #pw-root .span-3{grid-column:span 2}}
+
+</style>
+  <style>
 /* editor.css */
 .app-shell {
   min-height: 100vh;
@@ -2349,9 +2170,8 @@ button:disabled {
   }
 }
 
-
-
-
+</style>
+  <style>
 /* module.css */
 .module-shell {
   --module-red: #d71920;
@@ -5413,240 +5233,62 @@ button:disabled {
 .profile-head{display:flex;align-items:center;gap:16px;padding:14px 0 4px}.profile-head h3{margin:0 0 4px}.profile-head p{margin:0 0 8px;color:#777;font-size:13px}
 .profile-assets{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.profile-assets>div{padding:16px;border:1px solid #e6e6e6;border-radius:10px;background:#fafafa}.profile-assets strong{display:block;font-size:24px}.profile-assets span{color:#777;font-size:12px}
 
-
-/* === Dual-panel embed + Zippo shell overlays === */
-.d02-app-shell { display: flex !important; height: calc(100vh - var(--header-h) - 4px) !important; min-height: 0 !important; overflow: hidden !important; background: var(--color-bg-page); }
-.module-shell { display: contents; }
-.sidebar.module-sidebar, .module-topbar, .app-shell > .sidebar { display: none !important; }
-.module-page-shell { margin-left: 0 !important; min-height: 0; flex: 1; display: flex; flex-direction: column; min-width: 0; }
-.module-main { flex: 1; overflow: auto; padding: 24px; }
-#insight-panel { display: none; flex: 1; flex-direction: column; min-height: 0; min-width: 0; overflow: hidden; }
-#insight-panel.active { display: flex; }
-#pw-panel { display: none; flex: 1; overflow: auto; padding: 24px; background: var(--color-bg-page); }
-#pw-panel.active { display: block; }
-.d02-main-region { flex: 1; display: flex; flex-direction: column; min-width: 0; overflow: hidden; background: var(--color-bg-page); }
-.d02-page-breadcrumb { padding: 0 0 16px; font-size: 13px; color: var(--color-ink-tertiary); }
-.d02-page-breadcrumb strong { color: var(--color-ink); font-weight: 600; }
-.d02-page-breadcrumb b { margin: 0 6px; color: var(--color-line); font-weight: 400; }
-#pw-root .toast { position: fixed; right: 28px; bottom: 28px; z-index: 80; }
-#pw-root .modal-backdrop { z-index: 70; }
-.module-dialog { z-index: 80; }
-#pw-panel .pager select.control { min-width: 64px; }
-
-  
-    /* body 纵向壳：顶栏固定，下方 zippo-body 占满剩余高度 */
-    body.overflow-hidden, body.zippo-fixed, body.d06-shell {
-      display: flex !important; flex-direction: column !important; height: 100vh !important; margin: 0;
-    }
-    body > header, body > .brand-stripe, body > .h-1.brand-stripe, body > div.h-1 {
-      flex: 0 0 auto !important;
-    }
-    .zippo-body { flex: 1 1 auto !important; min-height: 0 !important; height: auto !important; }
-    main.zippo-main, .zippo-main {
-      flex: 1 1 auto !important; min-width: 0 !important; min-height: 0 !important;
-      overflow-y: auto !important;
-    }
-
-
-html,body{height:100%;overflow:hidden;margin:0}
-.d02-app-shell{height:calc(100vh - 60px)!important;overflow:hidden}
-.d02-app-shell .proto-main, .d02-app-shell > main, #pw-root .content-host{overflow-y:auto;min-height:0;flex:1}
-
-
-
-
-/* ZIPPO_NAV_HIERARCHY_V3 */
-details.nav-group { margin: 0 0 6px; border: 0; }
-details.nav-group > summary.nav-l1 {
-  list-style: none; cursor: pointer; user-select: none;
-  display: flex; align-items: center; justify-content: space-between; gap: 8px;
-  min-height: 40px; padding: 0 12px; margin: 0; border-radius: 4px;
-  font-size: 13px !important; font-weight: 600 !important; line-height: 1.2;
-  color: #FFFFFF !important; letter-spacing: 0 !important; text-transform: none !important;
-  background: transparent;
-}
-details.nav-group > summary.nav-l1::-webkit-details-marker { display: none; }
-details.nav-group > summary.nav-l1 .nav-chev {
-  font-size: 10px; color: rgba(255,255,255,.7); transition: transform .15s;
-}
-details.nav-group:not([open]) > summary.nav-l1 .nav-chev { transform: rotate(-90deg); }
-details.nav-group > summary.nav-l1:hover { background: #2d2d2d; }
-.nav-l2-wrap { display: flex; flex-direction: column; gap: 2px; padding: 2px 0 6px; }
-.nav-l2-wrap .proto-nav-item,
-.nav-l2-wrap > button,
-.nav-l2-wrap .nav-item,
-aside .nav-l2-wrap button {
-  font-size: 13px !important;
-  color: #E8E8E8 !important;
-  min-height: 40px;
-}
-/* dark sidebar contrast: kill low-contrast tertiary / selected white block */
-aside.proto-sidebar, aside.sidebar, aside.module-sidebar, .proto-sidebar {
-  color: #E8E8E8 !important;
-}
-aside.proto-sidebar .text-ink-secondary,
-aside.proto-sidebar .text-ink-tertiary,
-aside.proto-sidebar .text-ink,
-aside .nav-label {
-  color: #E8E8E8 !important;
-}
-aside.proto-sidebar button.text-ink-secondary,
-aside.proto-sidebar a.text-ink-secondary {
-  color: #E8E8E8 !important;
-}
-aside.proto-sidebar .bg-\[\#F5F5F5\],
-aside.proto-sidebar button.bg-\[\#F5F5F5\] {
-  background: #2d2d2d !important;
-  color: #FFFFFF !important;
-}
-aside.proto-sidebar .hover\:bg-fill:hover,
-aside.proto-sidebar button:hover {
-  background: #2d2d2d !important;
-  color: #FFFFFF !important;
-}
-/* L1 labels that are not yet details */
-.nav-label, .proto-nav-group, .proto-sidebar-title {
-  font-size: 13px !important;
-  font-weight: 600 !important;
-  color: #FFFFFF !important;
-  letter-spacing: 0 !important;
-  text-transform: none !important;
-}
-.proto-nav-item, .nav button, aside .nav button {
-  color: #E8E8E8 !important;
-  font-size: 13px !important;
-}
-.proto-nav-item.active, .nav button.active {
-  color: #FFFFFF !important;
-}
-/* hide sidebar bottom notes / brand footnotes */
-.sidebar-note, .sidebar-foot, .sidebar-footer,
-aside .zippo-sidebar-note,
-aside nav > .mt-6.px-3.py-3.rounded-lg {
-  display: none !important;
-}
-
-/* ZIPPO_NAV_SPACING_V2 */
-.nav, .proto-sidebar-nav, aside .nav, .sidebar .nav {
-  gap: 4px !important;
-}
-.proto-nav-item, .nav button, .nav-item, .side-nav a, .menu-item {
-  min-height: 40px !important;
-  height: auto !important;
-  max-height: none !important;
-  padding-top: 8px !important;
-  padding-bottom: 8px !important;
-  box-sizing: border-box !important;
-  flex-shrink: 0 !important;
-}
-.nav-label, .proto-sidebar-title .label {
-  padding-top: 10px !important;
-  padding-bottom: 4px !important;
-}
-
-/* ZIPPO_GLOBAL_SHELL_V2 */
-.card.has-table { display:flex; flex-direction:column; min-height:0; }
-.card.has-table > .table-wrap { flex:1 1 auto; min-height:0; overflow:auto; }
-.card > .pager, .card > .pager.pagination, .pager.zippo-pager-sticky {
-  position:sticky; bottom:0; z-index:5; flex-shrink:0;
-  background:#fff; border-top:1px solid #EBEBEB; margin-top:0;
-  box-shadow:0 -4px 12px rgba(0,0,0,.04);
-}
-.sidebar-foot, .sidebar-footer { display:none !important; }
-.zippo-user-menu { position:relative; display:inline-flex; }
-.zippo-user-menu-panel {
-  display:none; position:absolute; right:0; top:calc(100% + 6px); min-width:128px;
-  background:#fff; color:#0A0A0A; border:1px solid #EBEBEB; border-radius:6px;
-  box-shadow:0 8px 24px rgba(0,0,0,.12); padding:4px; z-index:80;
-}
-.zippo-user-menu.open .zippo-user-menu-panel { display:block; }
-.zippo-user-menu-panel button {
-  display:block; width:100%; text-align:left; border:0; background:transparent;
-  padding:8px 10px; font-size:13px; border-radius:4px; cursor:pointer; color:#0A0A0A;
-}
-.zippo-user-menu-panel button:hover { background:#F5F5F5; }
-
-
 </style>
 </head>
 <body>
-<header class="d02-header">
-    <div class="d02-header-inner">
-      <div class="d02-logo">
-        <span class="d02-logo-text">ZIPPO</span>
+  <div class="app-shell module-shell">
+    <aside class="sidebar module-sidebar" aria-label="选品中心主导航">
+      <div class="brand-block">
+        <div class="brand-mark">AI</div>
+        <div><strong>AI-PIM</strong><span>选品中心</span></div>
       </div>
-      <nav id="open-tabs" style="display:flex;align-items:center;gap:2px;overflow-x:auto;flex:1;min-width:0" aria-label="已打开页面"></nav>
-      <div class="d02-header-actions">
-        <select class="d02-role" id="d02-role" title="当前角色" aria-label="角色">
-          <option value="dealer">经销商运营</option>
-          <option value="npi">NPI 商品专员</option>
-          <option value="pw">PW 项目负责人</option>
-          <option value="designer">品牌设计师</option>
-        </select>
-        <button type="button" class="d02-icon-btn" id="d02-bell" title="通知" aria-label="通知" style="position:relative"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg><span class="zippo-notify-dot" style="position:absolute;top:6px;right:6px;width:6px;height:6px;border-radius:50%;background:#C8102E"></span></button>
-        <div class="d02-avatar" title="陈晓雯">陈</div>
-      </div>
-    </div>
-  </header>
-  <div class="brand-stripe"></div>
 
-  <div class="d02-app-shell">
-    <aside class="proto-sidebar" id="d02-sidebar">
-      <nav style="padding:12px 8px">
-        <details class="nav-group" open>
-          <summary class="nav-l1">选品中心·提报<span class="nav-chev">›</span></summary>
-          <div class="nav-l2-wrap">
-            <button type="button" class="proto-nav-item" data-shell-route="pw" data-pw-view="list">
-              <span class="ui-icon">📋</span><span>提报管理</span>
-            </button>
-            <button type="button" class="proto-nav-item" data-shell-route="pw" data-pw-view="pool">
-              <span class="ui-icon">🗂</span><span>商品池协同</span>
-            </button>
-          </div>
-        </details>
-        <details class="nav-group" open>
-          <summary class="nav-l1">数据洞察<span class="nav-chev">›</span></summary>
-          <div class="nav-l2-wrap">
-            <button type="button" class="proto-nav-item" data-shell-route="insight" data-insight-route="dashboard">
-              <span class="ui-icon">🔥</span><span>热点工作台</span>
-            </button>
-            <button type="button" class="proto-nav-item" data-shell-route="insight" data-insight-route="collection">
-              <span class="ui-icon">⭐</span><span>采集与关注</span>
-            </button>
-            <button type="button" class="proto-nav-item" data-shell-route="insight" data-insight-route="trends">
-              <span class="ui-icon">📈</span><span>趋势洞察</span>
-            </button>
-          </div>
-        </details>
-        <details class="nav-group" open>
-          <summary class="nav-l1">设计转化<span class="nav-chev">›</span></summary>
-          <div class="nav-l2-wrap">
-            <button type="button" class="proto-nav-item" data-shell-route="insight" data-insight-route="inspirations">
-              <span class="ui-icon">✨</span><span>灵感库</span>
-            </button>
-            <button type="button" class="proto-nav-item" data-shell-route="insight" data-insight-route="studio">
-              <span class="ui-icon">🎨</span><span>灵感工作室</span>
-            </button>
-            <button type="button" class="proto-nav-item" data-shell-route="insight" data-insight-route="designs">
-              <span class="ui-icon">🖼</span><span>我的设计稿</span>
-            </button>
-          </div>
-        </details>
-        <nav id="d02-insight-nav" hidden></nav>
-        <nav id="module-nav" hidden aria-hidden="true"></nav>
+      <div class="module-identity">
+        <span class="module-identity__icon">◈</span>
+        <div><strong>热点设计洞察</strong><small>从热点到可落地设计</small></div>
+      </div>
+
+      <nav id="module-nav">
+        <p>商品提报</p>
+        <button class="nav-item" type="button" data-pw-view="list"><span class="ui-icon">▤</span><span>商品提报</span></button>
+        <button class="nav-item" type="button" data-pw-view="pool"><span class="ui-icon">◒</span><span>商品池协同</span></button>
+        <p>数据洞察</p>
+        <button class="nav-item" type="button" data-route="dashboard"><span class="ui-icon">▦</span><span>热点工作台</span><em class="nav-count">12</em></button>
+        <button class="nav-item" type="button" data-route="collection"><span class="ui-icon">⌁</span><span>采集与关注</span></button>
+        <button class="nav-item" type="button" data-route="trends"><span class="ui-icon">↗</span><span>趋势洞察</span></button>
+        <p>设计转化</p>
+        <button class="nav-item" type="button" data-route="inspirations"><span class="ui-icon">◇</span><span>灵感卡</span><em class="nav-count muted">8</em></button>
+        <button class="nav-item" type="button" data-route="studio"><span class="ui-icon">✦</span><span>设计生成</span></button>
+        <button class="nav-item" type="button" data-route="designs"><span class="ui-icon">▣</span><span>我的设计稿</span><em class="nav-count muted">6</em></button>
+        <p>系统管理</p>
+        <button class="nav-item" type="button" data-route="strategy" data-permission="group-admin"><span class="ui-icon">⚙</span><span>筛选与评分策略</span></button>
+        <button class="nav-item" type="button" data-route="usage" data-permission="group-admin"><span class="ui-icon">◫</span><span>AI 使用量</span></button>
+        <button class="nav-item" type="button" data-route="profile"><span class="ui-icon">◎</span><span>个人中心</span></button>
       </nav>
+
+      <div class="sidebar-footer">
+        <span class="avatar">林</span>
+        <div><strong>设计师小林</strong><small>品牌设计部</small></div>
+        <button class="sidebar-more" type="button" data-action="role-menu" aria-label="切换角色视角">···</button>
+      </div>
     </aside>
-    <div class="d02-main-region">
-      <div id="pw-panel">
-        <div class="d02-page-breadcrumb" id="pw-breadcrumb">选品中心 <b>/</b> <strong>提报管理</strong></div>
-        <section id="pw-app-content"></section>
-      </div>
-      <div id="insight-panel" class="module-shell">
-        <div class="page-shell module-page-shell">
-          <div class="d02-page-breadcrumb breadcrumb" id="insight-breadcrumb"><span>选品中心</span><b>/</b><strong>热点工作台</strong></div>
-          <main class="module-main" id="module-view" tabindex="-1" aria-live="polite"></main>
+
+    <div class="page-shell module-page-shell">
+      <header class="topbar module-topbar">
+        <div class="breadcrumb" id="breadcrumb"><span>选品中心</span><b>/</b><strong>热点工作台</strong></div>
+        <div class="topbar-actions">
+          <label class="global-search" aria-label="搜索热点、灵感或设计包"><span>⌕</span><input id="global-search" type="search" placeholder="搜索热点、灵感、设计包"><kbd>⌘ K</kbd></label>
+          <span class="prototype-tag">高保真交互原型 · 示例数据</span>
+          <button class="icon-button" type="button" data-action="help" aria-label="查看帮助">?</button>
+          <button class="icon-button notification-button" type="button" data-action="notifications" aria-label="查看消息">♢<i></i></button>
         </div>
-      </div>
+      </header>
+
+      <main class="module-main" id="module-view" tabindex="-1" aria-live="polite"></main>
+      <section class="module-main" id="pw-panel" aria-label="商品提报">
+        <section class="content" id="pw-app-content"></section>
+      </section>
+
     </div>
   </div>
 
@@ -5656,109 +5298,21 @@ aside nav > .mt-6.px-3.py-3.rounded-lg {
 <div class="modal-backdrop" id="sku-confirm-modal"><div class="modal" style="width:520px"><div class="modal-header"><h2>确认 SKU 商品编码</h2><button class="close" onclick="closeModal('sku-confirm-modal')">×</button></div><div class="modal-body"><div class="notice"><strong>请确认编码无误</strong><br>该编码将用于校验经销商自由主档中的已上市商品。确认后系统将查询主档商品数据库，校验通过后才会提交提报。</div><div style="margin-top:18px;padding:15px;background:#f7f7f7;border-radius:5px"><span style="color:#777;font-size:12px">SKU 商品编码</span><strong id="confirm-sku" style="display:block;font-size:20px;margin-top:7px;letter-spacing:.5px"></strong></div></div><div class="modal-footer"><button class="btn" onclick="closeModal('sku-confirm-modal')">返回修改</button><button class="btn primary" onclick="confirmSkuSubmit()">确认并校验</button></div></div></div>
 <div class="modal-backdrop" id="detail-modal"><div class="modal" style="width:min(1240px,calc(100vw - 50px))"><div class="modal-header"><h2>提报详情 · PW20260803018</h2><button class="close" onclick="closeModal('detail-modal')">×</button></div><div class="modal-body" id="detail-body"></div><div class="modal-footer"><button class="btn" onclick="closeModal('detail-modal')">关闭</button></div></div></div>
 <div class="modal-backdrop" id="copyright-transfer-modal"><div class="modal" style="width:620px"><div class="modal-header"><h2>版权转让申请</h2><button class="close" onclick="closeModal('copyright-transfer-modal')">×</button></div><div class="modal-body"><div class="notice">提交后由版权转让审批人审核。审核同意后，系统将在计划生效时间更新主数据版权方。</div><div class="section" style="margin-top:16px"><div class="section-title">转让信息</div><div class="form-grid" style="grid-template-columns:1fr 1fr"><div class="field"><label>当前版权方</label><input class="control readonly" id="transfer-from" readonly></div><div class="field"><label>转让至</label><input class="control readonly" id="transfer-to" value="品牌方" readonly></div><div class="field"><label class="required">是否有合同（一页纸/老款）</label><select class="control" id="transfer-contract"><option>是</option><option>否</option></select></div><div class="field"><label class="required">计划版权转让生效时间</label><input class="control" id="transfer-effective-at" type="datetime-local" value="2026-09-30T10:00"></div><div class="field span-2"><label class="required">版权转让合同</label><div class="upload"><button type="button" onclick="showToast('已选择合同文件（演示）')">＋ 上传合同</button><em>支持图片、PDF；提交申请时必填</em></div></div><div class="field span-2"><label>转让说明</label><textarea class="control" id="transfer-reason" style="height:76px;padding-top:9px" placeholder="请输入版权转让说明"></textarea></div></div></div><div class="section"><div class="section-title">主数据更新说明</div><div class="detail-body" style="padding:14px"><p style="margin:0;color:#666;font-size:12px;line-height:1.8">审核同意后，系统按计划生效时间调用主数据接口，将版权方更新为品牌方。更新成功后通知提报人，并提醒 NPI 商品专员进行商品变更复核。</p></div></div></div><div class="modal-footer"><button class="btn" onclick="closeModal('copyright-transfer-modal')">取消</button><button class="btn primary" onclick="submitCopyrightTransfer()">提交审核</button></div></div></div>
-    <div class="toast" id="pw-toast"></div>
-  </div>
+<div class="toast" id="pw-toast"></div>
+</div>
+
   <dialog class="module-dialog" id="module-dialog" aria-labelledby="dialog-title">
     <div class="module-dialog__header">
-      <div><span class="dialog-eyebrow" id="dialog-eyebrow">操作</span><h2 id="dialog-title">查看详情</h2></div>
+      <div><span class="dialog-eyebrow" id="dialog-eyebrow">详情</span><h2 id="dialog-title">查看详情</h2></div>
       <button class="icon-button" type="button" data-action="close-dialog" aria-label="关闭">×</button>
     </div>
     <div class="module-dialog__body" id="dialog-body"></div>
     <div class="module-dialog__footer" id="dialog-footer"></div>
   </dialog>
-  <div class="toast module-toast" id="insight-toast" role="status" aria-live="polite"><span class="toast-icon">✓</span><span id="toast-copy"></span></div>
+
+  <div class="toast module-toast" id="toast" role="status" aria-live="polite"><span class="toast-icon">✓</span><span id="toast-copy"></span></div>
 
   <script>
-
-const rows=[{no:'PW20260823102400123',name:'曜石龙纹系列',code:'LSD-00402',time:'2026-08-23 10:24',update:'2026-08-23 10:26',status:'审批中',node:'法务初审',thumb:'red'},{no:'PW20260822160800234',name:'黑曜火焰图案',code:'-',time:'2026-08-22 16:08',update:'2026-08-22 16:08',status:'草稿',node:'-',thumb:'dark'},{no:'PW20260821093200345',name:'城市夜行者',code:'LSE-00388',time:'2026-08-21 09:32',update:'2026-08-22 09:15',status:'已创主档',node:'终级审批',thumb:''},{no:'PW20260820110500456',name:'复古徽章限定款',code:'-',time:'2026-08-20 11:05',update:'2026-08-21 18:20',status:'审批结束',node:'未通过',thumb:'dark'}];
-const requestedView=new URLSearchParams(location.search).get('view');let currentView=['pool','form','detail'].includes(requestedView)?requestedView:'list';let formMode='new';let submissionRole='dealer';
-function navigateView(view){if(view==='approval')view='list';currentView=view;const url=new URL(location.href);url.search=view==='list'?'':'?view='+view;url.hash='';history.pushState({view},'',url);closeModal('detail-modal');closeModal('form-modal');closeModal('sku-confirm-modal');if(document.getElementById('copyright-transfer-modal'))closeModal('copyright-transfer-modal');if(window.D02Shell){const map={list:['pw-list','提报管理'],pool:['pw-pool','商品池协同'],form:['pw-list','提报管理'],detail:['pw-list','提报管理']};const m=map[view]||map.list;window.D02Shell.openPwTab(m[0],m[1],view);}else{render();}}
-window.addEventListener('popstate',()=>{const view=new URLSearchParams(location.search).get('view');currentView=['pool','form','detail'].includes(view)?view:'list';render()});
-function statusTag(s){const c=s==='审批中'?'red':(s==='审批结束'||s==='已创主档')?'green':s==='草稿'?'gray':'orange';return `<span class="tag ${c}">${s}</span>`}
-function render(){if(currentView==='form'){openForm();return}if(currentView==='detail'){openDetail();return}if(currentView==='approval'){renderApproval();return}if(currentView==='pool'){renderPool();return}renderList()}
-const poolRows=[{id:'P001',no:'PW20260818102000123',name:'星影鎏金',pool:'未选中',refs:[],submit:'2026-08-18 10:20',update:'2026-08-19 09:15',approval:'审批结束（通过）',type:'LSD（新品）',material:'LSD-00402',sku:'未创建',push:'未推送',source:'华东经销商',org:'华东经销商',process:'电镀 + 激光雕刻',base:'205/207',listed:'否',blackBox:'是',sample:false,order:false,sampleQty:0,orderQty:0}, {id:'P002',no:'PW20260816143000234',name:'山河如画',pool:'未选中',refs:['官旗'],submit:'2026-08-16 14:30',update:'2026-08-19 10:42',approval:'审批结束（通过）',type:'LSE（爆品）',material:'LSE-00403',sku:'SKU-10000403',push:'推送成功',source:'华南经销商',org:'华南经销商',process:'蚀刻 + 上色',base:'205',listed:'否',blackBox:'否',sample:true,order:true,sampleQty:2,orderQty:120}, {id:'P003',no:'PW20260815110800345',name:'都市几何',pool:'未选中',refs:['经销商'],submit:'2026-08-15 11:08',update:'2026-08-18 16:20',approval:'审批结束（通过，已补充资料）',type:'LOT（定制）',material:'LOT-00404',sku:'未创建',push:'未推送',source:'华西经销商',org:'华西经销商',process:'丝印',base:'207',listed:'是',blackBox:'否',sample:true,order:true,sampleQty:1,orderQty:60}, {id:'P004',no:'PW20260814094000456',name:'黑曜徽章',pool:'待定',refs:[],submit:'2026-08-14 09:40',update:'2026-08-18 13:10',approval:'审批结束（通过）',type:'LSD（新品）',material:'LSD-00401',sku:'未创建',push:'未推送',source:'华东经销商',org:'华东经销商',process:'雕刻',base:'205/207',listed:'否',blackBox:'是',sample:false,order:false,sampleQty:0,orderQty:0}];
-let poolRole='npi',poolTab='未选中',poolQuery='';
-function poolTag(text){const cls=text.includes('通过')||text.includes('成功')?'green':text.includes('未')||text==='待定'?'orange':text.includes('审批')?'red':'gray';return `<span class="tag ${cls}">${text}</span>`}
-function poolMatches(p,tab){return tab==='官旗'||tab==='经销商'?p.refs.includes(tab):p.pool===tab}
-function renderPool(){const roleLabel={npi:'NPI 商品专员',flagship:'官旗专营运营',dealer:'经销商运营',pw:'PW 项目负责人'}[poolRole];const allowed=poolRole==='npi'?['未选中','官旗','经销商']:poolRole==='flagship'?['官旗']:poolRole==='dealer'?['经销商']:['待定'];if(!allowed.includes(poolTab))poolTab=allowed[0];const data=poolRows.filter(p=>poolMatches(p,poolTab)&&(poolQuery===''||(p.no+p.name+p.source).includes(poolQuery)));document.getElementById('pw-app-content').innerHTML=`<div class="page-title"><div><h1>商品池协同</h1><p>统一查看提报商品的物理归属和商品池引用关系</p></div><div class="actions"><button class="btn" onclick="navigateView('list')">返回提报列表</button><select class="control" style="width:150px" onchange="changePoolRole(this.value)"><option value="npi" ${poolRole==='npi'?'selected':''}>NPI 商品专员</option><option value="flagship" ${poolRole==='flagship'?'selected':''}>官旗专营运营</option><option value="dealer" ${poolRole==='dealer'?'selected':''}>经销商运营</option><option value="pw" ${poolRole==='pw'?'selected':''}>PW 项目负责人</option></select><button class="btn" onclick="showToast('商品池数据已刷新')">↻ 刷新</button></div></div><div class="filter"><div class="filter-grid"><div class="field"><label>商品名称 / PW 提报单号</label><input class="control" id="pool-q" value="${poolQuery}" placeholder="请输入关键词" /></div><div class="field"><label>商品池</label><select class="control" id="pool-tab" onchange="poolTab=this.value;renderPool()">${allowed.map(x=>`<option value="${x}" ${poolTab===x?'selected':''}>${x}商品池</option>`).join('')}</select></div><div class="field"><label>审批结论</label><select class="control"><option>全部</option><option>审批结束（通过）</option><option>审批结束（通过，已补充资料）</option></select></div><div class="filter-actions"><button class="btn primary" onclick="searchPool()">查询</button><button class="btn" onclick="resetPool()">重置</button></div></div></div><div class="stats"><div class="stat"><span>当前视角</span><strong style="font-size:20px">${roleLabel}</strong></div><div class="stat"><span>当前商品数</span><strong>${data.length}</strong></div><div class="stat"><span>已创建主档</span><strong>${data.filter(p=>p.sku!=='未创建').length}</strong></div></div><div class="table-card"><div class="table-head"><strong>${poolTab}商品池</strong><span>物理池：待定/未选中二选一 · 官旗/经销商为可并存引用</span></div><div class="table-wrap"><table><thead><tr><th>商品信息</th><th>PW 提报单号</th><th>物料编码</th><th>主档 SKU 编码</th><th>审批结论</th><th>加工工艺 / 机底</th><th>物理池 / 引用池</th><th>更新时间</th><th>操作</th></tr></thead><tbody>${data.map(p=>`<tr><td><div><strong>${p.name}</strong><span class="sub">${p.source} · ${p.type}</span></div></td><td><span class="link">${p.no}</span></td><td>${p.material}</td><td>${p.sku==='未创建'?'<span style="color:#aaa">未创建</span>':`<span class="link">${p.sku}</span>`}</td><td>${poolTag(p.approval)}</td><td>${p.process}<span class="sub">${p.base}</span></td><td>${poolTag(p.pool+'商品池')}${p.refs.length?`<span class="sub">引用：${p.refs.join('、')}商品池</span>`:''}</td><td>${p.update}</td><td><button class="btn small" onclick="openPoolDetail('${p.id}')">详情</button>${poolRole==='npi'&&p.pool==='未选中'?`<button class="btn small" style="margin-left:6px" onclick="movePool('${p.id}','官旗')">增加官旗引用</button><button class="btn small" style="margin-left:6px" onclick="movePool('${p.id}','经销商')">增加经销商引用</button>`:''}${poolRole==='pw'&&p.pool==='待定'?`<button class="btn small primary" style="margin-left:6px" onclick="restorePendingPool('${p.id}')">恢复至未选池</button>`:''}${poolRole==='npi'?`<button class="btn small" style="margin-left:6px" onclick="pushPoolMaster('${p.id}')">推至主档</button>`:''}${(poolRole==='flagship'||poolRole==='dealer')?`<button class="btn small primary" style="margin-left:6px" onclick="openPoolFeedback('${p.id}')">反馈</button>`:''}</td></tr>`).join('')||'<tr><td colspan="9" style="text-align:center;padding:60px;color:#888">当前视角暂无商品</td></tr>'}</tbody></table></div><div class="pager"><span>共 ${data.length} 条记录</span><span>商品池引用和物理归属可在详情中查看</span></div></div>`}
-function renderApproval(){const pending=rows.filter(r=>r.status==='审批中');document.getElementById('pw-app-content').innerHTML=`<div class="page-title"><div><h1>审批工作台</h1><p>PW 项目负责人待处理提报，审核通过后可指定商品入池去向</p></div><div class="actions"><button class="btn" onclick="navigateView('list')">返回提报列表</button><button class="btn" onclick="showToast('待办数据已刷新')">↻ 刷新</button></div></div><div class="filter"><div class="filter-grid"><div class="field"><label>PW 提报单号 / 图案名称</label><input class="control" placeholder="请输入关键词" /></div><div class="field"><label>审批节点</label><select class="control"><option>PW 项目负责人处理</option><option>全部节点</option></select></div><div class="field"><label>处理状态</label><select class="control"><option>待我处理</option><option>全部</option></select></div><div class="filter-actions"><button class="btn primary" onclick="showToast('已查询待办')">查询</button><button class="btn" onclick="renderApproval()">重置</button></div></div></div><div class="stats"><div class="stat"><span>待我处理</span><strong>${pending.length}</strong></div><div class="stat"><span>需选择入池去向</span><strong>${pending.length}</strong></div><div class="stat"><span>已处理</span><strong>12</strong></div></div><div class="table-card"><div class="table-head"><strong>PW 项目负责人待办</strong><span>审批通过后仅记录入池意向，终级审批通过后正式入池</span></div><div class="table-wrap"><table><thead><tr><th>PW 提报单号</th><th>图案名称</th><th>缩略图</th><th>提报时间</th><th>当前节点</th><th>处理人</th><th>操作</th></tr></thead><tbody>${pending.map(r=>`<tr><td><span class="link">${r.no}</span></td><td><strong>${r.name}</strong><span class="sub">${r.code}</span></td><td><span class="thumb ${r.thumb}">商品图</span></td><td>${r.time}</td><td>${statusTag('审批中')}<span class="sub">${r.node}</span></td><td>PW 项目负责人</td><td><button class="btn small primary" onclick="openPwApproval('${r.no}')">审批</button></td></tr>`).join('')||'<tr><td colspan="7" style="text-align:center;padding:60px;color:#888">暂无待办</td></tr>'}</tbody></table></div></div>`}
-function openPwApproval(no){const r=rows.find(x=>x.no===no);if(!r)return;document.getElementById('detail-modal').classList.add('show');document.getElementById('detail-body').innerHTML=`<div class="detail"><div><div class="detail-card"><h3>提报资料 · ${r.no}</h3><div class="detail-body"><div class="kv"><div class="kv-item"><label>图案名称</label><strong>${r.name}</strong></div><div class="kv-item"><label>物料编码</label><strong>${r.code}</strong></div><div class="kv-item"><label>提报时间</label><strong>${r.time}</strong></div><div class="kv-item"><label>内部侵权检测</label><strong><span class="tag green">未发现相似商品</span></strong></div><div class="kv-item"><label>外部侵权检测</label><strong><span class="tag orange">结果已返回</span></strong></div><div class="kv-item"><label>法务结论</label><strong><span class="tag green">通过</span></strong></div></div><div class="notice" style="margin-top:18px">审批通过后，商品不会立即进入商品池；需等待所有必审节点完成，系统再按本次选择正式入池。</div></div></div></div><div><div class="detail-card"><h3>PW 项目负责人处理</h3><div class="detail-body"><div class="field"><label class="required">审核结论</label><select class="control" id="pw-decision"><option value="通过">通过</option><option value="不通过">不通过</option><option value="暂不审核">暂不审核</option></select></div><div class="field" style="margin-top:16px"><label class="required">审核通过后的入池去向</label><select class="control" id="pw-pool-target" onchange="togglePendingReason(this.value)"><option value="未选中">未选商品池</option><option value="待定">待定商品池</option></select></div><div class="field" id="pending-reason-wrap" style="margin-top:16px;display:none"><label class="required">待定原因</label><textarea class="control" id="pending-reason" style="height:82px;padding-top:9px" placeholder="请输入暂不公开给 NPI 的原因"></textarea></div><div class="field" style="margin-top:16px"><label>PW 审核意见</label><textarea class="control" id="pw-opinion" style="height:82px;padding-top:9px" placeholder="请输入审核意见"></textarea></div></div></div></div></div>`;document.querySelector('#detail-modal .modal-footer').innerHTML='<button class="btn" onclick="closeModal(\'detail-modal\')">取消</button><button class="btn" onclick="savePwApproval(\''+no+'\',\'暂不审核\')">暂不审核</button><button class="btn danger" onclick="savePwApproval(\''+no+'\',\'不通过\')">审核不通过</button><button class="btn primary" onclick="savePwApproval(\''+no+'\',\'通过\')">审核通过</button>'}
-function togglePendingReason(value){const wrap=document.getElementById('pending-reason-wrap');if(wrap)wrap.style.display=value==='待定'?'block':'none'}
-function savePwApproval(no,decision){const target=document.getElementById('pw-pool-target')?.value||'未选中';const reason=(document.getElementById('pending-reason')?.value||'').trim();const record=rows.find(x=>x.no===no);if(decision==='通过'&&target==='待定'&&!reason){showToast('请选择待定原因后再提交');return}if(record&&decision==='通过'){record.pwDecision='通过';record.poolTarget=target;record.pendingReason=reason;record.node='终级审批';showToast(`已记录审核通过及${target}商品池入池意向，待终级审批完成后生效`)}else if(record&&decision==='不通过'){record.status='审批结束';record.node='不通过';record.pwDecision='不通过';showToast('已记录审核不通过，商品不会进入商品池')}else if(decision==='暂不审核'){showToast('已暂不审核，提报仍保留在待办列表')}closeModal('detail-modal');document.querySelector('#detail-modal .modal-footer').innerHTML='<button class="btn" onclick="closeModal(\'detail-modal\')">关闭</button>'}
-function restorePendingPool(id){const p=poolRows.find(x=>x.id===id);if(!p)return;const reason=window.prompt(`请输入将“${p.name}”恢复至未选商品池的原因`);if(reason===null)return;if(!reason.trim()){showToast('请输入恢复原因后再提交');return}p.pool='未选中';p.update='2026-08-22 10:30';p.restoreReason=reason.trim();sendPoolNotification(p,'未选中');showToast(`商品已恢复至未选商品池，消息通知已记录给${p.notice.targets}`);renderPool()}
-function changePoolRole(role){poolRole=role;poolTab=role==='npi'?'未选中':role==='flagship'?'官旗':role==='dealer'?'经销商':'待定';renderPool()}
-function sendPoolNotification(record,target){const targetRoles={待定:['经销商提报人','PW 项目负责人'],未选中:['经销商提报人','NPI 商品专员'],官旗:['经销商提报人','NPI 商品专员','官旗专营运营'],经销商:['经销商提报人','NPI 商品专员','经销商运营']}[target]||[];const content=target==='官旗'||target==='经销商'?`商品“${record.name}”已建立${target}商品池引用`:`商品“${record.name}”已进入${target}商品池`;record.notice={status:'已记录',method:'待定',targets:targetRoles.join('、'),time:'2026-08-22 10:30',content}}
-function searchPool(){poolQuery=(document.getElementById('pool-q')?.value||'').trim();poolTab=document.getElementById('pool-tab')?.value||poolTab;renderPool()}
-function resetPool(){poolQuery='';renderPool()}
-function movePool(id,target){const p=poolRows.find(x=>x.id===id);if(!p)return;if(!p.refs)p.refs=[];if(p.refs.includes(target)){showToast(`该商品已存在${target}商品池引用`);return}if(!confirm(`确认增加“${p.name}”的${target}商品池引用吗？`))return;p.refs.push(target);p.update='2026-08-23 10:30';sendPoolNotification(p,target);showToast(`已增加${target}商品池引用，消息通知已记录给${p.notice.targets}`);renderPool()}
-function pushPoolMaster(id){const p=poolRows.find(x=>x.id===id);if(!p)return;p.push='推送成功';if(p.sku==='未创建')p.sku='SKU-1000'+p.material.slice(-3);showToast('已将商品完整信息推送至主数据原数据接口');renderPool()}
-function openPoolDetail(id){const p=poolRows.find(x=>x.id===id);if(!p)return;const refs=p.refs||[];document.getElementById('detail-modal').classList.add('show');document.getElementById('detail-body').innerHTML=`<div class="detail"><div><div class="detail-card"><h3>经销商提报详情 <span style="float:right">${poolTag(p.pool+'物理池')}${refs.length?` ${refs.map(x=>poolTag(x+'引用')).join(' ')}`:''}</span></h3><div class="detail-body"><div class="notice" style="margin-bottom:16px">商品池详情展示经销商提交时的原始信息，供 NPI、官旗运营和经销商运营查看；未选中/待定是物理归属，官旗/经销商是可并存的引用关系。</div><div class="kv"><div class="kv-item"><label>图案名称</label><strong>${p.name}</strong></div><div class="kv-item"><label>PW 提报单号</label><strong>${p.no}</strong></div><div class="kv-item"><label>提报来源</label><strong>${p.source}</strong></div><div class="kv-item"><label>提报组织</label><strong>${p.org||p.source}</strong></div><div class="kv-item"><label>提报时间</label><strong>${p.submit}</strong></div><div class="kv-item"><label>更新时间</label><strong>${p.update}</strong></div><div class="kv-item"><label>物料编码</label><strong>${p.material}</strong></div><div class="kv-item"><label>主档 SKU 编码</label><strong>${p.sku}</strong></div><div class="kv-item"><label>产品类型</label><strong>${p.type}</strong></div><div class="kv-item"><label>是否已上市</label><strong>${p.listed}</strong></div><div class="kv-item"><label>能否放入小黑盒</label><strong>${p.blackBox}</strong></div><div class="kv-item"><label>加工工艺</label><strong>${p.process}</strong></div><div class="kv-item"><label>使用机底/模型</label><strong>${p.base}</strong></div><div class="kv-item"><label>预估加工未税单价</label><strong>¥ 115.04</strong></div><div class="kv-item"><label>生产天数</label><strong>15-20 天</strong></div></div><hr style="border:0;border-top:1px solid #eee;margin:20px 0"><div class="evidence"><div class="evidence-card"><h4>效果图 / 实物图</h4><span class="thumb red" style="width:88px;height:88px">提报图样</span><p style="margin-top:8px">经销商提报时上传，作为商品图样参考。</p></div><div class="evidence-card"><h4>设计图</h4><span class="thumb dark" style="width:88px;height:88px">设计图</span><p style="margin-top:8px">经销商提报时上传，供审核和侵权检测使用。</p></div><div class="evidence-card"><h4>商品白底图</h4><span class="thumb" style="width:88px;height:88px">白底图</span><p style="margin-top:8px">未上传时保留坑位，后续可补充。</p></div></div></div></div><div class="detail-card" style="margin-top:18px"><h3>侵权检测凭证</h3><div class="detail-body"><div class="evidence"><div class="evidence-card"><h4>内部以图搜图</h4><div class="result"><span class="tag green">未发现相似商品</span></div><p>检测范围：品牌商品及已审核选品<br>相似物料号：无</p></div><div class="evidence-card"><h4>外部侵权检测</h4><div class="result"><span class="tag orange">结果待接口返回</span></div><p>外部网站接口能力待确认；如取得结果，将展示相似图片、来源 URL、快照和相似物料号。</p></div></div></div></div></div><div><div class="detail-card"><h3>商品池流转与运营反馈</h3><div class="detail-body"><div class="timeline"><div class="event"><strong>提报审批通过</strong><small>${p.submit}</small><p>商品具备进入商品池的资格。</p></div><div class="event current"><strong>物理归属：${p.pool}商品池</strong><small>最近更新 ${p.update}</small><p>引用商品池：${refs.length?refs.join('、'):'无'}；官旗与经销商引用可以同时存在。</p></div>${p.notice?`<div class="event"><strong>消息通知</strong><small>${p.notice.time} · ${p.notice.status} · 通知方式：${p.notice.method}</small><p>已通知：${p.notice.targets}<br>${p.notice.content}</p></div>`:''}${p.feedbackNote?`<div class="event"><strong>${p.feedbackRole||'运营'}备注</strong><small>${p.feedbackTime||'暂无时间'} · ${p.feedbackStatus||'已保存'}</small><p>${p.feedbackNote}</p></div>`:''}<div class="event"><strong>主档推送状态</strong><small>${p.push}</small><p>推至主档不改变物理商品池和商品池引用关系。</p></div></div></div></div></div></div>`}
-function openPoolDetail(id){const p=poolRows.find(x=>x.id===id);if(!p)return;const refs=p.refs||[];const v=(value,fallback='--')=>value||fallback;document.getElementById('detail-modal').classList.add('show');document.getElementById('detail-body').innerHTML=`<div class="detail"><div><div class="detail-card"><h3>经销商提报详情 <span style="float:right">${poolTag(p.pool+'物理池')}${refs.length?` ${refs.map(x=>poolTag(x+'引用')).join(' ')}`:''}</span></h3><div class="detail-body"><div class="notice" style="margin-bottom:16px">商品池详情引用经销商提报单原始数据，只读展示，不提供补充资料按钮。未选中/待定是物理归属，官旗/经销商是可并存的引用关系。</div><div class="section"><div class="section-title">身份信息</div><div class="kv"><div class="kv-item"><label>PW 提报单号</label><strong>${v(p.no)}</strong></div><div class="kv-item"><label>图案名称</label><strong>${v(p.name)}</strong></div><div class="kv-item"><label>图案 ID</label><strong>${v(p.patternId,'PTN-20260823-001')}</strong></div><div class="kv-item"><label>版权方</label><strong>${v(p.copyrightOwner,'华东品牌组织 / Zippo')}</strong></div><div class="kv-item"><label>加工商信息</label><strong>${v(p.manufacturer,'华东供应组织 / 上海加工厂')}</strong></div><div class="kv-item"><label>作者</label><strong>${v(p.author,'陈晓雯')}</strong></div><div class="kv-item"><label>是否存在多种颜色效果</label><strong>${v(p.multiColor,'否')}</strong></div><div class="kv-item"><label>关联 PW 任务</label><strong>${v(p.relatedPw,'无')}</strong></div><div class="kv-item"><label>颜色名称</label><strong>${v(p.colorName,'曜石黑')}</strong></div><div class="kv-item"><label>颜色编码</label><strong>${v(p.colorCode,'BLK-001')}</strong></div></div></div><div class="section"><div class="section-title">设计与素材</div><div class="kv"><div class="kv-item"><label>效果图/实物图</label><strong>已上传 3 张</strong></div><div class="kv-item"><label>设计图</label><strong>已上传 1 张</strong></div><div class="kv-item"><label>商品白底图</label><strong>${v(p.whiteImage,'未上传')}</strong></div><div class="kv-item"><label>商品图片</label><strong>${v(p.productImage,'未补充')}</strong></div><div class="kv-item"><label>商品图片描述</label><strong>${v(p.productImageDescription,'未补充')}</strong></div><div class="kv-item"><label>创意完成时间</label><strong>${v(p.creativeCompletedAt,'未填写')}</strong></div><div class="kv-item"><label>字体来源</label><strong>${v(p.fontSource,'品牌授权字体')}</strong></div></div><div class="evidence" style="margin-top:16px"><div class="evidence-card"><h4>效果图/实物图</h4><span class="thumb red" style="width:88px;height:88px">提报图样</span><p style="margin-top:8px">经销商提报时上传。</p></div><div class="evidence-card"><h4>设计图</h4><span class="thumb dark" style="width:88px;height:88px">设计图</span><p style="margin-top:8px">用于审核与侵权检测。</p></div><div class="evidence-card"><h4>商品白底图</h4><span class="thumb" style="width:88px;height:88px">${p.whiteImage?'白底图':'未上传'}</span><p style="margin-top:8px">无白底图时保留待补充状态。</p></div></div></div><div class="section"><div class="section-title">加工与商品状态</div><div class="kv"><div class="kv-item"><label>是否有其他配件</label><strong>${v(p.hasAccessories,'否')}</strong></div><div class="kv-item"><label>对应配件图片</label><strong>${v(p.accessoryImages,'未上传')}</strong></div><div class="kv-item"><label>使用机底/模型</label><strong>${v(p.base)}</strong></div><div class="kv-item"><label>预估加工未税单价</label><strong>¥ ${v(p.price,'115.04')}</strong></div><div class="kv-item"><label>加工工艺</label><strong>${v(p.process)}</strong></div><div class="kv-item"><label>生产天数</label><strong>${v(p.productionDays,'15-20')} 天</strong></div><div class="kv-item"><label>能否放入小黑盒</label><strong>${v(p.blackBox,'是')}</strong></div><div class="kv-item"><label>是否商品已上市</label><strong>${v(p.listed,'否')}</strong></div><div class="kv-item"><label>SKU 商品编码</label><strong>${v(p.dealerSku,'未填写')}</strong></div><div class="kv-item"><label>目前进度</label><strong>${v(p.progress,'设计阶段')}</strong></div><div class="kv-item"><label>主档 SKU 编码</label><strong>${v(p.sku,'未创建')}</strong></div></div></div><div class="section"><div class="section-title">版权信息</div><div class="kv"><div class="kv-item"><label>是否有作品登记证书</label><strong>${v(p.certificate,'否')}</strong></div><div class="kv-item"><label>是否已发表</label><strong>${v(p.published,'否')}</strong></div><div class="kv-item"><label>发表时间</label><strong>${v(p.publishedAt,'未填写')}</strong></div><div class="kv-item"><label>发表方</label><strong>${v(p.publisher,'未填写')}</strong></div><div class="kv-item"><label>发表链接</label><strong>${v(p.publishedUrl,'未填写')}</strong></div><div class="kv-item"><label>发表平台</label><strong>${v(p.publishedPlatform,'未填写')}</strong></div><div class="kv-item"><label>是否有其他权利</label><strong>${v(p.otherRights,'否')}</strong></div><div class="kv-item"><label>对应权利图片</label><strong>${v(p.rightsImages,'未上传')}</strong></div><div class="kv-item"><label>版权登记进度</label><strong>${v(p.copyrightProgress,'未登记')}</strong></div><div class="kv-item"><label>创意思路</label><strong>${v(p.idea,'未补充')}</strong></div></div></div></div></div><div><div class="detail-card"><h3>侵权检测凭证</h3><div class="detail-body"><div class="evidence"><div class="evidence-card"><h4>内部以图搜图</h4><div class="result"><span class="tag green">未发现相似商品</span></div><p>检测范围：品牌商品及已审核选品<br>相似物料号：无</p></div><div class="evidence-card"><h4>外部侵权检测</h4><div class="result"><span class="tag orange">结果待接口返回</span></div><p>外部网站接口能力待确认；如取得结果，将展示相似图片、来源 URL、快照和相似物料号。</p></div></div></div></div><div class="detail-card" style="margin-top:18px"><h3>审批与商品池信息</h3><div class="detail-body"><div class="timeline"><div class="event"><strong>审批结束</strong><small>${v(p.submit)}</small><p>商品具备进入商品池的资格。</p></div><div class="event current"><strong>物理归属：${v(p.pool)}</strong><small>最近更新 ${v(p.update)}</small><p>引用商品池：${refs.length?refs.join('、'):'无'}；官旗与经销商引用可以同时存在。</p></div>${p.notice?`<div class="event"><strong>消息通知</strong><small>${p.notice.time} · ${p.notice.status} · 通知方式：${p.notice.method}</small><p>已通知：${p.notice.targets}<br>${p.notice.content}</p></div>`:''}${p.feedbackNote?`<div class="event"><strong>${p.feedbackRole||'运营'}反馈</strong><small>${p.feedbackTime||'暂无时间'} · ${p.feedbackStatus||'已保存'}</small><p>${p.feedbackNote}</p></div>`:''}<div class="event"><strong>主档推送状态</strong><small>${v(p.push,'未推送')}</small><p>推至主档不改变物理商品池和商品池引用关系。</p></div></div></div></div></div></div>`;document.querySelector('#detail-modal .modal-footer').innerHTML='<button class="btn" onclick="closeModal(\'detail-modal\')">关闭</button>'}
-function openPoolFeedback(id){const p=poolRows.find(x=>x.id===id);if(!p)return;const roleName=poolRole==='flagship'?'官旗专营运营':'经销商运营';document.getElementById('detail-modal').classList.add('show');document.getElementById('detail-body').innerHTML=`<div class="detail-card"><h3>${roleName}反馈 · ${p.no}</h3><div class="detail-body"><div class="notice">请填写对该商品的业务备注。备注用于 NPI 查看和后续商品池协同记录，不创建寄样任务、不生成订货单。</div><div class="field" style="margin-top:16px"><label>反馈备注</label><textarea class="control" id="feedback-note" style="height:140px;padding-top:10px" placeholder="请输入对该商品的意见、选品建议或后续跟进说明">${p.feedbackNote||''}</textarea></div></div></div>`;document.querySelector('#detail-modal .modal-footer').innerHTML='<button class="btn" onclick="closeModal(\'detail-modal\')">取消</button><button class="btn primary" onclick="savePoolFeedback(\''+id+'\')">确认提交</button>'}
-function savePoolFeedback(id){const p=poolRows.find(x=>x.id===id);if(!p)return;const note=(document.getElementById('feedback-note')?.value||'').trim();if(!note){showToast('请输入反馈备注后再提交');return}p.feedbackNote=note;p.feedbackRole=poolRole==='flagship'?'官旗专营运营':'经销商运营';p.feedbackTime='2026-08-23 10:30';p.feedbackStatus='已提交';p.update='2026-08-23 10:30';closeModal('detail-modal');showToast('反馈备注已提交');renderPool()}
-function renderList(){const roleNames={manufacturer:'加工商',dealer:'经销商',retailer:'零售商',designer:'CCS 设计师'};document.getElementById('pw-app-content').innerHTML=`<div class="page-title"><div><h1>提报管理</h1><p>查看当前角色可见的提报记录与处理状态</p></div><div class="actions"><select class="control" style="width:145px" aria-label="提报角色" onchange="changeSubmissionRole(this.value)"><option value="manufacturer" ${submissionRole==='manufacturer'?'selected':''}>加工商视角</option><option value="dealer" ${submissionRole==='dealer'?'selected':''}>经销商视角</option><option value="retailer" ${submissionRole==='retailer'?'selected':''}>零售商视角</option><option value="designer" ${submissionRole==='designer'?'selected':''}>CCS 设计师视角</option></select><button class="btn" onclick="showToast('已刷新列表')">↻ 刷新</button><button class="btn" onclick="openColumns()">☷ 列设置</button><button class="btn primary" onclick="openForm()">＋ 新建提报</button></div></div><div class="notice" style="margin-bottom:15px">当前演示角色：${roleNames[submissionRole]}。角色字段视角来自组织架构配置；加工商在本原型中按查看视角展示，提报填写权限以最终角色配置为准。</div><div class="filter" style="position:relative"><div class="filter-grid"><div class="field"><label>PW 提报单号</label><input class="control" id="q-no" placeholder="请输入提报单号" /></div><div class="field"><label>创建提报时间</label><input class="control" placeholder="选择时间范围" /></div><div class="field"><label>提报状态</label><select class="control"><option>全部状态</option><option>草稿</option><option>已提交</option><option>审批中</option><option>审批结束</option><option>已创主档</option></select></div><div class="filter-actions"><button class="btn primary" onclick="filterRows()">查询</button><button class="btn" onclick="renderList()">重置</button></div></div><div class="columns-menu" id="quick-columns"></div></div><div class="stats"><div class="stat"><span>全部提报</span><strong>18</strong></div><div class="stat"><span>处理中</span><strong>06</strong></div><div class="stat"><span>已创主档</span><strong>04</strong></div></div><div class="table-card"><div class="table-head"><strong>我的提报</strong><span>仅展示当前角色本人创建的数据 · 最近更新：2026-08-03 10:26</span></div><div class="table-wrap"><table><thead><tr><th>PW 提报单号</th><th>图案名称</th><th>主档 SKU 编码</th><th>缩略图</th><th>提报时间</th><th>更新时间</th><th>提报状态</th><th>操作</th></tr></thead><tbody id="rows"></tbody></table></div><div class="pager"><span>共 18 条记录</span><div class="pages"><button>‹</button><button class="active">1</button><button>2</button><button>3</button><button>›</button></div></div></div>`;fillRows(rows)}
-function fillRows(data){const el=document.getElementById('rows');if(!el)return;el.innerHTML=data.map((r,i)=>`<tr><td><a class="link">${r.no}</a></td><td><strong>${r.name}</strong><span class="sub">PW 商品创意提报</span></td><td>${r.code==='-'?'<span style="color:#aaa">未生成</span>':`<span class="link">${r.code}</span>`}</td><td><span class="thumb ${r.thumb}">商品图</span></td><td>${r.time}</td><td>${r.update}</td><td>${statusTag(r.status)}</td><td><button class="btn small" onclick="openRecord(${i})">详情</button>${r.status==='草稿'?'<button class="btn small" style="margin-left:6px" onclick="openForm()">编辑</button>':''}</td></tr>`).join('')}
-function filterRows(){const q=(document.getElementById('q-no')?.value||'').trim();fillRows(q?rows.filter(r=>r.no.includes(q)):rows);showToast(q?'已按提报单号筛选':'已查询')}
-function openRecord(i){if(rows[i]?.status==='草稿'){openForm();return}document.querySelector('#detail-modal .modal-footer').innerHTML='<button class="btn" onclick="closeModal(\'detail-modal\')">关闭</button><button class="btn primary" onclick="supplement()">补充指定资料</button>';openDetail()}
-function openColumns(){document.getElementById('column-options').innerHTML=['图案名称','物料编码','缩略图','提报时间','更新时间','提报状态'].map((x,i)=>`<label><input type="checkbox" checked/> ${x}</label>`).join('');document.getElementById('columns-modal').classList.add('show')}
-function applyColumns(){closeModal('columns-modal');showToast('列表字段设置已保存')}
-function openForm(){document.getElementById('form-modal').classList.add('show');document.getElementById('form-body').innerHTML=`<div class="stepper"><div class="step active"><span class="num">1</span>创意与素材</div><div class="step-line"></div><div class="step"><span class="num">2</span>权属与供货信息</div><div class="step-line"></div><div class="step"><span class="num">3</span>确认提交</div></div><div class="notice" style="margin-bottom:15px">PW 提报单号将在提报单创建成功后自动生成，提交后不可修改。</div><div class="section"><div class="section-title">创意与素材</div><div class="form-grid"><div class="field"><label class="required">图案名称</label><input class="control" placeholder="请输入图案名称" value="曜石龙纹系列" /></div><div class="field"><label class="required">版权方 <span class="help">?</span></label><input class="control readonly" value="华东品牌组织 / Zippo" readonly /></div><div class="field"><label class="required">加工商信息 <span class="help">?</span></label><input class="control readonly" value="华东供应组织 / 上海加工厂" readonly /></div><div class="field"><label class="required">作者</label><input class="control" placeholder="请输入作者" value="陈晓雯" /></div><div class="field span-2"><label class="required">效果图 / 实物图</label><div class="upload"><button>＋ 上传图片</button><span class="thumb red">效果图</span><em>支持 JPG、PNG，最多 9 张</em></div></div><div class="field span-2"><label class="required">设计图</label><div class="upload"><button>＋ 上传附件</button><em>用于侵权检测和审核参考</em></div></div><div class="field"><label>商品白底图</label><div class="upload"><button>＋ 上传</button><em>可后续补充</em></div></div><div class="field"><label class="required">是否存在多种颜色效果</label><select class="control"><option>否</option><option>是</option></select></div><div class="field"><label>颜色名称</label><input class="control" placeholder="例如：曜石黑" /></div><div class="field"><label>颜色编码</label><input class="control" placeholder="可后续补充" /></div></div></div><div class="section"><div class="section-title">权属与供货信息</div><div class="form-grid"><div class="field"><label class="required">是否有其他配件</label><select class="control"><option>否</option><option>是</option></select></div><div class="field"><label class="required">是否有作品登记证书</label><select class="control"><option>否</option><option>是</option></select></div><div class="field"><label class="required">是否已发表</label><select class="control"><option>否</option><option>是</option></select></div><div class="field"><label class="required">是否已上市</label><select class="control"><option>否</option><option>是</option></select></div><div class="field"><label class="required">字体来源</label><input class="control" placeholder="请输入字体来源" /></div><div class="field"><label class="required">能否放入小黑盒</label><select class="control"><option>是</option><option>否</option></select></div><div class="field"><label class="required">预估加工未税单价</label><input class="control" placeholder="请输入金额" value="115.04" /></div><div class="field"><label class="required">生产天数</label><input class="control" placeholder="例如：15-20" value="15-20" /></div><div class="field span-3"><label>创意思路</label><textarea class="control" style="height:70px;padding-top:9px" placeholder="审批结束后仍可补充"></textarea></div></div></div>`}
-function openForm(){const modal=document.getElementById('form-modal');modal.classList.add('show');modal.dataset.enhanced='1';modal.dataset.dealerFields='1';modal.dataset.processFields='1';modal.innerHTML='<div class="modal"><div class="modal-header"><h2>我要提报</h2><button class="close" onclick="closeModal(\'form-modal\')">×</button></div><div class="modal-body" id="form-body"><div class="stepper"><div class="step active"><span class="num">1</span>提报信息</div><div class="step-line"></div><div class="step"><span class="num">2</span>确认提交</div></div><div class="notice" style="margin-bottom:15px">提报单创建成功后自动生成 PW 提报单号；保存草稿不发起审批，确定提交后将进入侵权检测和审批流程。</div><div class="section"><div class="section-title">身份信息</div><div class="form-grid"><div class="field"><label>PW 提报单号</label><input class="control readonly" value="保存后自动生成" readonly></div><div class="field"><label class="required">图案名称 <span class="help">?</span></label><input class="control" placeholder="请输入图案名称" value="曜石龙纹系列"></div><div class="field"><label>图案 ID</label><input class="control readonly" value="保存后自动生成" readonly></div><div class="field"><label class="required">版权方 <span class="help">?</span></label><input class="control readonly" value="华东品牌组织 / Zippo" readonly></div><div class="field"><label class="required">加工商信息 <span class="help">?</span></label><input class="control readonly" value="华东供应组织 / 上海加工厂" readonly></div><div class="field"><label class="required">作者</label><input class="control" placeholder="请输入作者" value="陈晓雯"></div><div class="field"><label class="required">是否存在多种颜色效果</label><select class="control" onchange="toggleMultiColorField(this.value)"><option>否</option><option>是</option></select></div><div class="field" id="pw-task-field" style="display:none"><label class="required">关联 PW 任务 <span class="help">?</span></label><select class="control"><option>当前任务（首条颜色，自动创建主任务）</option><option>PW20260802007 · 黑曜火焰图案</option></select><span class="sub">如当前为第一个颜色提报，可关联本任务</span></div><div class="field"><label>颜色名称</label><input class="control" placeholder="例如：曜石黑"></div><div class="field"><label>颜色编码</label><input class="control" placeholder="请输入颜色编码"></div></div></div><div class="section"><div class="section-title">设计与素材</div><div class="form-grid"><div class="field span-2"><label class="required">效果图/实物图</label><div class="upload"><button>＋ 上传图片</button><span class="thumb red">效果图</span><em>支持 JPG、PNG，最多 9 张</em></div></div><div class="field span-2"><label class="required">设计图</label><div class="upload"><button>＋ 上传图片</button><span class="thumb dark">设计图</span><em>用于侵权检测和审核参考</em></div></div><div class="field"><label>商品白底图</label><div class="upload"><button>＋ 上传图片</button><em>可后续补充</em></div></div><div class="field"><label>商品图片</label><div class="upload"><button>＋ 上传图片</button><em>可由经销商或生产补充</em></div></div><div class="field span-2"><label>商品图片描述</label><textarea class="control" style="height:70px;padding-top:9px" placeholder="请描述商品图片内容、角度或用途"></textarea></div></div></div><div class="section"><div class="section-title">加工信息</div><div class="form-grid"><div class="field"><label class="required">是否有其他配件</label><select class="control"><option>否</option><option>是</option></select></div><div class="field"><label>对应配件图片</label><div class="upload"><button>＋ 上传图片</button><em>有其他配件时上传</em></div></div><div class="field"><label class="required">使用机底/模型</label><input class="control" placeholder="请输入使用机底或模型" value="205/207"></div><div class="field"><label class="required">预估加工未税单价</label><input class="control" placeholder="请输入金额" value="115.04"></div><div class="field"><label class="required">加工工艺</label><input class="control" placeholder="请输入预计加工工艺" value="电镀"></div><div class="field"><label class="required">生产天数</label><input class="control" placeholder="例如：15-20" value="15-20"></div><div class="field"><label class="required">能否放入小黑盒</label><select class="control"><option>是</option><option>否</option></select></div></div></div><div class="section"><div class="section-title">商品状态与主档信息</div><div class="form-grid"><div class="field"><label class="required">是否商品已上市</label><select class="control" id="is-listed" onchange="toggleSkuField(this.value)"><option>否</option><option>是</option></select></div><div class="field" id="sku-field" style="display:none"><label class="required">SKU 商品编码</label><input class="control" id="sku-code" placeholder="请输入自由主档中的 SKU 编码"><span class="sub">上市商品提交前将校验该编码是否存在</span></div><div class="field"><label>目前进度</label><select class="control"><option>设计阶段</option><option>打样阶段</option><option>生产阶段</option></select></div></div></div><div class="section"><div class="section-title">版权信息</div><div class="form-grid"><div class="field"><label class="required">是否有作品登记证书</label><select class="control"><option>否</option><option>是</option></select></div><div class="field"><label>首页</label><div class="upload"><button>＋ 上传图片</button><em>发表内容首页截图</em></div></div><div class="field"><label>作品页</label><div class="upload"><button>＋ 上传图片</button><em>发表内容作品页截图</em></div></div><div class="field"><label class="required">是否已发表</label><select class="control"><option>否</option><option>是</option></select></div><div class="field"><label>发表时间</label><input class="control" type="date"></div><div class="field"><label>发表方</label><input class="control" placeholder="请输入发表方"></div><div class="field"><label>发表链接</label><input class="control" placeholder="请输入 URL"></div><div class="field"><label>发表平台</label><select class="control"><option>请选择</option><option>天猫</option><option>京东</option><option>小红书</option><option>其他</option></select></div><div class="field"><label>创意完成时间</label><input class="control" type="date"></div><div class="field"><label class="required">字体来源</label><input class="control" placeholder="请输入字体来源"></div><div class="field"><label class="required">是否有其他权利</label><select class="control"><option>否</option><option>是</option></select></div><div class="field"><label>对应权利图片</label><div class="upload"><button>＋ 上传图片</button><em>版权或其他权利凭证</em></div></div><div class="field"><label>版权登记进度</label><select class="control"><option>未登记</option><option>登记中</option><option>已登记</option></select></div><div class="field span-2"><label>创意思路</label><textarea class="control" style="height:70px;padding-top:9px" placeholder="请输入创意背景及设计说明"></textarea></div></div></div></div><div class="modal-footer"><button class="btn" onclick="closeModal(\'form-modal\')">取消</button><button class="btn" onclick="saveDraft()">保存草稿</button><button class="btn primary" onclick="submitForm()">提交</button></div></div>'}
-function changeSubmissionRole(role){submissionRole=role;renderList()}
-function applySubmissionRole(){const modal=document.getElementById('form-modal');const names={manufacturer:'加工商',dealer:'经销商',retailer:'零售商',designer:'CCS 设计师'};const title=modal.querySelector('.modal-header h2');if(title)title.textContent=`${names[submissionRole]}视角 · 我要提报`;const body=modal.querySelector('#form-body');if(!body)return;const old=body.querySelector('.role-note');if(old)old.remove();const note=document.createElement('div');note.className='notice role-note';note.style.marginBottom='15px';note.textContent=submissionRole==='manufacturer'?'当前为加工商展示视角：仅展示字段表中加工商可见字段，字段不可编辑。':'当前为提报角色填写视角：仅展示字段表中经销商/零售商/CCS 设计师可见字段；草稿状态可编辑，确定提交后进入审批流程。';body.insertBefore(note,body.firstChild);const submitterVisible=['PW 提报单号','图案名称','图案 ID','版权方','是否存在多种颜色效果','关联 PW 任务','效果图/实物图','设计图','商品白底图','商品图片','商品图片描述','创意完成时间','字体来源','是否商品已上市','SKU 商品编码','产品商品类型','法务评估风险','法务审核意见','PW 审核意见','终级审批意见','侵权检测记录','侵权检测记录/证据链','当前物理商品池','商品池引用关系','待定原因','选品备注','反馈备注','主档 SKU 编码','提报状态','是否可转移','是否有合同','版权转移合同','版权转移状态','转移前版权方','转移后版权方','转移申请人','转移审批人','转移审批意见','转移审批时间','版权转移完成时间'];const labels=[...body.querySelectorAll('.field')];labels.forEach(field=>{const label=field.querySelector('label');if(!label)return;const text=label.textContent.replace(' ?','').trim();const visible=submissionRole==='manufacturer'||submitterVisible.some(name=>text.includes(name));field.style.display=visible?'':'none'});const controls=[...body.querySelectorAll('input,select,textarea, .upload button')];controls.forEach(x=>{if(x.classList.contains('readonly'))return;if(submissionRole==='manufacturer'){x.disabled=true;x.setAttribute('aria-disabled','true')}else{x.disabled=false;x.removeAttribute('aria-disabled')}});modal.querySelectorAll('.modal-footer .btn').forEach(btn=>{const isCancel=btn.textContent.includes('取消');btn.style.display=submissionRole==='manufacturer'&&!isCancel?'none':''})}
-const openFormBase=openForm;openForm=function(){openFormBase();applySubmissionRole()}
-function submitForm(){const listed=document.getElementById('is-listed')?.value;const sku=document.getElementById('sku-code')?.value.trim();if(listed==='是'){if(!sku){showToast('请填写 SKU 商品编码后再提交');return}document.getElementById('confirm-sku').textContent=sku;document.getElementById('sku-confirm-modal').classList.add('show');return}closeModal('form-modal');showToast('提交成功，已进入侵权检测与审批流程');setTimeout(()=>{if(currentView==='form'){currentView='list';render()}},100)}
-function saveDraft(){closeModal('form-modal');showToast('草稿已保存，可在列表继续编辑')}
-function openDetail(){document.getElementById('detail-modal').classList.add('show');document.getElementById('detail-body').innerHTML=`<div class="detail"><div><div class="detail-card"><h3>提报资料与附件 <span class="tag red" style="float:right">审批中</span></h3><div class="detail-body"><div class="kv"><div class="kv-item"><label>图案名称</label><strong>曜石龙纹系列</strong></div><div class="kv-item"><label>PW 提报单号</label><strong>PW20260803018</strong></div><div class="kv-item"><label>提报时间</label><strong>2026-08-03 10:24</strong></div><div class="kv-item"><label>版权方</label><strong>华东品牌组织 / Zippo</strong></div><div class="kv-item"><label>加工商信息</label><strong>华东供应组织 / 上海加工厂</strong></div><div class="kv-item"><label>作者</label><strong>陈晓雯</strong></div><div class="kv-item"><label>是否已上市</label><strong>否</strong></div><div class="kv-item"><label>预估加工未税单价</label><strong>¥ 115.04</strong></div><div class="kv-item"><label>生产天数</label><strong>15-20 天</strong></div></div><hr style="border:0;border-top:1px solid #eee;margin:20px 0"><div class="evidence"><div class="evidence-card"><h4>效果图 / 实物图</h4><span class="thumb red" style="width:82px;height:82px">商品图</span></div><div class="evidence-card"><h4>商品白底图</h4><div class="upload" style="min-height:82px"><span class="thumb" style="width:60px;height:60px">未上传</span><p style="margin:0;color:#888;font-size:12px">审批结束后可补充</p></div></div></div></div></div><div class="detail-card" style="margin-top:18px"><h3>侵权检测凭证</h3><div class="detail-body"><div class="evidence"><div class="evidence-card"><h4>内部以图搜图</h4><div class="result"><span class="tag green">未发现相似商品</span></div><p>检测范围：品牌商品及已审核选品<br>检测时间：2026-08-03 10:25<br>相似物料号：无</p></div><div class="evidence-card"><h4>外部侵权检测</h4><div class="result"><span class="tag orange">结果待接口返回</span></div><p>外部网站接口能力待确认<br>如取得结果，将展示相似图片、来源 URL、快照和相似物料号。</p></div></div></div></div></div><div><div class="detail-card"><h3>审批进展</h3><div class="detail-body"><div class="timeline"><div class="event"><strong>发起审批</strong><small>经销商 · 2026-08-03 10:26</small><p>已提交，进入侵权检测。</p></div><div class="event"><strong>内外侵权检测</strong><small>系统 · 2026-08-03 10:26</small><p>内部检测已完成，外部结果等待接口返回。</p></div><div class="event current"><strong>法务初审</strong><small>当前节点 · 待法务处理</small><p>待法务查看检测凭证并填写审核意见。</p></div><div class="event"><strong>PW 项目负责人审批</strong><small>未开始</small></div><div class="event"><strong>终级审批</strong><small>未开始</small></div></div></div></div><div class="detail-card" style="margin-top:18px"><h3>审批历史</h3><div class="detail-body" style="padding:0"><table style="min-width:0"><thead><tr><th>节点</th><th>处理人</th><th>状态</th><th>操作时间</th></tr></thead><tbody><tr><td>发起审批</td><td>陈晓雯</td><td>${statusTag('已完成')}</td><td>08-03 10:26</td></tr><tr><td>侵权检测</td><td>系统</td><td>${statusTag('已完成')}</td><td>08-03 10:26</td></tr><tr><td>法务初审</td><td>待分配</td><td>${statusTag('审批中')}</td><td>-</td></tr></tbody></table></div></div></div></div>`}
-function supplement(){showToast('已进入指定资料补充状态，仅开放创意完成时间、版权登记进度和创意思路');}
-function closeModal(id){document.getElementById(id).classList.remove('show');}
-function showToast(msg){const t=document.getElementById('pw-toast');t.textContent=msg;t.classList.remove('show');void t.offsetWidth;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2800)}
-function enhanceListedField(){const modal=document.getElementById('form-modal');if(!modal.classList.contains('show')||modal.dataset.enhanced==='1')return;const labels=[...modal.querySelectorAll('label')];const label=labels.find(x=>x.textContent.includes('是否已上市'));if(!label)return;const field=label.closest('.field');if(!field)return;field.innerHTML='<label class="required">是否商品已上市 <span class="help">?</span></label><select class="control" id="is-listed" onchange="toggleSkuField(this.value)"><option>否</option><option>是</option></select>';const sku=document.createElement('div');sku.className='field';sku.id='sku-field';sku.style.display='none';sku.innerHTML='<label class="required">SKU 商品编码</label><input class="control" id="sku-code" placeholder="请输入自由主档中的 SKU 编码"><span class="sub">上市商品提交前将校验该编码是否存在</span>';field.parentNode.insertBefore(sku,field.nextSibling);modal.dataset.enhanced='1'}
-function toggleSkuField(value){const field=document.getElementById('sku-field');if(field)field.style.display=value==='是'?'block':'none'}
-function enhanceDealerFields(){const modal=document.getElementById('form-modal');if(!modal.classList.contains('show')||modal.dataset.dealerFields==='1')return;const labels=[...modal.querySelectorAll('label')];const multiLabel=labels.find(x=>x.textContent.includes('是否存在多种颜色效果'));if(multiLabel){const multiField=multiLabel.closest('.field');const multiSelect=multiField.querySelector('select');multiSelect.id='multi-color';multiSelect.setAttribute('onchange','toggleMultiColorField(this.value)');const pwField=document.createElement('div');pwField.className='field';pwField.id='pw-task-field';pwField.style.display='none';pwField.innerHTML='<label class="required">关联 PW 任务 <span class="help">?</span></label><select class="control" id="related-pw-task"><option>当前任务（首条颜色，自动创建主任务）</option><option>PW20260802007 · 黑曜火焰图案</option></select><span class="sub">如当前为第一个颜色提报，可关联本任务</span>';multiField.parentNode.insertBefore(pwField,multiField.nextSibling)}const fontLabel=labels.find(x=>x.textContent.includes('字体来源'));if(fontLabel){const rightsField=document.createElement('div');rightsField.className='field';rightsField.id='other-rights-field';rightsField.innerHTML='<label class="required">是否有其他权利</label><select class="control"><option>否</option><option>是</option></select>';fontLabel.closest('.field').parentNode.insertBefore(rightsField,fontLabel.closest('.field'))}const ideaLabel=labels.find(x=>x.textContent.includes('创意思路'));if(ideaLabel){const ideaField=ideaLabel.closest('.field');const completionField=document.createElement('div');completionField.className='field';completionField.innerHTML='<label>创意完成时间</label><input class="control" type="date" value="2026-08-03" />';const progressField=document.createElement('div');progressField.className='field';progressField.innerHTML='<label>版权登记进度</label><select class="control"><option>未登记</option><option>登记中</option><option>已登记</option></select>';ideaField.parentNode.insertBefore(completionField,ideaField);ideaField.parentNode.insertBefore(progressField,ideaField)}modal.dataset.dealerFields='1'}
-function toggleMultiColorField(value){const field=document.getElementById('pw-task-field');if(field)field.style.display=value==='是'?'block':'none'}
-function enhanceProcessFields(){const modal=document.getElementById('form-modal');if(!modal.classList.contains('show')||modal.dataset.processFields==='1')return;const labels=[...modal.querySelectorAll('label')];const daysLabel=labels.find(x=>x.textContent.includes('生产天数'));if(!daysLabel)return;const daysField=daysLabel.closest('.field');const processField=document.createElement('div');processField.className='field';processField.innerHTML='<label class="required">加工工艺</label><input class="control" id="process-technique" placeholder="请输入预计加工工艺" value="电镀" />';const baseField=document.createElement('div');baseField.className='field';baseField.innerHTML='<label class="required">使用机底/模型</label><input class="control" id="base-model" placeholder="请输入使用机底或模型" value="205/207" />';daysField.parentNode.insertBefore(processField,daysField.nextSibling);daysField.parentNode.insertBefore(baseField,processField.nextSibling);modal.dataset.processFields='1'}
-const originalOpenFormWithFooter=openForm;
-openForm=function(){originalOpenFormWithFooter();const modal=document.getElementById('form-modal');modal.querySelector('.modal-body .modal-footer')?.remove();const footer=modal.querySelector(':scope > .modal > .modal-footer');if(footer){footer.innerHTML='<button class="btn" onclick="closeModal(\'form-modal\')">取消</button><button class="btn" onclick="saveDraft()">保存草稿</button><button class="btn primary" onclick="submitForm()">确定提交</button>';footer.style.position='sticky';footer.style.bottom='0';footer.style.background='#fff';footer.style.zIndex='2'}applySubmissionRole()};
-function submitForm(){const listed=document.getElementById('is-listed')?.value;const sku=document.getElementById('sku-code')?.value.trim();if(listed==='是'){if(!sku){showToast('请填写 SKU 商品编码后再提交');return}document.getElementById('confirm-sku').textContent=sku;document.getElementById('sku-confirm-modal').classList.add('show');return}closeModal('form-modal');showToast('提交成功，已进入侵权检测与审批流程')}
-function confirmSkuSubmit(){const sku=document.getElementById('sku-code')?.value.trim();closeModal('sku-confirm-modal');if(sku!=='ZP-205-0001'){showToast('未查询到该 SKU 商品编码，请确认编码后重试');return}closeModal('form-modal');showToast('SKU 校验通过，提报已提交并进入侵权检测与审批流程')}
-new MutationObserver(()=>{enhanceListedField();enhanceDealerFields();enhanceProcessFields()}).observe(document.getElementById('form-modal'),{attributes:true,childList:true,subtree:true});
-new MutationObserver(()=>{document.querySelectorAll('#detail-body label').forEach(label=>{if(label.textContent.trim()==='是否已上市')label.textContent='是否商品已上市'})}).observe(document.getElementById('detail-modal'),{childList:true,subtree:true});
-function normalizePoolActionLabels(){document.querySelectorAll('button').forEach(btn=>{if(btn.textContent.trim()==='增加官旗引用')btn.textContent='推至官旗池';if(btn.textContent.trim()==='增加经销商引用')btn.textContent='推至经销商池'})}
-new MutationObserver(normalizePoolActionLabels).observe(document.getElementById('pw-app-content'),{childList:true,subtree:true});
-new MutationObserver(()=>{if(currentView==='pool')document.querySelectorAll('#pw-app-content [data-action="copyright-transfer"]').forEach(x=>x.remove())}).observe(document.getElementById('pw-app-content'),{childList:true,subtree:true});
-let transferSourceId='';let transferContractUploaded=false;
-function uploadTransferContract(){transferContractUploaded=true;const status=document.getElementById('transfer-contract-status');if(status)status.textContent='已上传：版权转让合同（演示）';const button=document.querySelector('#copyright-transfer-modal .upload button');if(button)button.textContent='已上传合同';showToast('合同文件已上传')}
-function openCopyrightTransfer(id,source){const record=source==='pool'?poolRows.find(x=>x.id===id):rows[id];const sku=source==='pool'?record?.sku:record?.code;if(!record||!sku||sku==='未创建'||sku==='-'){showToast('商品尚未建立主档，暂不能发起版权转让');return}transferSourceId=id;transferContractUploaded=false;document.getElementById('transfer-from').value=source==='pool'?(record.copyrightOwner||'当前版权方'): '华东品牌组织 / Zippo';const uploadButton=document.querySelector('#copyright-transfer-modal .upload button');if(uploadButton)uploadButton.onclick=uploadTransferContract;const status=document.getElementById('transfer-contract-status');if(status)status.textContent='支持图片、PDF；提交申请时必填';document.getElementById('copyright-transfer-modal').classList.add('show')}
-function submitCopyrightTransfer(){const hasContract=document.getElementById('transfer-contract')?.value;const effectiveAt=document.getElementById('transfer-effective-at')?.value;if(hasContract!=='是'||!transferContractUploaded){showToast('请确认并上传一页纸或老款合同');return}if(!effectiveAt){showToast('请选择计划版权转让生效时间');return}closeModal('copyright-transfer-modal');showToast('版权转让申请已提交，已通知版权转让审批人')}
-function normalizeSubmissionModuleName(){document.querySelectorAll('.nav a.active span').forEach(x=>{if(x.textContent.trim()==='PW 经销商提报')x.textContent='提报管理'});document.querySelectorAll('.crumb strong').forEach(x=>{if(x.textContent.trim()==='PW 经销商提报')x.textContent='提报管理'});document.querySelectorAll('#pw-app-content .page-title h1').forEach(x=>{if(x.textContent.trim()==='PW 经销商提报')x.textContent='提报管理'});document.title='AI-PIM | 提报管理'}
-new MutationObserver(normalizeSubmissionModuleName).observe(document.getElementById('pw-app-content'),{childList:true,subtree:true});
-// Keep approval status as the single workflow result returned by the approval service.
-poolRows.forEach(p=>{p.approval=p.approval.includes('通过')?'同意':'驳回'});
-const originalRenderPool=renderPool;
-renderPool=function(){originalRenderPool();document.querySelectorAll('#pw-app-content th').forEach(x=>{if(x.textContent.trim()==='审批结论')x.textContent='审批状态'});document.querySelectorAll('#pw-app-content label').forEach(x=>{if(x.textContent.trim()==='审批结论')x.textContent='审批状态'});document.querySelectorAll('#pw-app-content select').forEach(select=>{if([...select.options].some(option=>option.textContent.includes('审批结束'))){select.innerHTML='<option>全部</option><option>同意</option><option>驳回</option>'}});document.querySelectorAll('#pw-app-content table tbody tr').forEach(row=>{if(row.querySelector('[data-action="copyright-transfer"]'))return;const no=row.cells[1]?.textContent.trim();const record=poolRows.find(x=>x.no===no);if(!record)return;const button=document.createElement('button');button.className='btn small';button.dataset.action='copyright-transfer';button.textContent='版权转让';button.title=record.sku==='未创建'?'商品尚未建立主档，暂不能发起版权转让':'';button.onclick=()=>openCopyrightTransfer(record.id,'pool');row.lastElementChild.appendChild(button)})};
-function addPoolImageColumn(){const table=document.querySelector('#pw-app-content table');if(!table)return;const head=table.querySelector('thead tr');if(!head||head.children[0]?.textContent.trim()!=='商品信息'||head.querySelector('[data-col="pool-image"]'))return;const th=document.createElement('th');th.dataset.col='pool-image';th.textContent='商品图片';head.insertBefore(th,head.lastElementChild);table.querySelectorAll('tbody tr').forEach(row=>{if(row.querySelector('[data-col="pool-image"]'))return;const no=row.cells[1]?.textContent.trim();const record=poolRows.find(x=>x.no===no);if(!record)return;const td=document.createElement('td');td.dataset.col='pool-image';td.innerHTML=`<span class="thumb ${record.whiteImage?'':'red'}">${record.whiteImage?'白底图':'商品图'}</span><span class="sub">${record.whiteImage?'白底图':'效果图/实物图'}</span>`;row.insertBefore(td,row.lastElementChild)});const empty=table.querySelector('tbody td[colspan]');if(empty)empty.colSpan=10}
-new MutationObserver(addPoolImageColumn).observe(document.getElementById('pw-app-content'),{childList:true,subtree:true});
-const originalOpenPoolDetail=openPoolDetail;
-openPoolDetail=function(id){originalOpenPoolDetail(id);const p=poolRows.find(x=>x.id===id);const firstSection=document.querySelector('#detail-body .section .kv');if(p&&firstSection&&!firstSection.querySelector('[data-field="approval-status"]')){const item=document.createElement('div');item.className='kv-item';item.dataset.field='approval-status';item.innerHTML=`<label>审批状态</label><strong>${p.approval}</strong>`;firstSection.appendChild(item)}};
-let activeSubmissionIndex=0;
-const originalOpenDetail=openDetail;
-openDetail=function(){originalOpenDetail();const record=rows[activeSubmissionIndex]||rows[0];const status=record.status==='已创主档'||record.status==='审批结束'?(record.status==='已创主档'?'同意':'驳回'):'--';const title=document.querySelector('#detail-body h3');const badge=title?.querySelector('.tag');if(badge){badge.textContent=record.status;badge.className=`tag ${record.status==='审批中'?'red':record.status==='草稿'?'gray':'green'}`}document.querySelectorAll('#detail-body .timeline .event.current strong').forEach(x=>{x.textContent=record.status==='审批中'?record.node:(record.status==='已创主档'?'已创主档':'审批结束')});document.querySelectorAll('#detail-body .timeline .event.current p').forEach(x=>{x.textContent=record.status==='审批中'?'等待当前审核人处理':status==='同意'?'审批流已回写同意，等待或已完成主档处理':'审批流已回写驳回，商品不可进入商品池'});};
-const originalOpenRecord=openRecord;
-openRecord=function(i){activeSubmissionIndex=i;originalOpenRecord(i);const record=rows[i];if(record&&record.code!=='-'&&record.status!=='草稿'){document.querySelector('#detail-modal .modal-footer').insertAdjacentHTML('afterbegin',`<button class="btn" onclick="openCopyrightTransfer(${i},'submission')">版权转让</button>`)}};
-function getApprovalStatus(record){return record.approval||(record.status==='已创主档'?'同意':record.status==='审批结束'?'驳回':'待处理')}
-const originalRenderList=renderList;
-function enhanceSubmissionActions(){const body=document.querySelector('#pw-app-content table tbody');if(!body)return;[...body.rows].forEach(row=>{if(row.querySelector('[data-action="copyright-transfer"]'))return;const no=row.cells[0]?.textContent.trim();const record=rows.find(x=>x.no===no);if(!record||record.status==='草稿')return;const actionCell=row.lastElementChild;const button=document.createElement('button');button.className='btn small';button.dataset.action='copyright-transfer';button.textContent='版权转让';button.title=record.code==='-'?'商品尚未建立主档，暂不能发起版权转让':'';button.onclick=()=>openCopyrightTransfer(rows.indexOf(record),'submission');actionCell.appendChild(button)})}
-renderList=function(){originalRenderList();document.querySelector('#pw-app-content .stats')?.remove();const grid=document.querySelector('#pw-app-content .filter-grid');const actions=grid?.querySelector('.filter-actions');if(grid&&actions&&!document.getElementById('q-name')){const nameField=document.createElement('div');nameField.className='field';nameField.innerHTML='<label>图案名称</label><input class="control" id="q-name" placeholder="请输入图案名称" />';const approvalField=document.createElement('div');approvalField.className='field';approvalField.innerHTML='<label>审核状态</label><select class="control" id="q-approval"><option>全部</option><option>同意</option><option>驳回</option></select>';grid.insertBefore(nameField,actions);grid.insertBefore(approvalField,actions)}const head=document.querySelector('#pw-app-content table thead tr');if(head&&!head.querySelector('[data-col="approval"]')){const th=document.createElement('th');th.dataset.col='approval';th.textContent='审核状态';const statusTh=[...head.children].find(x=>x.textContent.trim()==='提报状态');head.insertBefore(th,statusTh)}const body=document.querySelector('#pw-app-content table tbody');if(body){[...body.rows].forEach(row=>{if(row.querySelector('[data-col="approval"]'))return;const no=row.cells[0]?.textContent.trim();const record=rows.find(x=>x.no===no);const td=document.createElement('td');td.dataset.col='approval';td.innerHTML=statusTag(getApprovalStatus(record||{}));const statusCell=[...row.cells].find(x=>x.textContent.trim()===(record?.status||''));row.insertBefore(td,statusCell||row.lastElementChild)})}enhanceSubmissionActions()};
-const originalFilterRows=filterRows;
-filterRows=function(){const name=(document.getElementById('q-name')?.value||'').trim();const approval=document.getElementById('q-approval')?.value||'全部';const no=(document.getElementById('q-no')?.value||'').trim();const filtered=rows.filter(record=>(!no||record.no.includes(no))&&(!name||record.name.includes(name))&&(approval==='全部'||getApprovalStatus(record)===approval));fillRows(filtered);const body=document.querySelector('#pw-app-content table tbody');if(body){[...body.rows].forEach(row=>{const record=rows.find(x=>x.no===row.cells[0]?.textContent.trim());if(!record)return;const td=document.createElement('td');td.dataset.col='approval';td.innerHTML=statusTag(getApprovalStatus(record));const statusCell=[...row.cells].find(x=>x.textContent.trim()===record.status);row.insertBefore(td,statusCell||row.lastElementChild)})}enhanceSubmissionActions();showToast('已按筛选条件查询')};
-normalizeSubmissionModuleName();
-/* boot via D02Shell */
-
-  </script>
-  <script>
-/* insight script 1 */
-
 /* module-data.js */
 (function () {
   window.AIPIM_DATA = {
@@ -5827,11 +5381,8 @@ normalizeSubmissionModuleName();
   };
 }());
 
-
-  </script>
+</script>
   <script>
-/* insight script 2 */
-
 /* module-views-core.js */
 (function () {
   const data = window.AIPIM_DATA;
@@ -6106,11 +5657,8 @@ normalizeSubmissionModuleName();
   };
 }());
 
-
-  </script>
+</script>
   <script>
-/* insight script 3 */
-
 /* module-views-design.js */
 (function () {
   const data = window.AIPIM_DATA;
@@ -6308,11 +5856,8 @@ normalizeSubmissionModuleName();
   };
 }());
 
-
-  </script>
+</script>
   <script>
-/* insight script 4 */
-
 /* module-views-system.js */
 (function () {
   const data = window.AIPIM_DATA;
@@ -6416,11 +5961,8 @@ normalizeSubmissionModuleName();
   };
 }());
 
-
-  </script>
+</script>
   <script>
-/* insight script 5 */
-
 /* prototype.js */
 (function () {
   "use strict";
@@ -6429,13 +5971,13 @@ normalizeSubmissionModuleName();
   const views = window.AIPIM_VIEWS;
   const view = document.querySelector("#module-view");
   const nav = document.querySelector("#module-nav");
-  const breadcrumb = document.querySelector("#insight-breadcrumb");
+  const breadcrumb = document.querySelector("#breadcrumb");
   const dialog = document.querySelector("#module-dialog");
   const dialogEyebrow = document.querySelector("#dialog-eyebrow");
   const dialogTitle = document.querySelector("#dialog-title");
   const dialogBody = document.querySelector("#dialog-body");
   const dialogFooter = document.querySelector("#dialog-footer");
-  const toast = document.querySelector("#insight-toast");
+  const toast = document.querySelector("#toast");
   const toastCopy = document.querySelector("#toast-copy");
   const globalSearch = document.querySelector("#global-search");
   const state = {
@@ -6502,9 +6044,9 @@ normalizeSubmissionModuleName();
   }
 
   function go(route) {
-    const hash = "insight/" + route;
-    if (window.location.hash.slice(1) === hash) render(route);
-    else window.location.hash = hash;
+    if (!data.routeMeta[route]) route = "dashboard";
+    if (window.location.hash.slice(1) === route) render(route);
+    else window.location.hash = route;
   }
 
   function render(route) {
@@ -6512,9 +6054,8 @@ normalizeSubmissionModuleName();
     state.route = nextRoute;
     const meta = data.routeMeta[nextRoute];
     view.innerHTML = views[nextRoute] ? views[nextRoute]() : `<div class="empty-state"><span>◇</span><strong>页面准备中</strong></div>`;
-    if (nav) nav.querySelectorAll("[data-route]").forEach((button) => button.classList.toggle("active", button.dataset.route === nextRoute));
-    if (window.D02Shell && typeof meta !== 'undefined' && meta) window.D02Shell.syncInsightTab(meta.title);
-    if (breadcrumb) breadcrumb.innerHTML = `<span>选品中心</span><b>/</b><span>${meta.parent}</span><b>/</b><strong>${meta.title}</strong>`;
+    nav.querySelectorAll("[data-route]").forEach((button) => button.classList.toggle("active", button.dataset.route === nextRoute));
+    breadcrumb.innerHTML = `<span>选品中心</span><b>/</b><span>${meta.parent}</span><b>/</b><strong>${meta.title}</strong>`;
     document.title = `${meta.title}｜热点设计洞察`;
     syncRoleUI();
     window.scrollTo({ top: 0, behavior: "auto" });
@@ -6732,7 +6273,7 @@ normalizeSubmissionModuleName();
       eyebrow: "待提报设计包",
       title: item.title,
       wide: true,
-      body: `<div class="dialog-grid"><section class="dialog-section"><h3>资料概览</h3><div class="audit-list"><div class="audit-row"><span>设计包编号</span><strong>${item.id}</strong></div><div class="audit-row"><span>机型</span><strong>${item.model}</strong></div><div class="audit-row"><span>工艺方向</span><strong>${item.craft}</strong></div><div class="audit-row"><span>资料完整度</span><strong>${item.completeness}</strong></div></div></section><section class="dialog-section"><h3>待补充项</h3><p>生产可行性确认记录</p><p>知识产权人工审核记录</p><p>正式预算与制作周期（需外部数据）</p></section></div><section class="dialog-section"><h3>交给经销商后会发生什么</h3><p>经销商在现有 PW 提报页面引用本设计包，补充正式提报字段并主动提交。系统不会替经销商自动提报。</p></section>`,
+      body: `<div class="dialog-grid"><section class="dialog-section"><h3>资料概览</h3><div class="audit-list"><div class="audit-row"><span>设计包编号</span><strong>${item.id}</strong></div><div class="audit-row"><span>机型</span><strong>${item.model}</strong></div><div class="audit-row"><span>工艺方向</span><strong>${item.craft}</strong></div><div class="audit-row"><span>资料完整度</span><strong>${item.completeness}</strong></div></div></section><section class="dialog-section"><h3>待补充项</h3><p>生产可行性确认记录</p><p>知识产权人工审核记录</p><p>正式预算与制作周期（需外部数据）</p></section></div><section class="dialog-section"><h3>交给经销商后会发生什么</h3><p>经销商在现有商品提报页面引用本设计包，补充正式提报字段并主动提交。系统不会替经销商自动提报。</p></section>`,
       footer: `<span class="tag ${item.stateClass}">${item.state}</span><div class="footer-actions"><button class="module-button" type="button" data-action="close-dialog">关闭</button><button class="module-button primary" type="button" data-action="handoff-dealer">交给经销商确认</button></div>`
     });
   }
@@ -7343,19 +6884,17 @@ normalizeSubmissionModuleName();
     processDesignFile(event.dataTransfer?.files?.[0]);
   });
 
-  if (globalSearch) {
-    globalSearch.addEventListener("keydown", (event) => {
-      if (event.key === "Enter" && globalSearch.value.trim()) {
-        const keyword = safeText(globalSearch.value.trim());
-        openDialog({ eyebrow: "全局搜索", title: `“${keyword}”的搜索结果`, body: `<div class="audit-list"><div class="audit-row"><span>热点</span><strong>2 个相关结果</strong></div><div class="audit-row"><span>灵感卡</span><strong>1 张相关灵感</strong></div><div class="audit-row"><span>设计包</span><strong>0 个结果</strong></div></div><p style="margin:14px 0 0;color:#8a8a8a;font-size:12px">原型仅展示搜索交互，结果为示例。</p>` });
-      }
-    });
-  }
+  globalSearch.addEventListener("keydown", (event) => {
+    if (event.key === "Enter" && globalSearch.value.trim()) {
+      const keyword = safeText(globalSearch.value.trim());
+      openDialog({ eyebrow: "全局搜索", title: `“${keyword}”的搜索结果`, body: `<div class="audit-list"><div class="audit-row"><span>热点</span><strong>2 个相关结果</strong></div><div class="audit-row"><span>灵感卡</span><strong>1 张相关灵感</strong></div><div class="audit-row"><span>设计包</span><strong>0 个结果</strong></div></div><p style="margin:14px 0 0;color:#8a8a8a;font-size:12px">原型仅展示搜索交互，结果为示例。</p>` });
+    }
+  });
 
   document.addEventListener("keydown", (event) => {
     if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
       event.preventDefault();
-      if (globalSearch) globalSearch.focus();
+      globalSearch.focus();
     }
     if (event.key === "Escape") closeDialog();
   });
@@ -7364,210 +6903,174 @@ normalizeSubmissionModuleName();
     if (event.target === dialog) closeDialog();
   });
 
-  window.addEventListener("hashchange", () => { const h = window.location.hash.slice(1); if (h.startsWith("insight/")) render(h.slice(8)); });
-  window.__insightGo = go;
-  /* initial route via D02Shell */
+  window.addEventListener("hashchange", () => render(window.location.hash.slice(1)));
+  render(window.location.hash.slice(1) || "dashboard");
 }());
 
+</script>
+<script>
 
-  </script>
-
-  <script>
-
-(function () {
-  const tabs = [];
-  let activeTabId = "pw-list";
-  const pwPanel = document.getElementById("pw-panel");
-  const insightPanel = document.getElementById("insight-panel");
-  const tabBar = document.getElementById("open-tabs");
-  const sidebar = document.getElementById("d02-sidebar");
-  const crumb = document.getElementById("pw-breadcrumb");
-
-  const PW_LABEL = { list: "提报管理", pool: "商品池协同" };
-
-  function renderTabs() {
-    tabBar.innerHTML = tabs.map((t) =>
-      `<button type="button" class="open-tab ${t.id === activeTabId ? "active" : ""}" data-tab-id="${t.id}">
-        <span>${t.label}</span>
-        <span class="tab-close" data-close-tab="${t.id}" title="关闭">✕</span>
-      </button>`
-    ).join("");
-  }
-
-  function syncSidebar(module, insightRoute, pwView) {
-    sidebar.querySelectorAll(".proto-nav-item[data-shell-route]").forEach((btn) => {
-      let on = false;
-      if (module === "pw" && btn.dataset.shellRoute === "pw") {
-        const v = btn.dataset.pwView || "list";
-        on = v === (pwView || "list");
-      }
-      if (module === "insight" && btn.dataset.insightRoute === insightRoute) on = true;
-      btn.classList.toggle("active", on);
-    });
-  }
-
-  function showModule(module, insightRoute, pwView) {
-    pwPanel.classList.toggle("active", module === "pw");
-    insightPanel.classList.toggle("active", module === "insight");
-    if (module === "pw") {
-      document.title = (PW_LABEL[pwView] || "提报管理") + "｜选品中心";
-      if (window.location.hash.indexOf("insight/") === 1) {
-        history.replaceState(null, "", location.pathname + location.search);
-      }
-      if (typeof currentView !== "undefined") currentView = pwView || "list";
-      if (crumb) {
-        const title = PW_LABEL[pwView || "list"] || "提报管理";
-        crumb.innerHTML = `选品中心 <b>/</b> <strong>${title}</strong>`;
-      }
-      if (typeof render === "function") render();
-    } else {
-      const route = insightRoute || "dashboard";
-      if (typeof window.__insightGo === "function") window.__insightGo(route);
-    }
-  }
-
-  function openTab(id, label, module, insightRoute, pwView) {
-    let tab = tabs.find((t) => t.id === id);
-    if (!tab) {
-      tab = { id, label, module, insightRoute, pwView };
-      tabs.push(tab);
-    } else {
-      tab.label = label;
-      tab.pwView = pwView;
-      tab.insightRoute = insightRoute;
-    }
-    activeTabId = id;
-    renderTabs();
-    showModule(module, insightRoute, pwView);
-    syncSidebar(module, insightRoute, pwView);
-  }
-
-  function closeTab(id) {
-    if (tabs.length <= 1) return;
-    const idx = tabs.findIndex((t) => t.id === id);
-    if (idx < 0) return;
-    tabs.splice(idx, 1);
-    if (activeTabId === id) {
-      const next = tabs[Math.max(0, idx - 1)];
-      activeTabId = next.id;
-      showModule(next.module, next.insightRoute, next.pwView);
-      syncSidebar(next.module, next.insightRoute, next.pwView);
-    }
-    renderTabs();
-  }
-
-  sidebar.addEventListener("click", (e) => {
-    const btn = e.target.closest("[data-shell-route]");
-    if (!btn) return;
-    if (btn.dataset.shellRoute === "pw") {
-      if (btn.dataset.pwToast) {
-        if (typeof showToast === "function") showToast(btn.dataset.pwToast);
-        return;
-      }
-      const view = btn.dataset.pwView || "list";
-      const id = view === "list" ? "pw-list" : "pw-" + view;
-      openTab(id, PW_LABEL[view] || btn.querySelector("span:nth-child(2)").textContent.trim(), "pw", null, view);
-    } else {
-      const route = btn.dataset.insightRoute || "dashboard";
-      const label = (btn.querySelector("span:nth-child(2)") || btn).textContent.trim();
-      openTab("insight-" + route, label, "insight", route, null);
-    }
+const rows=[{no:'PW20260823102400123',name:'曜石龙纹系列',code:'LSD-00402',time:'2026-08-23 10:24',update:'2026-08-23 10:26',status:'审批中',node:'法务初审',thumb:'red'},{no:'PW20260822160800234',name:'黑曜火焰图案',code:'-',time:'2026-08-22 16:08',update:'2026-08-22 16:08',status:'草稿',node:'-',thumb:'dark'},{no:'PW20260821093200345',name:'城市夜行者',code:'LSE-00388',time:'2026-08-21 09:32',update:'2026-08-22 09:15',status:'已创主档',node:'终级审批',thumb:''},{no:'PW20260820110500456',name:'复古徽章限定款',code:'-',time:'2026-08-20 11:05',update:'2026-08-21 18:20',status:'审批结束',node:'未通过',thumb:'dark'}];
+const requestedView=new URLSearchParams(location.search).get('view');let currentView=['pool','form','detail'].includes(requestedView)?requestedView:'list';let formMode='new';let submissionRole='dealer';
+function navigateView(view){currentView=view;const url=new URL(location.href);url.search=view==='list'?'':'?view='+view;url.hash='';history.pushState({view},'',url);closeModal('detail-modal');closeModal('form-modal');closeModal('sku-confirm-modal');render()}
+window.addEventListener('popstate',()=>{const view=new URLSearchParams(location.search).get('view');currentView=['pool','form','detail'].includes(view)?view:'list';render()});
+function statusTag(s){const c=s==='审批中'?'red':(s==='审批结束'||s==='已创主档')?'green':s==='草稿'?'gray':'orange';return `<span class="tag ${c}">${s}</span>`}
+function render(){if(currentView==='form'){openForm();return}if(currentView==='detail'){openDetail();return}if(currentView==='approval'){renderApproval();return}if(currentView==='pool'){renderPool();return}renderList()}
+const poolRows=[{id:'P001',no:'PW20260818102000123',name:'星影鎏金',pool:'未选中',refs:[],submit:'2026-08-18 10:20',update:'2026-08-19 09:15',approval:'审批结束（通过）',type:'LSD（新品）',material:'LSD-00402',sku:'未创建',push:'未推送',source:'华东经销商',org:'华东经销商',process:'电镀 + 激光雕刻',base:'205/207',listed:'否',blackBox:'是',sample:false,order:false,sampleQty:0,orderQty:0}, {id:'P002',no:'PW20260816143000234',name:'山河如画',pool:'未选中',refs:['官旗'],submit:'2026-08-16 14:30',update:'2026-08-19 10:42',approval:'审批结束（通过）',type:'LSE（爆品）',material:'LSE-00403',sku:'SKU-10000403',push:'推送成功',source:'华南经销商',org:'华南经销商',process:'蚀刻 + 上色',base:'205',listed:'否',blackBox:'否',sample:true,order:true,sampleQty:2,orderQty:120}, {id:'P003',no:'PW20260815110800345',name:'都市几何',pool:'未选中',refs:['经销商'],submit:'2026-08-15 11:08',update:'2026-08-18 16:20',approval:'审批结束（通过，已补充资料）',type:'LOT（定制）',material:'LOT-00404',sku:'未创建',push:'未推送',source:'华西经销商',org:'华西经销商',process:'丝印',base:'207',listed:'是',blackBox:'否',sample:true,order:true,sampleQty:1,orderQty:60}, {id:'P004',no:'PW20260814094000456',name:'黑曜徽章',pool:'待定',refs:[],submit:'2026-08-14 09:40',update:'2026-08-18 13:10',approval:'审批结束（通过）',type:'LSD（新品）',material:'LSD-00401',sku:'未创建',push:'未推送',source:'华东经销商',org:'华东经销商',process:'雕刻',base:'205/207',listed:'否',blackBox:'是',sample:false,order:false,sampleQty:0,orderQty:0}];
+let poolRole='npi',poolTab='未选中',poolQuery='';
+function poolTag(text){const cls=text.includes('通过')||text.includes('成功')?'green':text.includes('未')||text==='待定'?'orange':text.includes('审批')?'red':'gray';return `<span class="tag ${cls}">${text}</span>`}
+function poolMatches(p,tab){return tab==='官旗'||tab==='经销商'?p.refs.includes(tab):p.pool===tab}
+function renderPool(){const roleLabel={npi:'NPI 商品专员',flagship:'官旗专营运营',dealer:'经销商运营',pw:'PW 项目负责人'}[poolRole];const allowed=poolRole==='npi'?['未选中','官旗','经销商']:poolRole==='flagship'?['官旗']:poolRole==='dealer'?['经销商']:['待定'];if(!allowed.includes(poolTab))poolTab=allowed[0];const data=poolRows.filter(p=>poolMatches(p,poolTab)&&(poolQuery===''||(p.no+p.name+p.source).includes(poolQuery)));document.getElementById('pw-app-content').innerHTML=`<div class="page-title"><div><h1>商品池协同</h1><p>统一查看提报商品的物理归属和商品池引用关系</p></div><div class="actions"><button class="btn" onclick="navigateView('list')">返回提报列表</button><select class="control" style="width:150px" onchange="changePoolRole(this.value)"><option value="npi" ${poolRole==='npi'?'selected':''}>NPI 商品专员</option><option value="flagship" ${poolRole==='flagship'?'selected':''}>官旗专营运营</option><option value="dealer" ${poolRole==='dealer'?'selected':''}>经销商运营</option><option value="pw" ${poolRole==='pw'?'selected':''}>PW 项目负责人</option></select><button class="btn" onclick="showToast('商品池数据已刷新')">↻ 刷新</button></div></div><div class="filter"><div class="filter-grid"><div class="field"><label>商品名称 / PW 提报单号</label><input class="control" id="pool-q" value="${poolQuery}" placeholder="请输入关键词" /></div><div class="field"><label>商品池</label><select class="control" id="pool-tab" onchange="poolTab=this.value;renderPool()">${allowed.map(x=>`<option value="${x}" ${poolTab===x?'selected':''}>${x}商品池</option>`).join('')}</select></div><div class="field"><label>审批结论</label><select class="control"><option>全部</option><option>审批结束（通过）</option><option>审批结束（通过，已补充资料）</option></select></div><div class="filter-actions"><button class="btn primary" onclick="searchPool()">查询</button><button class="btn" onclick="resetPool()">重置</button></div></div></div><div class="stats"><div class="stat"><span>当前视角</span><strong style="font-size:20px">${roleLabel}</strong></div><div class="stat"><span>当前商品数</span><strong>${data.length}</strong></div><div class="stat"><span>已创建主档</span><strong>${data.filter(p=>p.sku!=='未创建').length}</strong></div></div><div class="table-card"><div class="table-head"><strong>${poolTab}商品池</strong><span>物理池：待定/未选中二选一 · 官旗/经销商为可并存引用</span></div><div class="table-wrap"><table><thead><tr><th>商品信息</th><th>PW 提报单号</th><th>物料编码</th><th>主档 SKU 编码</th><th>审批结论</th><th>加工工艺 / 机底</th><th>物理池 / 引用池</th><th>更新时间</th><th>操作</th></tr></thead><tbody>${data.map(p=>`<tr><td><div><strong>${p.name}</strong><span class="sub">${p.source} · ${p.type}</span></div></td><td><span class="link">${p.no}</span></td><td>${p.material}</td><td>${p.sku==='未创建'?'<span style="color:#aaa">未创建</span>':`<span class="link">${p.sku}</span>`}</td><td>${poolTag(p.approval)}</td><td>${p.process}<span class="sub">${p.base}</span></td><td>${poolTag(p.pool+'商品池')}${p.refs.length?`<span class="sub">引用：${p.refs.join('、')}商品池</span>`:''}</td><td>${p.update}</td><td><button class="btn small" onclick="openPoolDetail('${p.id}')">详情</button>${poolRole==='npi'&&p.pool==='未选中'?`<button class="btn small" style="margin-left:6px" onclick="movePool('${p.id}','官旗')">增加官旗引用</button><button class="btn small" style="margin-left:6px" onclick="movePool('${p.id}','经销商')">增加经销商引用</button>`:''}${poolRole==='pw'&&p.pool==='待定'?`<button class="btn small primary" style="margin-left:6px" onclick="restorePendingPool('${p.id}')">恢复至未选池</button>`:''}${poolRole==='npi'?`<button class="btn small" style="margin-left:6px" onclick="pushPoolMaster('${p.id}')">推至主档</button>`:''}${(poolRole==='flagship'||poolRole==='dealer')?`<button class="btn small primary" style="margin-left:6px" onclick="openPoolFeedback('${p.id}')">反馈</button>`:''}</td></tr>`).join('')||'<tr><td colspan="9" style="text-align:center;padding:60px;color:#888">当前视角暂无商品</td></tr>'}</tbody></table></div><div class="pager"><span>共 ${data.length} 条记录</span><span>商品池引用和物理归属可在详情中查看</span></div></div>`}
+function renderApproval(){const pending=rows.filter(r=>r.status==='审批中');document.getElementById('pw-app-content').innerHTML=`<div class="page-title"><div><h1>审批工作台</h1><p>PW 项目负责人待处理提报，审核通过后可指定商品入池去向</p></div><div class="actions"><button class="btn" onclick="navigateView('list')">返回提报列表</button><button class="btn" onclick="showToast('待办数据已刷新')">↻ 刷新</button></div></div><div class="filter"><div class="filter-grid"><div class="field"><label>PW 提报单号 / 图案名称</label><input class="control" placeholder="请输入关键词" /></div><div class="field"><label>审批节点</label><select class="control"><option>PW 项目负责人处理</option><option>全部节点</option></select></div><div class="field"><label>处理状态</label><select class="control"><option>待我处理</option><option>全部</option></select></div><div class="filter-actions"><button class="btn primary" onclick="showToast('已查询待办')">查询</button><button class="btn" onclick="renderApproval()">重置</button></div></div></div><div class="stats"><div class="stat"><span>待我处理</span><strong>${pending.length}</strong></div><div class="stat"><span>需选择入池去向</span><strong>${pending.length}</strong></div><div class="stat"><span>已处理</span><strong>12</strong></div></div><div class="table-card"><div class="table-head"><strong>PW 项目负责人待办</strong><span>审批通过后仅记录入池意向，终级审批通过后正式入池</span></div><div class="table-wrap"><table><thead><tr><th>PW 提报单号</th><th>图案名称</th><th>缩略图</th><th>提报时间</th><th>当前节点</th><th>处理人</th><th>操作</th></tr></thead><tbody>${pending.map(r=>`<tr><td><span class="link">${r.no}</span></td><td><strong>${r.name}</strong><span class="sub">${r.code}</span></td><td><span class="thumb ${r.thumb}">商品图</span></td><td>${r.time}</td><td>${statusTag('审批中')}<span class="sub">${r.node}</span></td><td>PW 项目负责人</td><td><button class="btn small primary" onclick="openPwApproval('${r.no}')">审批</button></td></tr>`).join('')||'<tr><td colspan="7" style="text-align:center;padding:60px;color:#888">暂无待办</td></tr>'}</tbody></table></div></div>`}
+function openPwApproval(no){const r=rows.find(x=>x.no===no);if(!r)return;document.getElementById('detail-modal').classList.add('show');document.getElementById('detail-body').innerHTML=`<div class="detail"><div><div class="detail-card"><h3>提报资料 · ${r.no}</h3><div class="detail-body"><div class="kv"><div class="kv-item"><label>图案名称</label><strong>${r.name}</strong></div><div class="kv-item"><label>物料编码</label><strong>${r.code}</strong></div><div class="kv-item"><label>提报时间</label><strong>${r.time}</strong></div><div class="kv-item"><label>内部侵权检测</label><strong><span class="tag green">未发现相似商品</span></strong></div><div class="kv-item"><label>外部侵权检测</label><strong><span class="tag orange">结果已返回</span></strong></div><div class="kv-item"><label>法务结论</label><strong><span class="tag green">通过</span></strong></div></div><div class="notice" style="margin-top:18px">审批通过后，商品不会立即进入商品池；需等待所有必审节点完成，系统再按本次选择正式入池。</div></div></div></div><div><div class="detail-card"><h3>PW 项目负责人处理</h3><div class="detail-body"><div class="field"><label class="required">审核结论</label><select class="control" id="pw-decision"><option value="通过">通过</option><option value="不通过">不通过</option><option value="暂不审核">暂不审核</option></select></div><div class="field" style="margin-top:16px"><label class="required">审核通过后的入池去向</label><select class="control" id="pw-pool-target" onchange="togglePendingReason(this.value)"><option value="未选中">未选商品池</option><option value="待定">待定商品池</option></select></div><div class="field" id="pending-reason-wrap" style="margin-top:16px;display:none"><label class="required">待定原因</label><textarea class="control" id="pending-reason" style="height:82px;padding-top:9px" placeholder="请输入暂不公开给 NPI 的原因"></textarea></div><div class="field" style="margin-top:16px"><label>PW 审核意见</label><textarea class="control" id="pw-opinion" style="height:82px;padding-top:9px" placeholder="请输入审核意见"></textarea></div></div></div></div></div>`;document.querySelector('#detail-modal .modal-footer').innerHTML='<button class="btn" onclick="closeModal(\'detail-modal\')">取消</button><button class="btn" onclick="savePwApproval(\''+no+'\',\'暂不审核\')">暂不审核</button><button class="btn danger" onclick="savePwApproval(\''+no+'\',\'不通过\')">审核不通过</button><button class="btn primary" onclick="savePwApproval(\''+no+'\',\'通过\')">审核通过</button>'}
+function togglePendingReason(value){const wrap=document.getElementById('pending-reason-wrap');if(wrap)wrap.style.display=value==='待定'?'block':'none'}
+function savePwApproval(no,decision){const target=document.getElementById('pw-pool-target')?.value||'未选中';const reason=(document.getElementById('pending-reason')?.value||'').trim();const record=rows.find(x=>x.no===no);if(decision==='通过'&&target==='待定'&&!reason){showToast('请选择待定原因后再提交');return}if(record&&decision==='通过'){record.pwDecision='通过';record.poolTarget=target;record.pendingReason=reason;record.node='终级审批';showToast(`已记录审核通过及${target}商品池入池意向，待终级审批完成后生效`)}else if(record&&decision==='不通过'){record.status='审批结束';record.node='不通过';record.pwDecision='不通过';showToast('已记录审核不通过，商品不会进入商品池')}else if(decision==='暂不审核'){showToast('已暂不审核，提报仍保留在待办列表')}closeModal('detail-modal');document.querySelector('#detail-modal .modal-footer').innerHTML='<button class="btn" onclick="closeModal(\'detail-modal\')">关闭</button>'}
+function restorePendingPool(id){const p=poolRows.find(x=>x.id===id);if(!p)return;const reason=window.prompt(`请输入将“${p.name}”恢复至未选商品池的原因`);if(reason===null)return;if(!reason.trim()){showToast('请输入恢复原因后再提交');return}p.pool='未选中';p.update='2026-08-22 10:30';p.restoreReason=reason.trim();sendPoolNotification(p,'未选中');showToast(`商品已恢复至未选商品池，消息通知已记录给${p.notice.targets}`);renderPool()}
+function changePoolRole(role){poolRole=role;poolTab=role==='npi'?'未选中':role==='flagship'?'官旗':role==='dealer'?'经销商':'待定';renderPool()}
+function sendPoolNotification(record,target){const targetRoles={待定:['经销商提报人','PW 项目负责人'],未选中:['经销商提报人','NPI 商品专员'],官旗:['经销商提报人','NPI 商品专员','官旗专营运营'],经销商:['经销商提报人','NPI 商品专员','经销商运营']}[target]||[];const content=target==='官旗'||target==='经销商'?`商品“${record.name}”已建立${target}商品池引用`:`商品“${record.name}”已进入${target}商品池`;record.notice={status:'已记录',method:'待定',targets:targetRoles.join('、'),time:'2026-08-22 10:30',content}}
+function searchPool(){poolQuery=(document.getElementById('pool-q')?.value||'').trim();poolTab=document.getElementById('pool-tab')?.value||poolTab;renderPool()}
+function resetPool(){poolQuery='';renderPool()}
+function movePool(id,target){const p=poolRows.find(x=>x.id===id);if(!p)return;if(!p.refs)p.refs=[];if(p.refs.includes(target)){showToast(`该商品已存在${target}商品池引用`);return}if(!confirm(`确认增加“${p.name}”的${target}商品池引用吗？`))return;p.refs.push(target);p.update='2026-08-23 10:30';sendPoolNotification(p,target);showToast(`已增加${target}商品池引用，消息通知已记录给${p.notice.targets}`);renderPool()}
+function pushPoolMaster(id){const p=poolRows.find(x=>x.id===id);if(!p)return;p.push='推送成功';if(p.sku==='未创建')p.sku='SKU-1000'+p.material.slice(-3);showToast('已将商品完整信息推送至主数据原数据接口');renderPool()}
+function openPoolDetail(id){const p=poolRows.find(x=>x.id===id);if(!p)return;const refs=p.refs||[];document.getElementById('detail-modal').classList.add('show');document.getElementById('detail-body').innerHTML=`<div class="detail"><div><div class="detail-card"><h3>经销商提报详情 <span style="float:right">${poolTag(p.pool+'物理池')}${refs.length?` ${refs.map(x=>poolTag(x+'引用')).join(' ')}`:''}</span></h3><div class="detail-body"><div class="notice" style="margin-bottom:16px">商品池详情展示经销商提交时的原始信息，供 NPI、官旗运营和经销商运营查看；未选中/待定是物理归属，官旗/经销商是可并存的引用关系。</div><div class="kv"><div class="kv-item"><label>图案名称</label><strong>${p.name}</strong></div><div class="kv-item"><label>PW 提报单号</label><strong>${p.no}</strong></div><div class="kv-item"><label>提报来源</label><strong>${p.source}</strong></div><div class="kv-item"><label>提报组织</label><strong>${p.org||p.source}</strong></div><div class="kv-item"><label>提报时间</label><strong>${p.submit}</strong></div><div class="kv-item"><label>更新时间</label><strong>${p.update}</strong></div><div class="kv-item"><label>物料编码</label><strong>${p.material}</strong></div><div class="kv-item"><label>主档 SKU 编码</label><strong>${p.sku}</strong></div><div class="kv-item"><label>产品类型</label><strong>${p.type}</strong></div><div class="kv-item"><label>是否已上市</label><strong>${p.listed}</strong></div><div class="kv-item"><label>能否放入小黑盒</label><strong>${p.blackBox}</strong></div><div class="kv-item"><label>加工工艺</label><strong>${p.process}</strong></div><div class="kv-item"><label>使用机底/模型</label><strong>${p.base}</strong></div><div class="kv-item"><label>预估加工未税单价</label><strong>¥ 115.04</strong></div><div class="kv-item"><label>生产天数</label><strong>15-20 天</strong></div></div><hr style="border:0;border-top:1px solid #eee;margin:20px 0"><div class="evidence"><div class="evidence-card"><h4>效果图 / 实物图</h4><span class="thumb red" style="width:88px;height:88px">提报图样</span><p style="margin-top:8px">经销商提报时上传，作为商品图样参考。</p></div><div class="evidence-card"><h4>设计图</h4><span class="thumb dark" style="width:88px;height:88px">设计图</span><p style="margin-top:8px">经销商提报时上传，供审核和侵权检测使用。</p></div><div class="evidence-card"><h4>商品白底图</h4><span class="thumb" style="width:88px;height:88px">白底图</span><p style="margin-top:8px">未上传时保留坑位，后续可补充。</p></div></div></div></div><div class="detail-card" style="margin-top:18px"><h3>侵权检测凭证</h3><div class="detail-body"><div class="evidence"><div class="evidence-card"><h4>内部以图搜图</h4><div class="result"><span class="tag green">未发现相似商品</span></div><p>检测范围：品牌商品及已审核选品<br>相似物料号：无</p></div><div class="evidence-card"><h4>外部侵权检测</h4><div class="result"><span class="tag orange">结果待接口返回</span></div><p>外部网站接口能力待确认；如取得结果，将展示相似图片、来源 URL、快照和相似物料号。</p></div></div></div></div></div><div><div class="detail-card"><h3>商品池流转与运营反馈</h3><div class="detail-body"><div class="timeline"><div class="event"><strong>提报审批通过</strong><small>${p.submit}</small><p>商品具备进入商品池的资格。</p></div><div class="event current"><strong>物理归属：${p.pool}商品池</strong><small>最近更新 ${p.update}</small><p>引用商品池：${refs.length?refs.join('、'):'无'}；官旗与经销商引用可以同时存在。</p></div>${p.notice?`<div class="event"><strong>消息通知</strong><small>${p.notice.time} · ${p.notice.status} · 通知方式：${p.notice.method}</small><p>已通知：${p.notice.targets}<br>${p.notice.content}</p></div>`:''}${p.feedbackNote?`<div class="event"><strong>${p.feedbackRole||'运营'}备注</strong><small>${p.feedbackTime||'暂无时间'} · ${p.feedbackStatus||'已保存'}</small><p>${p.feedbackNote}</p></div>`:''}<div class="event"><strong>主档推送状态</strong><small>${p.push}</small><p>推至主档不改变物理商品池和商品池引用关系。</p></div></div></div></div></div></div>`}
+function openPoolDetail(id){const p=poolRows.find(x=>x.id===id);if(!p)return;const refs=p.refs||[];const v=(value,fallback='--')=>value||fallback;document.getElementById('detail-modal').classList.add('show');document.getElementById('detail-body').innerHTML=`<div class="detail"><div><div class="detail-card"><h3>经销商提报详情 <span style="float:right">${poolTag(p.pool+'物理池')}${refs.length?` ${refs.map(x=>poolTag(x+'引用')).join(' ')}`:''}</span></h3><div class="detail-body"><div class="notice" style="margin-bottom:16px">商品池详情引用经销商提报单原始数据，只读展示，不提供补充资料按钮。未选中/待定是物理归属，官旗/经销商是可并存的引用关系。</div><div class="section"><div class="section-title">身份信息</div><div class="kv"><div class="kv-item"><label>PW 提报单号</label><strong>${v(p.no)}</strong></div><div class="kv-item"><label>图案名称</label><strong>${v(p.name)}</strong></div><div class="kv-item"><label>图案 ID</label><strong>${v(p.patternId,'PTN-20260823-001')}</strong></div><div class="kv-item"><label>版权方</label><strong>${v(p.copyrightOwner,'华东品牌组织 / Zippo')}</strong></div><div class="kv-item"><label>加工商信息</label><strong>${v(p.manufacturer,'华东供应组织 / 上海加工厂')}</strong></div><div class="kv-item"><label>作者</label><strong>${v(p.author,'陈晓雯')}</strong></div><div class="kv-item"><label>是否存在多种颜色效果</label><strong>${v(p.multiColor,'否')}</strong></div><div class="kv-item"><label>关联 PW 任务</label><strong>${v(p.relatedPw,'无')}</strong></div><div class="kv-item"><label>颜色名称</label><strong>${v(p.colorName,'曜石黑')}</strong></div><div class="kv-item"><label>颜色编码</label><strong>${v(p.colorCode,'BLK-001')}</strong></div></div></div><div class="section"><div class="section-title">设计与素材</div><div class="kv"><div class="kv-item"><label>效果图/实物图</label><strong>已上传 3 张</strong></div><div class="kv-item"><label>设计图</label><strong>已上传 1 张</strong></div><div class="kv-item"><label>商品白底图</label><strong>${v(p.whiteImage,'未上传')}</strong></div><div class="kv-item"><label>商品图片</label><strong>${v(p.productImage,'未补充')}</strong></div><div class="kv-item"><label>商品图片描述</label><strong>${v(p.productImageDescription,'未补充')}</strong></div><div class="kv-item"><label>创意完成时间</label><strong>${v(p.creativeCompletedAt,'未填写')}</strong></div><div class="kv-item"><label>字体来源</label><strong>${v(p.fontSource,'品牌授权字体')}</strong></div></div><div class="evidence" style="margin-top:16px"><div class="evidence-card"><h4>效果图/实物图</h4><span class="thumb red" style="width:88px;height:88px">提报图样</span><p style="margin-top:8px">经销商提报时上传。</p></div><div class="evidence-card"><h4>设计图</h4><span class="thumb dark" style="width:88px;height:88px">设计图</span><p style="margin-top:8px">用于审核与侵权检测。</p></div><div class="evidence-card"><h4>商品白底图</h4><span class="thumb" style="width:88px;height:88px">${p.whiteImage?'白底图':'未上传'}</span><p style="margin-top:8px">无白底图时保留待补充状态。</p></div></div></div><div class="section"><div class="section-title">加工与商品状态</div><div class="kv"><div class="kv-item"><label>是否有其他配件</label><strong>${v(p.hasAccessories,'否')}</strong></div><div class="kv-item"><label>对应配件图片</label><strong>${v(p.accessoryImages,'未上传')}</strong></div><div class="kv-item"><label>使用机底/模型</label><strong>${v(p.base)}</strong></div><div class="kv-item"><label>预估加工未税单价</label><strong>¥ ${v(p.price,'115.04')}</strong></div><div class="kv-item"><label>加工工艺</label><strong>${v(p.process)}</strong></div><div class="kv-item"><label>生产天数</label><strong>${v(p.productionDays,'15-20')} 天</strong></div><div class="kv-item"><label>能否放入小黑盒</label><strong>${v(p.blackBox,'是')}</strong></div><div class="kv-item"><label>是否商品已上市</label><strong>${v(p.listed,'否')}</strong></div><div class="kv-item"><label>SKU 商品编码</label><strong>${v(p.dealerSku,'未填写')}</strong></div><div class="kv-item"><label>目前进度</label><strong>${v(p.progress,'设计阶段')}</strong></div><div class="kv-item"><label>主档 SKU 编码</label><strong>${v(p.sku,'未创建')}</strong></div></div></div><div class="section"><div class="section-title">版权信息</div><div class="kv"><div class="kv-item"><label>是否有作品登记证书</label><strong>${v(p.certificate,'否')}</strong></div><div class="kv-item"><label>是否已发表</label><strong>${v(p.published,'否')}</strong></div><div class="kv-item"><label>发表时间</label><strong>${v(p.publishedAt,'未填写')}</strong></div><div class="kv-item"><label>发表方</label><strong>${v(p.publisher,'未填写')}</strong></div><div class="kv-item"><label>发表链接</label><strong>${v(p.publishedUrl,'未填写')}</strong></div><div class="kv-item"><label>发表平台</label><strong>${v(p.publishedPlatform,'未填写')}</strong></div><div class="kv-item"><label>是否有其他权利</label><strong>${v(p.otherRights,'否')}</strong></div><div class="kv-item"><label>对应权利图片</label><strong>${v(p.rightsImages,'未上传')}</strong></div><div class="kv-item"><label>版权登记进度</label><strong>${v(p.copyrightProgress,'未登记')}</strong></div><div class="kv-item"><label>创意思路</label><strong>${v(p.idea,'未补充')}</strong></div></div></div></div></div><div><div class="detail-card"><h3>侵权检测凭证</h3><div class="detail-body"><div class="evidence"><div class="evidence-card"><h4>内部以图搜图</h4><div class="result"><span class="tag green">未发现相似商品</span></div><p>检测范围：品牌商品及已审核选品<br>相似物料号：无</p></div><div class="evidence-card"><h4>外部侵权检测</h4><div class="result"><span class="tag orange">结果待接口返回</span></div><p>外部网站接口能力待确认；如取得结果，将展示相似图片、来源 URL、快照和相似物料号。</p></div></div></div></div><div class="detail-card" style="margin-top:18px"><h3>审批与商品池信息</h3><div class="detail-body"><div class="timeline"><div class="event"><strong>审批结束</strong><small>${v(p.submit)}</small><p>商品具备进入商品池的资格。</p></div><div class="event current"><strong>物理归属：${v(p.pool)}</strong><small>最近更新 ${v(p.update)}</small><p>引用商品池：${refs.length?refs.join('、'):'无'}；官旗与经销商引用可以同时存在。</p></div>${p.notice?`<div class="event"><strong>消息通知</strong><small>${p.notice.time} · ${p.notice.status} · 通知方式：${p.notice.method}</small><p>已通知：${p.notice.targets}<br>${p.notice.content}</p></div>`:''}${p.feedbackNote?`<div class="event"><strong>${p.feedbackRole||'运营'}反馈</strong><small>${p.feedbackTime||'暂无时间'} · ${p.feedbackStatus||'已保存'}</small><p>${p.feedbackNote}</p></div>`:''}<div class="event"><strong>主档推送状态</strong><small>${v(p.push,'未推送')}</small><p>推至主档不改变物理商品池和商品池引用关系。</p></div></div></div></div></div></div>`;document.querySelector('#detail-modal .modal-footer').innerHTML='<button class="btn" onclick="closeModal(\'detail-modal\')">关闭</button>'}
+function openPoolFeedback(id){const p=poolRows.find(x=>x.id===id);if(!p)return;const roleName=poolRole==='flagship'?'官旗专营运营':'经销商运营';document.getElementById('detail-modal').classList.add('show');document.getElementById('detail-body').innerHTML=`<div class="detail-card"><h3>${roleName}反馈 · ${p.no}</h3><div class="detail-body"><div class="notice">请填写对该商品的业务备注。备注用于 NPI 查看和后续商品池协同记录，不创建寄样任务、不生成订货单。</div><div class="field" style="margin-top:16px"><label>反馈备注</label><textarea class="control" id="feedback-note" style="height:140px;padding-top:10px" placeholder="请输入对该商品的意见、选品建议或后续跟进说明">${p.feedbackNote||''}</textarea></div></div></div>`;document.querySelector('#detail-modal .modal-footer').innerHTML='<button class="btn" onclick="closeModal(\'detail-modal\')">取消</button><button class="btn primary" onclick="savePoolFeedback(\''+id+'\')">确认提交</button>'}
+function savePoolFeedback(id){const p=poolRows.find(x=>x.id===id);if(!p)return;const note=(document.getElementById('feedback-note')?.value||'').trim();if(!note){showToast('请输入反馈备注后再提交');return}p.feedbackNote=note;p.feedbackRole=poolRole==='flagship'?'官旗专营运营':'经销商运营';p.feedbackTime='2026-08-23 10:30';p.feedbackStatus='已提交';p.update='2026-08-23 10:30';closeModal('detail-modal');showToast('反馈备注已提交');renderPool()}
+function renderList(){const roleNames={manufacturer:'加工商',dealer:'经销商',retailer:'零售商',designer:'CCS 设计师'};document.getElementById('pw-app-content').innerHTML=`<div class="page-title"><div><h1>提报管理</h1><p>查看当前角色可见的提报记录与处理状态</p></div><div class="actions"><select class="control" style="width:145px" aria-label="提报角色" onchange="changeSubmissionRole(this.value)"><option value="manufacturer" ${submissionRole==='manufacturer'?'selected':''}>加工商视角</option><option value="dealer" ${submissionRole==='dealer'?'selected':''}>经销商视角</option><option value="retailer" ${submissionRole==='retailer'?'selected':''}>零售商视角</option><option value="designer" ${submissionRole==='designer'?'selected':''}>CCS 设计师视角</option></select><button class="btn" onclick="showToast('已刷新列表')">↻ 刷新</button><button class="btn" onclick="openColumns()">☷ 列设置</button><button class="btn primary" onclick="openForm()">＋ 新建提报</button></div></div><div class="notice" style="margin-bottom:15px">当前演示角色：${roleNames[submissionRole]}。角色字段视角来自组织架构配置；加工商在本原型中按查看视角展示，提报填写权限以最终角色配置为准。</div><div class="filter" style="position:relative"><div class="filter-grid"><div class="field"><label>PW 提报单号</label><input class="control" id="q-no" placeholder="请输入提报单号" /></div><div class="field"><label>创建提报时间</label><input class="control" placeholder="选择时间范围" /></div><div class="field"><label>提报状态</label><select class="control"><option>全部状态</option><option>草稿</option><option>已提交</option><option>审批中</option><option>审批结束</option><option>已创主档</option></select></div><div class="filter-actions"><button class="btn primary" onclick="filterRows()">查询</button><button class="btn" onclick="renderList()">重置</button></div></div><div class="columns-menu" id="quick-columns"></div></div><div class="stats"><div class="stat"><span>全部提报</span><strong>18</strong></div><div class="stat"><span>处理中</span><strong>06</strong></div><div class="stat"><span>已创主档</span><strong>04</strong></div></div><div class="table-card"><div class="table-head"><strong>我的提报</strong><span>仅展示当前角色本人创建的数据 · 最近更新：2026-08-03 10:26</span></div><div class="table-wrap"><table><thead><tr><th>PW 提报单号</th><th>图案名称</th><th>主档 SKU 编码</th><th>缩略图</th><th>提报时间</th><th>更新时间</th><th>提报状态</th><th>操作</th></tr></thead><tbody id="rows"></tbody></table></div><div class="pager"><span>共 18 条记录</span><div class="pages"><button>‹</button><button class="active">1</button><button>2</button><button>3</button><button>›</button></div></div></div>`;fillRows(rows)}
+function fillRows(data){const el=document.getElementById('rows');if(!el)return;el.innerHTML=data.map((r,i)=>`<tr><td><a class="link">${r.no}</a></td><td><strong>${r.name}</strong><span class="sub">PW 商品创意提报</span></td><td>${r.code==='-'?'<span style="color:#aaa">未生成</span>':`<span class="link">${r.code}</span>`}</td><td><span class="thumb ${r.thumb}">商品图</span></td><td>${r.time}</td><td>${r.update}</td><td>${statusTag(r.status)}</td><td><button class="btn small" onclick="openRecord(${i})">详情</button>${r.status==='草稿'?'<button class="btn small" style="margin-left:6px" onclick="openForm()">编辑</button>':''}</td></tr>`).join('')}
+function filterRows(){const q=(document.getElementById('q-no')?.value||'').trim();fillRows(q?rows.filter(r=>r.no.includes(q)):rows);showToast(q?'已按提报单号筛选':'已查询')}
+function openRecord(i){if(rows[i]?.status==='草稿'){openForm();return}document.querySelector('#detail-modal .modal-footer').innerHTML='<button class="btn" onclick="closeModal(\'detail-modal\')">关闭</button><button class="btn primary" onclick="supplement()">补充指定资料</button>';openDetail()}
+function openColumns(){document.getElementById('column-options').innerHTML=['图案名称','物料编码','缩略图','提报时间','更新时间','提报状态'].map((x,i)=>`<label><input type="checkbox" checked/> ${x}</label>`).join('');document.getElementById('columns-modal').classList.add('show')}
+function applyColumns(){closeModal('columns-modal');showToast('列表字段设置已保存')}
+function openForm(){document.getElementById('form-modal').classList.add('show');document.getElementById('form-body').innerHTML=`<div class="stepper"><div class="step active"><span class="num">1</span>创意与素材</div><div class="step-line"></div><div class="step"><span class="num">2</span>权属与供货信息</div><div class="step-line"></div><div class="step"><span class="num">3</span>确认提交</div></div><div class="notice" style="margin-bottom:15px">PW 提报单号将在提报单创建成功后自动生成，提交后不可修改。</div><div class="section"><div class="section-title">创意与素材</div><div class="form-grid"><div class="field"><label class="required">图案名称</label><input class="control" placeholder="请输入图案名称" value="曜石龙纹系列" /></div><div class="field"><label class="required">版权方 <span class="help">?</span></label><input class="control readonly" value="华东品牌组织 / Zippo" readonly /></div><div class="field"><label class="required">加工商信息 <span class="help">?</span></label><input class="control readonly" value="华东供应组织 / 上海加工厂" readonly /></div><div class="field"><label class="required">作者</label><input class="control" placeholder="请输入作者" value="陈晓雯" /></div><div class="field span-2"><label class="required">效果图 / 实物图</label><div class="upload"><button>＋ 上传图片</button><span class="thumb red">效果图</span><em>支持 JPG、PNG，最多 9 张</em></div></div><div class="field span-2"><label class="required">设计图</label><div class="upload"><button>＋ 上传附件</button><em>用于侵权检测和审核参考</em></div></div><div class="field"><label>商品白底图</label><div class="upload"><button>＋ 上传</button><em>可后续补充</em></div></div><div class="field"><label class="required">是否存在多种颜色效果</label><select class="control"><option>否</option><option>是</option></select></div><div class="field"><label>颜色名称</label><input class="control" placeholder="例如：曜石黑" /></div><div class="field"><label>颜色编码</label><input class="control" placeholder="可后续补充" /></div></div></div><div class="section"><div class="section-title">权属与供货信息</div><div class="form-grid"><div class="field"><label class="required">是否有其他配件</label><select class="control"><option>否</option><option>是</option></select></div><div class="field"><label class="required">是否有作品登记证书</label><select class="control"><option>否</option><option>是</option></select></div><div class="field"><label class="required">是否已发表</label><select class="control"><option>否</option><option>是</option></select></div><div class="field"><label class="required">是否已上市</label><select class="control"><option>否</option><option>是</option></select></div><div class="field"><label class="required">字体来源</label><input class="control" placeholder="请输入字体来源" /></div><div class="field"><label class="required">能否放入小黑盒</label><select class="control"><option>是</option><option>否</option></select></div><div class="field"><label class="required">预估加工未税单价</label><input class="control" placeholder="请输入金额" value="115.04" /></div><div class="field"><label class="required">生产天数</label><input class="control" placeholder="例如：15-20" value="15-20" /></div><div class="field span-3"><label>创意思路</label><textarea class="control" style="height:70px;padding-top:9px" placeholder="审批结束后仍可补充"></textarea></div></div></div>`}
+function openForm(){const modal=document.getElementById('form-modal');modal.classList.add('show');modal.dataset.enhanced='1';modal.dataset.dealerFields='1';modal.dataset.processFields='1';modal.innerHTML='<div class="modal"><div class="modal-header"><h2>我要提报</h2><button class="close" onclick="closeModal(\'form-modal\')">×</button></div><div class="modal-body" id="form-body"><div class="stepper"><div class="step active"><span class="num">1</span>提报信息</div><div class="step-line"></div><div class="step"><span class="num">2</span>确认提交</div></div><div class="notice" style="margin-bottom:15px">提报单创建成功后自动生成 PW 提报单号；保存草稿不发起审批，确定提交后将进入侵权检测和审批流程。</div><div class="section"><div class="section-title">身份信息</div><div class="form-grid"><div class="field"><label>PW 提报单号</label><input class="control readonly" value="保存后自动生成" readonly></div><div class="field"><label class="required">图案名称 <span class="help">?</span></label><input class="control" placeholder="请输入图案名称" value="曜石龙纹系列"></div><div class="field"><label>图案 ID</label><input class="control readonly" value="保存后自动生成" readonly></div><div class="field"><label class="required">版权方 <span class="help">?</span></label><input class="control readonly" value="华东品牌组织 / Zippo" readonly></div><div class="field"><label class="required">加工商信息 <span class="help">?</span></label><input class="control readonly" value="华东供应组织 / 上海加工厂" readonly></div><div class="field"><label class="required">作者</label><input class="control" placeholder="请输入作者" value="陈晓雯"></div><div class="field"><label class="required">是否存在多种颜色效果</label><select class="control" onchange="toggleMultiColorField(this.value)"><option>否</option><option>是</option></select></div><div class="field" id="pw-task-field" style="display:none"><label class="required">关联 PW 任务 <span class="help">?</span></label><select class="control"><option>当前任务（首条颜色，自动创建主任务）</option><option>PW20260802007 · 黑曜火焰图案</option></select><span class="sub">如当前为第一个颜色提报，可关联本任务</span></div><div class="field"><label>颜色名称</label><input class="control" placeholder="例如：曜石黑"></div><div class="field"><label>颜色编码</label><input class="control" placeholder="请输入颜色编码"></div></div></div><div class="section"><div class="section-title">设计与素材</div><div class="form-grid"><div class="field span-2"><label class="required">效果图/实物图</label><div class="upload"><button>＋ 上传图片</button><span class="thumb red">效果图</span><em>支持 JPG、PNG，最多 9 张</em></div></div><div class="field span-2"><label class="required">设计图</label><div class="upload"><button>＋ 上传图片</button><span class="thumb dark">设计图</span><em>用于侵权检测和审核参考</em></div></div><div class="field"><label>商品白底图</label><div class="upload"><button>＋ 上传图片</button><em>可后续补充</em></div></div><div class="field"><label>商品图片</label><div class="upload"><button>＋ 上传图片</button><em>可由经销商或生产补充</em></div></div><div class="field span-2"><label>商品图片描述</label><textarea class="control" style="height:70px;padding-top:9px" placeholder="请描述商品图片内容、角度或用途"></textarea></div></div></div><div class="section"><div class="section-title">加工信息</div><div class="form-grid"><div class="field"><label class="required">是否有其他配件</label><select class="control"><option>否</option><option>是</option></select></div><div class="field"><label>对应配件图片</label><div class="upload"><button>＋ 上传图片</button><em>有其他配件时上传</em></div></div><div class="field"><label class="required">使用机底/模型</label><input class="control" placeholder="请输入使用机底或模型" value="205/207"></div><div class="field"><label class="required">预估加工未税单价</label><input class="control" placeholder="请输入金额" value="115.04"></div><div class="field"><label class="required">加工工艺</label><input class="control" placeholder="请输入预计加工工艺" value="电镀"></div><div class="field"><label class="required">生产天数</label><input class="control" placeholder="例如：15-20" value="15-20"></div><div class="field"><label class="required">能否放入小黑盒</label><select class="control"><option>是</option><option>否</option></select></div></div></div><div class="section"><div class="section-title">商品状态与主档信息</div><div class="form-grid"><div class="field"><label class="required">是否商品已上市</label><select class="control" id="is-listed" onchange="toggleSkuField(this.value)"><option>否</option><option>是</option></select></div><div class="field" id="sku-field" style="display:none"><label class="required">SKU 商品编码</label><input class="control" id="sku-code" placeholder="请输入自由主档中的 SKU 编码"><span class="sub">上市商品提交前将校验该编码是否存在</span></div><div class="field"><label>目前进度</label><select class="control"><option>设计阶段</option><option>打样阶段</option><option>生产阶段</option></select></div></div></div><div class="section"><div class="section-title">版权信息</div><div class="form-grid"><div class="field"><label class="required">是否有作品登记证书</label><select class="control"><option>否</option><option>是</option></select></div><div class="field"><label>首页</label><div class="upload"><button>＋ 上传图片</button><em>发表内容首页截图</em></div></div><div class="field"><label>作品页</label><div class="upload"><button>＋ 上传图片</button><em>发表内容作品页截图</em></div></div><div class="field"><label class="required">是否已发表</label><select class="control"><option>否</option><option>是</option></select></div><div class="field"><label>发表时间</label><input class="control" type="date"></div><div class="field"><label>发表方</label><input class="control" placeholder="请输入发表方"></div><div class="field"><label>发表链接</label><input class="control" placeholder="请输入 URL"></div><div class="field"><label>发表平台</label><select class="control"><option>请选择</option><option>天猫</option><option>京东</option><option>小红书</option><option>其他</option></select></div><div class="field"><label>创意完成时间</label><input class="control" type="date"></div><div class="field"><label class="required">字体来源</label><input class="control" placeholder="请输入字体来源"></div><div class="field"><label class="required">是否有其他权利</label><select class="control"><option>否</option><option>是</option></select></div><div class="field"><label>对应权利图片</label><div class="upload"><button>＋ 上传图片</button><em>版权或其他权利凭证</em></div></div><div class="field"><label>版权登记进度</label><select class="control"><option>未登记</option><option>登记中</option><option>已登记</option></select></div><div class="field span-2"><label>创意思路</label><textarea class="control" style="height:70px;padding-top:9px" placeholder="请输入创意背景及设计说明"></textarea></div></div></div></div><div class="modal-footer"><button class="btn" onclick="closeModal(\'form-modal\')">取消</button><button class="btn" onclick="saveDraft()">保存草稿</button><button class="btn primary" onclick="submitForm()">提交</button></div></div>'}
+function changeSubmissionRole(role){submissionRole=role;renderList()}
+function applySubmissionRole(){const modal=document.getElementById('form-modal');const names={manufacturer:'加工商',dealer:'经销商',retailer:'零售商',designer:'CCS 设计师'};const title=modal.querySelector('.modal-header h2');if(title)title.textContent=`${names[submissionRole]}视角 · 我要提报`;const body=modal.querySelector('#form-body');if(!body)return;const old=body.querySelector('.role-note');if(old)old.remove();const note=document.createElement('div');note.className='notice role-note';note.style.marginBottom='15px';note.textContent=submissionRole==='manufacturer'?'当前为加工商展示视角：仅展示字段表中加工商可见字段，字段不可编辑。':'当前为提报角色填写视角：仅展示字段表中经销商/零售商/CCS 设计师可见字段；草稿状态可编辑，确定提交后进入审批流程。';body.insertBefore(note,body.firstChild);const submitterVisible=['PW 提报单号','图案名称','图案 ID','版权方','是否存在多种颜色效果','关联 PW 任务','效果图/实物图','设计图','商品白底图','商品图片','商品图片描述','创意完成时间','字体来源','是否商品已上市','SKU 商品编码','产品商品类型','法务评估风险','法务审核意见','PW 审核意见','终级审批意见','侵权检测记录','侵权检测记录/证据链','当前物理商品池','商品池引用关系','待定原因','选品备注','反馈备注','主档 SKU 编码','提报状态','是否可转移','是否有合同','版权转移合同','版权转移状态','转移前版权方','转移后版权方','转移申请人','转移审批人','转移审批意见','转移审批时间','版权转移完成时间'];const labels=[...body.querySelectorAll('.field')];labels.forEach(field=>{const label=field.querySelector('label');if(!label)return;const text=label.textContent.replace(' ?','').trim();const visible=submissionRole==='manufacturer'||submitterVisible.some(name=>text.includes(name));field.style.display=visible?'':'none'});const controls=[...body.querySelectorAll('input,select,textarea, .upload button')];controls.forEach(x=>{if(x.classList.contains('readonly'))return;if(submissionRole==='manufacturer'){x.disabled=true;x.setAttribute('aria-disabled','true')}else{x.disabled=false;x.removeAttribute('aria-disabled')}});modal.querySelectorAll('.modal-footer .btn').forEach(btn=>{const isCancel=btn.textContent.includes('取消');btn.style.display=submissionRole==='manufacturer'&&!isCancel?'none':''})}
+const openFormBase=openForm;openForm=function(){openFormBase();applySubmissionRole()}
+function submitForm(){const listed=document.getElementById('is-listed')?.value;const sku=document.getElementById('sku-code')?.value.trim();if(listed==='是'){if(!sku){showToast('请填写 SKU 商品编码后再提交');return}document.getElementById('confirm-sku').textContent=sku;document.getElementById('sku-confirm-modal').classList.add('show');return}closeModal('form-modal');showToast('提交成功，已进入侵权检测与审批流程');setTimeout(()=>{if(currentView==='form'){currentView='list';render()}},100)}
+function saveDraft(){closeModal('form-modal');showToast('草稿已保存，可在列表继续编辑')}
+function openDetail(){document.getElementById('detail-modal').classList.add('show');document.getElementById('detail-body').innerHTML=`<div class="detail"><div><div class="detail-card"><h3>提报资料与附件 <span class="tag red" style="float:right">审批中</span></h3><div class="detail-body"><div class="kv"><div class="kv-item"><label>图案名称</label><strong>曜石龙纹系列</strong></div><div class="kv-item"><label>PW 提报单号</label><strong>PW20260803018</strong></div><div class="kv-item"><label>提报时间</label><strong>2026-08-03 10:24</strong></div><div class="kv-item"><label>版权方</label><strong>华东品牌组织 / Zippo</strong></div><div class="kv-item"><label>加工商信息</label><strong>华东供应组织 / 上海加工厂</strong></div><div class="kv-item"><label>作者</label><strong>陈晓雯</strong></div><div class="kv-item"><label>是否已上市</label><strong>否</strong></div><div class="kv-item"><label>预估加工未税单价</label><strong>¥ 115.04</strong></div><div class="kv-item"><label>生产天数</label><strong>15-20 天</strong></div></div><hr style="border:0;border-top:1px solid #eee;margin:20px 0"><div class="evidence"><div class="evidence-card"><h4>效果图 / 实物图</h4><span class="thumb red" style="width:82px;height:82px">商品图</span></div><div class="evidence-card"><h4>商品白底图</h4><div class="upload" style="min-height:82px"><span class="thumb" style="width:60px;height:60px">未上传</span><p style="margin:0;color:#888;font-size:12px">审批结束后可补充</p></div></div></div></div></div><div class="detail-card" style="margin-top:18px"><h3>侵权检测凭证</h3><div class="detail-body"><div class="evidence"><div class="evidence-card"><h4>内部以图搜图</h4><div class="result"><span class="tag green">未发现相似商品</span></div><p>检测范围：品牌商品及已审核选品<br>检测时间：2026-08-03 10:25<br>相似物料号：无</p></div><div class="evidence-card"><h4>外部侵权检测</h4><div class="result"><span class="tag orange">结果待接口返回</span></div><p>外部网站接口能力待确认<br>如取得结果，将展示相似图片、来源 URL、快照和相似物料号。</p></div></div></div></div></div><div><div class="detail-card"><h3>审批进展</h3><div class="detail-body"><div class="timeline"><div class="event"><strong>发起审批</strong><small>经销商 · 2026-08-03 10:26</small><p>已提交，进入侵权检测。</p></div><div class="event"><strong>内外侵权检测</strong><small>系统 · 2026-08-03 10:26</small><p>内部检测已完成，外部结果等待接口返回。</p></div><div class="event current"><strong>法务初审</strong><small>当前节点 · 待法务处理</small><p>待法务查看检测凭证并填写审核意见。</p></div><div class="event"><strong>PW 项目负责人审批</strong><small>未开始</small></div><div class="event"><strong>终级审批</strong><small>未开始</small></div></div></div></div><div class="detail-card" style="margin-top:18px"><h3>审批历史</h3><div class="detail-body" style="padding:0"><table style="min-width:0"><thead><tr><th>节点</th><th>处理人</th><th>状态</th><th>操作时间</th></tr></thead><tbody><tr><td>发起审批</td><td>陈晓雯</td><td>${statusTag('已完成')}</td><td>08-03 10:26</td></tr><tr><td>侵权检测</td><td>系统</td><td>${statusTag('已完成')}</td><td>08-03 10:26</td></tr><tr><td>法务初审</td><td>待分配</td><td>${statusTag('审批中')}</td><td>-</td></tr></tbody></table></div></div></div></div>`}
+function supplement(){showToast('已进入指定资料补充状态，仅开放创意完成时间、版权登记进度和创意思路');}
+function closeModal(id){document.getElementById(id).classList.remove('show');}
+function showToast(msg){const t=document.getElementById('pw-toast');t.textContent=msg;t.classList.remove('show');void t.offsetWidth;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2800)}
+function enhanceListedField(){const modal=document.getElementById('form-modal');if(!modal.classList.contains('show')||modal.dataset.enhanced==='1')return;const labels=[...modal.querySelectorAll('label')];const label=labels.find(x=>x.textContent.includes('是否已上市'));if(!label)return;const field=label.closest('.field');if(!field)return;field.innerHTML='<label class="required">是否商品已上市 <span class="help">?</span></label><select class="control" id="is-listed" onchange="toggleSkuField(this.value)"><option>否</option><option>是</option></select>';const sku=document.createElement('div');sku.className='field';sku.id='sku-field';sku.style.display='none';sku.innerHTML='<label class="required">SKU 商品编码</label><input class="control" id="sku-code" placeholder="请输入自由主档中的 SKU 编码"><span class="sub">上市商品提交前将校验该编码是否存在</span>';field.parentNode.insertBefore(sku,field.nextSibling);modal.dataset.enhanced='1'}
+function toggleSkuField(value){const field=document.getElementById('sku-field');if(field)field.style.display=value==='是'?'block':'none'}
+function enhanceDealerFields(){const modal=document.getElementById('form-modal');if(!modal.classList.contains('show')||modal.dataset.dealerFields==='1')return;const labels=[...modal.querySelectorAll('label')];const multiLabel=labels.find(x=>x.textContent.includes('是否存在多种颜色效果'));if(multiLabel){const multiField=multiLabel.closest('.field');const multiSelect=multiField.querySelector('select');multiSelect.id='multi-color';multiSelect.setAttribute('onchange','toggleMultiColorField(this.value)');const pwField=document.createElement('div');pwField.className='field';pwField.id='pw-task-field';pwField.style.display='none';pwField.innerHTML='<label class="required">关联 PW 任务 <span class="help">?</span></label><select class="control" id="related-pw-task"><option>当前任务（首条颜色，自动创建主任务）</option><option>PW20260802007 · 黑曜火焰图案</option></select><span class="sub">如当前为第一个颜色提报，可关联本任务</span>';multiField.parentNode.insertBefore(pwField,multiField.nextSibling)}const fontLabel=labels.find(x=>x.textContent.includes('字体来源'));if(fontLabel){const rightsField=document.createElement('div');rightsField.className='field';rightsField.id='other-rights-field';rightsField.innerHTML='<label class="required">是否有其他权利</label><select class="control"><option>否</option><option>是</option></select>';fontLabel.closest('.field').parentNode.insertBefore(rightsField,fontLabel.closest('.field'))}const ideaLabel=labels.find(x=>x.textContent.includes('创意思路'));if(ideaLabel){const ideaField=ideaLabel.closest('.field');const completionField=document.createElement('div');completionField.className='field';completionField.innerHTML='<label>创意完成时间</label><input class="control" type="date" value="2026-08-03" />';const progressField=document.createElement('div');progressField.className='field';progressField.innerHTML='<label>版权登记进度</label><select class="control"><option>未登记</option><option>登记中</option><option>已登记</option></select>';ideaField.parentNode.insertBefore(completionField,ideaField);ideaField.parentNode.insertBefore(progressField,ideaField)}modal.dataset.dealerFields='1'}
+function toggleMultiColorField(value){const field=document.getElementById('pw-task-field');if(field)field.style.display=value==='是'?'block':'none'}
+function enhanceProcessFields(){const modal=document.getElementById('form-modal');if(!modal.classList.contains('show')||modal.dataset.processFields==='1')return;const labels=[...modal.querySelectorAll('label')];const daysLabel=labels.find(x=>x.textContent.includes('生产天数'));if(!daysLabel)return;const daysField=daysLabel.closest('.field');const processField=document.createElement('div');processField.className='field';processField.innerHTML='<label class="required">加工工艺</label><input class="control" id="process-technique" placeholder="请输入预计加工工艺" value="电镀" />';const baseField=document.createElement('div');baseField.className='field';baseField.innerHTML='<label class="required">使用机底/模型</label><input class="control" id="base-model" placeholder="请输入使用机底或模型" value="205/207" />';daysField.parentNode.insertBefore(processField,daysField.nextSibling);daysField.parentNode.insertBefore(baseField,processField.nextSibling);modal.dataset.processFields='1'}
+const originalOpenFormWithFooter=openForm;
+openForm=function(){originalOpenFormWithFooter();const modal=document.getElementById('form-modal');modal.querySelector('.modal-body .modal-footer')?.remove();const footer=modal.querySelector(':scope > .modal > .modal-footer');if(footer){footer.innerHTML='<button class="btn" onclick="closeModal(\'form-modal\')">取消</button><button class="btn" onclick="saveDraft()">保存草稿</button><button class="btn primary" onclick="submitForm()">确定提交</button>';footer.style.position='sticky';footer.style.bottom='0';footer.style.background='#fff';footer.style.zIndex='2'}applySubmissionRole()};
+function submitForm(){const listed=document.getElementById('is-listed')?.value;const sku=document.getElementById('sku-code')?.value.trim();if(listed==='是'){if(!sku){showToast('请填写 SKU 商品编码后再提交');return}document.getElementById('confirm-sku').textContent=sku;document.getElementById('sku-confirm-modal').classList.add('show');return}closeModal('form-modal');showToast('提交成功，已进入侵权检测与审批流程')}
+function confirmSkuSubmit(){const sku=document.getElementById('sku-code')?.value.trim();closeModal('sku-confirm-modal');if(sku!=='ZP-205-0001'){showToast('未查询到该 SKU 商品编码，请确认编码后重试');return}closeModal('form-modal');showToast('SKU 校验通过，提报已提交并进入侵权检测与审批流程')}
+new MutationObserver(()=>{enhanceListedField();enhanceDealerFields();enhanceProcessFields()}).observe(document.getElementById('form-modal'),{attributes:true,childList:true,subtree:true});
+new MutationObserver(()=>{document.querySelectorAll('#detail-body label').forEach(label=>{if(label.textContent.trim()==='是否已上市')label.textContent='是否商品已上市'})}).observe(document.getElementById('detail-modal'),{childList:true,subtree:true});
+function normalizePoolActionLabels(){document.querySelectorAll('button').forEach(btn=>{if(btn.textContent.trim()==='增加官旗引用')btn.textContent='推至官旗池';if(btn.textContent.trim()==='增加经销商引用')btn.textContent='推至经销商池'})}
+new MutationObserver(normalizePoolActionLabels).observe(document.getElementById('pw-app-content'),{childList:true,subtree:true});
+new MutationObserver(()=>{if(currentView==='pool')document.querySelectorAll('#pw-app-content [data-action="copyright-transfer"]').forEach(x=>x.remove())}).observe(document.getElementById('pw-app-content'),{childList:true,subtree:true});
+let transferSourceId='';let transferContractUploaded=false;
+function uploadTransferContract(){transferContractUploaded=true;const status=document.getElementById('transfer-contract-status');if(status)status.textContent='已上传：版权转让合同（演示）';const button=document.querySelector('#copyright-transfer-modal .upload button');if(button)button.textContent='已上传合同';showToast('合同文件已上传')}
+function openCopyrightTransfer(id,source){const record=source==='pool'?poolRows.find(x=>x.id===id):rows[id];const sku=source==='pool'?record?.sku:record?.code;if(!record||!sku||sku==='未创建'||sku==='-'){showToast('商品尚未建立主档，暂不能发起版权转让');return}transferSourceId=id;transferContractUploaded=false;document.getElementById('transfer-from').value=source==='pool'?(record.copyrightOwner||'当前版权方'): '华东品牌组织 / Zippo';const uploadButton=document.querySelector('#copyright-transfer-modal .upload button');if(uploadButton)uploadButton.onclick=uploadTransferContract;const status=document.getElementById('transfer-contract-status');if(status)status.textContent='支持图片、PDF；提交申请时必填';document.getElementById('copyright-transfer-modal').classList.add('show')}
+function submitCopyrightTransfer(){const hasContract=document.getElementById('transfer-contract')?.value;const effectiveAt=document.getElementById('transfer-effective-at')?.value;if(hasContract!=='是'||!transferContractUploaded){showToast('请确认并上传一页纸或老款合同');return}if(!effectiveAt){showToast('请选择计划版权转让生效时间');return}closeModal('copyright-transfer-modal');showToast('版权转让申请已提交，已通知版权转让审批人')}
+function normalizeSubmissionModuleName(){if(!document.getElementById('pw-panel')?.classList.contains('active'))return;document.querySelectorAll('#pw-app-content .page-title h1').forEach(x=>{if(x.textContent.trim()==='PW 经销商提报')x.textContent='提报管理'});}
+new MutationObserver(normalizeSubmissionModuleName).observe(document.getElementById('pw-app-content'),{childList:true,subtree:true});
+// Keep approval status as the single workflow result returned by the approval service.
+poolRows.forEach(p=>{p.approval=p.approval.includes('通过')?'同意':'驳回'});
+const originalRenderPool=renderPool;
+renderPool=function(){originalRenderPool();document.querySelectorAll('#pw-app-content th').forEach(x=>{if(x.textContent.trim()==='审批结论')x.textContent='审批状态'});document.querySelectorAll('#pw-app-content label').forEach(x=>{if(x.textContent.trim()==='审批结论')x.textContent='审批状态'});document.querySelectorAll('#pw-app-content select').forEach(select=>{if([...select.options].some(option=>option.textContent.includes('审批结束'))){select.innerHTML='<option>全部</option><option>同意</option><option>驳回</option>'}});document.querySelectorAll('#pw-app-content table tbody tr').forEach(row=>{if(row.querySelector('[data-action="copyright-transfer"]'))return;const no=row.cells[1]?.textContent.trim();const record=poolRows.find(x=>x.no===no);if(!record)return;const button=document.createElement('button');button.className='btn small';button.dataset.action='copyright-transfer';button.textContent='版权转让';button.title=record.sku==='未创建'?'商品尚未建立主档，暂不能发起版权转让':'';button.onclick=()=>openCopyrightTransfer(record.id,'pool');row.lastElementChild.appendChild(button)})};
+function addPoolImageColumn(){const table=document.querySelector('#pw-app-content table');if(!table)return;const head=table.querySelector('thead tr');if(!head||head.children[0]?.textContent.trim()!=='商品信息'||head.querySelector('[data-col="pool-image"]'))return;const th=document.createElement('th');th.dataset.col='pool-image';th.textContent='商品图片';head.insertBefore(th,head.lastElementChild);table.querySelectorAll('tbody tr').forEach(row=>{if(row.querySelector('[data-col="pool-image"]'))return;const no=row.cells[1]?.textContent.trim();const record=poolRows.find(x=>x.no===no);if(!record)return;const td=document.createElement('td');td.dataset.col='pool-image';td.innerHTML=`<span class="thumb ${record.whiteImage?'':'red'}">${record.whiteImage?'白底图':'商品图'}</span><span class="sub">${record.whiteImage?'白底图':'效果图/实物图'}</span>`;row.insertBefore(td,row.lastElementChild)});const empty=table.querySelector('tbody td[colspan]');if(empty)empty.colSpan=10}
+new MutationObserver(addPoolImageColumn).observe(document.getElementById('pw-app-content'),{childList:true,subtree:true});
+function normalizeProposalLabels(){
+  const roots=document.querySelectorAll('#pw-panel,#pw-root,#pw-app-content,#detail-modal,#form-modal');
+  const replacements=[[/PW202/g,'TB202'],[/PW 提报单号/g,'提报单号'],[/PW 经销商提报/g,'提报管理'],[/关联 PW 任务/g,'关联提报任务'],[/PW 项目负责人/g,'项目负责人'],[/PW 审核意见/g,'项目负责人审核意见']];
+  roots.forEach(root=>{
+    const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);
+    const nodes=[];
+    let node;
+    while(node=walker.nextNode())nodes.push(node);
+    nodes.forEach(text=>{replacements.forEach(([from,to])=>{text.nodeValue=text.nodeValue.replace(from,to)})});
   });
+}
+normalizeProposalLabels();
+new MutationObserver(normalizeProposalLabels).observe(document.body,{childList:true,subtree:true});
+const originalOpenPoolDetail=openPoolDetail;
+openPoolDetail=function(id){originalOpenPoolDetail(id);const p=poolRows.find(x=>x.id===id);const firstSection=document.querySelector('#detail-body .section .kv');if(p&&firstSection&&!firstSection.querySelector('[data-field="approval-status"]')){const item=document.createElement('div');item.className='kv-item';item.dataset.field='approval-status';item.innerHTML=`<label>审批状态</label><strong>${p.approval}</strong>`;firstSection.appendChild(item)}};
+let activeSubmissionIndex=0;
+const originalOpenDetail=openDetail;
+openDetail=function(){originalOpenDetail();const record=rows[activeSubmissionIndex]||rows[0];const status=record.status==='已创主档'||record.status==='审批结束'?(record.status==='已创主档'?'同意':'驳回'):'--';const title=document.querySelector('#detail-body h3');const badge=title?.querySelector('.tag');if(badge){badge.textContent=record.status;badge.className=`tag ${record.status==='审批中'?'red':record.status==='草稿'?'gray':'green'}`}document.querySelectorAll('#detail-body .timeline .event.current strong').forEach(x=>{x.textContent=record.status==='审批中'?record.node:(record.status==='已创主档'?'已创主档':'审批结束')});document.querySelectorAll('#detail-body .timeline .event.current p').forEach(x=>{x.textContent=record.status==='审批中'?'等待当前审核人处理':status==='同意'?'审批流已回写同意，等待或已完成主档处理':'审批流已回写驳回，商品不可进入商品池'});};
+const originalOpenRecord=openRecord;
+openRecord=function(i){activeSubmissionIndex=i;originalOpenRecord(i);const record=rows[i];if(record&&record.code!=='-'&&record.status!=='草稿'){document.querySelector('#detail-modal .modal-footer').insertAdjacentHTML('afterbegin',`<button class="btn" onclick="openCopyrightTransfer(${i},'submission')">版权转让</button>`)}};
+function getApprovalStatus(record){return record.approval||(record.status==='已创主档'?'同意':record.status==='审批结束'?'驳回':'待处理')}
+const originalRenderList=renderList;
+function enhanceSubmissionActions(){const body=document.querySelector('#pw-app-content table tbody');if(!body)return;[...body.rows].forEach(row=>{if(row.querySelector('[data-action="copyright-transfer"]'))return;const no=row.cells[0]?.textContent.trim();const record=rows.find(x=>x.no===no);if(!record||record.status==='草稿')return;const actionCell=row.lastElementChild;const button=document.createElement('button');button.className='btn small';button.dataset.action='copyright-transfer';button.textContent='版权转让';button.title=record.code==='-'?'商品尚未建立主档，暂不能发起版权转让':'';button.onclick=()=>openCopyrightTransfer(rows.indexOf(record),'submission');actionCell.appendChild(button)})}
+renderList=function(){originalRenderList();document.querySelector('#pw-app-content .stats')?.remove();const grid=document.querySelector('#pw-app-content .filter-grid');const actions=grid?.querySelector('.filter-actions');if(grid&&actions&&!document.getElementById('q-name')){const nameField=document.createElement('div');nameField.className='field';nameField.innerHTML='<label>图案名称</label><input class="control" id="q-name" placeholder="请输入图案名称" />';const approvalField=document.createElement('div');approvalField.className='field';approvalField.innerHTML='<label>审核状态</label><select class="control" id="q-approval"><option>全部</option><option>同意</option><option>驳回</option></select>';grid.insertBefore(nameField,actions);grid.insertBefore(approvalField,actions)}const head=document.querySelector('#pw-app-content table thead tr');if(head&&!head.querySelector('[data-col="approval"]')){const th=document.createElement('th');th.dataset.col='approval';th.textContent='审核状态';const statusTh=[...head.children].find(x=>x.textContent.trim()==='提报状态');head.insertBefore(th,statusTh)}const body=document.querySelector('#pw-app-content table tbody');if(body){[...body.rows].forEach(row=>{if(row.querySelector('[data-col="approval"]'))return;const no=row.cells[0]?.textContent.trim();const record=rows.find(x=>x.no===no);const td=document.createElement('td');td.dataset.col='approval';td.innerHTML=statusTag(getApprovalStatus(record||{}));const statusCell=[...row.cells].find(x=>x.textContent.trim()===(record?.status||''));row.insertBefore(td,statusCell||row.lastElementChild)})}enhanceSubmissionActions()};
+const originalFilterRows=filterRows;
+filterRows=function(){const name=(document.getElementById('q-name')?.value||'').trim();const approval=document.getElementById('q-approval')?.value||'全部';const no=(document.getElementById('q-no')?.value||'').trim();const filtered=rows.filter(record=>(!no||record.no.includes(no))&&(!name||record.name.includes(name))&&(approval==='全部'||getApprovalStatus(record)===approval));fillRows(filtered);const body=document.querySelector('#pw-app-content table tbody');if(body){[...body.rows].forEach(row=>{const record=rows.find(x=>x.no===row.cells[0]?.textContent.trim());if(!record)return;const td=document.createElement('td');td.dataset.col='approval';td.innerHTML=statusTag(getApprovalStatus(record));const statusCell=[...row.cells].find(x=>x.textContent.trim()===record.status);row.insertBefore(td,statusCell||row.lastElementChild)})}enhanceSubmissionActions();showToast('已按筛选条件查询')};
+window.__pwRender = render;
 
-  tabBar.addEventListener("click", (e) => {
-    const closeEl = e.target.closest("[data-close-tab]");
-    if (closeEl) { e.stopPropagation(); closeTab(closeEl.dataset.closeTab); return; }
-    const tabBtn = e.target.closest("[data-tab-id]");
-    if (!tabBtn) return;
-    const tab = tabs.find((t) => t.id === tabBtn.dataset.tabId);
-    if (tab) openTab(tab.id, tab.label, tab.module, tab.insightRoute, tab.pwView);
-  });
-
-  window.D02Shell = {
-    syncInsightTab(label) {
-      const tab = tabs.find((t) => t.id === activeTabId);
-      if (tab && tab.module === "insight") { tab.label = label; renderTabs(); }
-      document.title = label + "｜选品中心";
-    },
-    openPwTab(id, label, view) {
-      openTab(id, label, "pw", null, view);
-    }
-  };
-
-  // Bridge help/notifications for header
-  document.getElementById("d02-help")?.addEventListener("click", () => {
-    document.dispatchEvent(new MouseEvent("click", { bubbles: true }));
-    const fake = document.createElement("button");
-    fake.setAttribute("data-action", "help");
-    fake.style.display = "none";
-    document.body.appendChild(fake);
-    fake.click();
-    fake.remove();
-  });
-  document.getElementById("d02-bell")?.addEventListener("click", () => {
-    const fake = document.createElement("button");
-    fake.setAttribute("data-action", "notifications");
-    fake.style.display = "none";
-    document.body.appendChild(fake);
-    fake.click();
-    fake.remove();
-  });
-
-  
-document.getElementById('d02-role')?.addEventListener('change', function(){
-  const v=this.value;
-  if(v==='npi'||v==='dealer'||v==='pw'){ if(typeof changePoolRole==='function') changePoolRole(v); }
-  if(typeof showToast==='function') showToast('已切换角色演示：'+this.options[this.selectedIndex].text);
-});
-
-  openTab("pw-list", "提报管理", "pw", null, "list");
-})();
-
-  </script>
-</body>
+</script>
 
 <script>
-/* ZIPPO_GLOBAL_SHELL_V2 */
-(function(){
-  if(window.__zippoShellV2) return;
-  window.__zippoShellV2 = 1;
-  document.querySelectorAll('.card').forEach(function(card){
-    if(card.querySelector('.table-wrap table')) card.classList.add('has-table');
-  });
-  document.querySelectorAll('.pager, .pagination').forEach(function(p){
-    p.classList.add('zippo-pager-sticky');
-  });
-  function wrapAvatar(el){
-    if(!el || el.closest('.zippo-user-menu')) return;
-    var wrap = document.createElement('div');
-    wrap.className = 'zippo-user-menu';
-    var panel = document.createElement('div');
-    panel.className = 'zippo-user-menu-panel';
-    panel.innerHTML = '<button type="button" data-act="profile">个人中心</button><button type="button" data-act="logout">退出登录</button>';
-    el.parentNode.insertBefore(wrap, el);
-    wrap.appendChild(el);
-    wrap.appendChild(panel);
-    el.style.cursor = 'pointer';
-    el.addEventListener('click', function(e){ e.stopPropagation(); wrap.classList.toggle('open'); });
-    panel.querySelector('[data-act=profile]').onclick = function(){
-      wrap.classList.remove('open');
-      var t=document.getElementById('pw-toast') || document.getElementById('insight-toast'); if(t){t.textContent='个人中心';t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1600);} else alert('个人中心');
-    };
-    panel.querySelector('[data-act=logout]').onclick = function(){
-      wrap.classList.remove('open');
-      var t=document.getElementById('pw-toast') || document.getElementById('insight-toast'); if(t){t.textContent='已退出登录';t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1600);} else alert('已退出登录');
-    };
-    document.addEventListener('click', function(){ wrap.classList.remove('open'); });
+(function () {
+  const pwPanel = document.getElementById("pw-panel");
+  const moduleView = document.getElementById("module-view");
+  const breadcrumb = document.getElementById("breadcrumb");
+  const nav = document.getElementById("module-nav");
+  const PW_LABEL = { list: "商品提报", pool: "商品池协同", approval: "审批工作台", form: "商品提报", detail: "提报详情" };
+
+  function showInsight() {
+    if (!pwPanel || !moduleView) return;
+    pwPanel.classList.remove("active");
+    moduleView.classList.remove("pw-hidden");
+    nav && nav.querySelectorAll("[data-pw-view]").forEach((btn) => btn.classList.remove("active"));
   }
-  document.querySelectorAll('[aria-label="账号"], [title="管理员"], .d05-avatar, .d03-avatar, .zippo-avatar-trigger').forEach(wrapAvatar);
-  document.querySelectorAll('.top-right span[title], .global-topbar .top-right > span[style*="border-radius:50%"]').forEach(function(el){
-    if(el.textContent && el.textContent.length<=2) wrapAvatar(el);
+
+  function showPw(view) {
+    view = view || "list";
+    if (typeof currentView !== "undefined") currentView = view === "approval" ? "list" : view;
+    if (typeof render === "function") render();
+    pwPanel.classList.add("active");
+    moduleView.classList.add("pw-hidden");
+    nav && nav.querySelectorAll("[data-route]").forEach((btn) => btn.classList.remove("active"));
+    nav && nav.querySelectorAll("[data-pw-view]").forEach((btn) => btn.classList.toggle("active", btn.dataset.pwView === (view === "form" || view === "detail" ? "list" : view)));
+    const title = PW_LABEL[view] || "商品提报";
+    if (breadcrumb) {
+      breadcrumb.innerHTML = view === "pool"
+        ? `<span>选品中心</span><b>/</b><span>商品提报</span><b>/</b><strong>商品池协同</strong>`
+        : `<span>选品中心</span><b>/</b><strong>商品提报</strong>`;
+    }
+    document.title = title + "｜选品中心";
+  }
+
+  window.__showPwPanel = showPw;
+  window.__hidePwPanel = showInsight;
+
+  document.addEventListener("click", function (event) {
+    const pwBtn = event.target.closest("[data-pw-view]");
+    if (!pwBtn) return;
+    event.preventDefault();
+    event.stopPropagation();
+    showPw(pwBtn.dataset.pwView || "list");
+  }, true);
+
+  ["pw-panel", "pw-root"].forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener("click", (event) => event.stopPropagation());
   });
-  document.querySelectorAll('.w-8.h-8.rounded-full, .rounded-full.bg-primary').forEach(function(el){
-    if(el.closest('header') && !el.closest('.zippo-user-menu')) wrapAvatar(el);
+
+  document.addEventListener("click", function (event) {
+    if (event.target.closest("[data-route]")) showInsight();
   });
+
+  const originalNavigate = window.navigateView;
+  if (typeof originalNavigate === "function") {
+    window.navigateView = function (view) {
+      showPw(view);
+      originalNavigate(view);
+    };
+  }
 })();
 </script>
 
+</body>
 <script src="view-guard.js"></script>
 </html>
