@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>D07 素材管理 · 黑红品牌版原型 V2.7</title>
+  <title>D07 素材管理 · 黑红品牌版原型 V2.9.2</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
   <script>
@@ -126,6 +126,53 @@
     @keyframes toastIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
     .drawer-enter { animation: drawerIn .22s ease; }
     @keyframes drawerIn { from { transform: translateX(100%); } to { transform: none; } }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .dam-spinner {
+      width: 28px; height: 28px; border: 3px solid rgba(200,16,46,.2);
+      border-top-color: var(--color-primary); border-radius: 50%;
+      animation: spin .7s linear infinite;
+    }
+    .dam-loading-overlay {
+      position: absolute; inset: 0; z-index: 20;
+      background: rgba(255,255,255,.78); backdrop-filter: blur(1px);
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
+    }
+    .analyze-frame {
+      position: relative; border-radius: 10px; overflow: hidden;
+      border: 1px solid var(--color-line-soft); background: #111;
+      aspect-ratio: 1 / 1;
+    }
+    .analyze-frame img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .analyze-frame .dim-veil {
+      position: absolute; inset: 0; pointer-events: none;
+      background: linear-gradient(180deg, rgba(10,10,10,.05) 0%, rgba(10,10,10,.72) 100%);
+      opacity: 0; transition: opacity .2s ease;
+    }
+    .analyze-frame.is-active .dim-veil { opacity: 1; }
+    .analyze-frame .dim-pop {
+      position: absolute; left: 12px; right: 12px; bottom: 12px;
+      background: rgba(255,255,255,.96); border-radius: 8px;
+      padding: 10px 12px; box-shadow: 0 8px 24px rgba(0,0,0,.18);
+      opacity: 0; transform: translateY(8px); transition: all .2s ease;
+      pointer-events: none;
+    }
+    .analyze-frame.is-active .dim-pop { opacity: 1; transform: none; }
+    .analyze-vs {
+      position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%);
+      z-index: 5; width: 40px; height: 40px; border-radius: 999px;
+      background: var(--color-primary); color: #fff; font-size: 12px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 4px 14px rgba(200,16,46,.45); pointer-events: none;
+    }
+    .dim-chip {
+      border: 1px solid var(--color-line); background: #fff; border-radius: 999px;
+      padding: 6px 12px; font-size: 12px; color: var(--color-ink-secondary);
+      transition: all .15s ease; cursor: default; white-space: nowrap;
+    }
+    .dim-chip:hover, .dim-chip.is-on {
+      border-color: var(--color-primary); background: var(--color-primary-bg);
+      color: var(--color-primary); font-weight: 600;
+    }
   
     /* App shell: header+sidebar fixed; only main scrolls */
     html, body { height: 100%; overflow: hidden; }
@@ -651,13 +698,17 @@ aside nav > .mt-6.px-3.py-3.rounded-lg {
             </div>
           </div>
           <!-- 内部 -->
-          <div x-show="searchScope==='internal'" class="border-2 border-dashed border-line rounded-lg p-8 text-center bg-fill/30">
+          <div x-show="searchScope==='internal'" class="relative border-2 border-dashed border-line rounded-lg p-8 text-center bg-fill/30 overflow-hidden">
+            <div x-show="searchLoading" class="dam-loading-overlay rounded-lg" x-cloak>
+              <div class="dam-spinner"></div>
+              <div class="text-sm font-medium text-ink">正在搜图</div>
+              <div class="text-xs text-ink-tertiary">预计约 1 秒 · 已等待 <span x-text="searchLoadingSec"></span>s</div>
+            </div>
             <div class="w-32 h-32 mx-auto thumb-placeholder rounded-lg mb-4"></div>
             <p class="text-sm font-medium">拖拽参考图或从本空间选择素材</p>
-            <p class="text-xs text-ink-tertiary mt-1">底层：阿里云 ProductSearch · 检索账号可访问空间 · 阈值 ≥85% · 不做上传侵权检测</p>
             <div class="mt-4 flex justify-center gap-2 flex-wrap">
-              <button @click="runSearch()" class="px-4 py-2 text-sm bg-primary text-white rounded-md">开始搜图</button>
-              <button @click="toast('临时 upload-token 15min（Q-E）')" class="px-4 py-2 text-sm border border-line rounded-md bg-white">上传参考图</button>
+              <button @click="runSearch()" class="px-4 py-2 text-sm bg-primary text-white rounded-md" :disabled="searchLoading">开始搜图</button>
+              <button @click="toast('已选择参考图')" class="px-4 py-2 text-sm border border-line rounded-md bg-white">上传参考图</button>
               <button @click="toast('从当前空间选择素材')" class="px-4 py-2 text-sm border border-line rounded-md bg-white">选已有素材</button>
             </div>
           </div>
@@ -670,7 +721,6 @@ aside nav > .mt-6.px-3.py-3.rounded-lg {
             <div class="border-2 border-dashed border-line rounded-lg p-8 text-center bg-fill/30">
               <div class="w-32 h-32 mx-auto thumb-placeholder rounded-lg mb-4"></div>
               <p class="text-sm font-medium" x-text="externalPlatform==='tmall' ? '检索淘宝 + 天猫公域同款 / 相似款' : '检索京东公域同款 / 相似款'"></p>
-              <p class="text-xs text-ink-tertiary mt-1">开放能力：淘宝拍立淘 / 京东开放平台识图 · 不自动写入素材库 · 失败不阻断内部搜图</p>
               <div class="mt-4 flex justify-center gap-2 flex-wrap">
                 <button @click="runExternalSearch()" class="px-4 py-2 text-sm bg-primary text-white rounded-md">开始搜全网</button>
                 <button @click="simulateExternalFail()" class="px-4 py-2 text-sm border border-warning text-warning rounded-md bg-white">模拟外部失败</button>
@@ -679,20 +729,24 @@ aside nav > .mt-6.px-3.py-3.rounded-lg {
           </div>
         </div>
         <!-- 内部结果 -->
-        <div x-show="searchScope==='internal' && searchResults.length">
+        <div x-show="searchScope==='internal' && searchResults.length" class="space-y-3 relative">
+          <div x-show="searchLoading" class="dam-loading-overlay rounded-lg min-h-[180px]" x-cloak>
+            <div class="dam-spinner"></div>
+            <div class="text-sm font-medium">正在加载结果…</div>
+          </div>
           <div class="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            <template x-for="(r,i) in pagedSearchResults" :key="i">
+            <template x-for="r in pagedSearchResults" :key="r.id">
             <div class="bg-white rounded-lg border border-line-soft overflow-hidden">
               <div class="aspect-square relative">
                 <img :src="thumbSvg(r.name)" class="w-full h-full object-cover" alt="" />
                 <span class="absolute top-2 left-2 tag-pill bg-brand-black text-white">本域素材</span>
-                <span class="absolute top-2 right-2 text-xs font-bold bg-black/70 text-white px-2 py-0.5 rounded" x-text="r.score+'%'"></span>
+                <span class="absolute top-2 right-2 text-xs font-bold bg-black/70 text-white px-2 py-0.5 rounded" x-text="r.scorePct+'%'"></span>
               </div>
               <div class="p-3">
                 <div class="text-sm font-medium truncate" x-text="r.name"></div>
-                <div class="text-xs text-ink-tertiary" x-text="(r.spaceName||'')+' · '+r.assetNo"></div>
+                <div class="text-xs text-ink-tertiary mt-0.5 truncate" x-text="r.spaceName || ''"></div>
                 <div class="mt-2 flex flex-wrap gap-2">
-                  <button @click="openAnalyze(r)" class="text-xs text-primary hover:underline">剖析</button>
+                  <button @click="openAnalyze(r)" class="text-xs text-primary hover:underline">大模型剖析</button>
                   <button @click="modal.linkSku=true" class="text-xs text-primary hover:underline">关联商品</button>
                   <button @click="toast('打开详情')" class="text-xs text-primary hover:underline">详情</button>
                   <button @click="toast('下载任务已创建')" class="text-xs text-primary hover:underline">下载</button>
@@ -701,7 +755,7 @@ aside nav > .mt-6.px-3.py-3.rounded-lg {
             </div>
           </template>
           </div>
-          <div class="flex flex-wrap items-center justify-between gap-2 mt-4 text-sm text-ink-secondary">
+          <div class="flex flex-wrap items-center justify-between gap-2 mt-1 text-sm text-ink-secondary">
             <span>共 <b x-text="searchResults.length"></b> 条 · 第 <span x-text="searchPageNo"></span>/<span x-text="searchTotalPages"></span> 页</span>
             <div class="flex items-center gap-2">
               <select x-model.number="searchPageSize" @change="searchPageNo=1" class="border border-line rounded px-2 py-1 text-xs bg-white">
@@ -777,7 +831,7 @@ aside nav > .mt-6.px-3.py-3.rounded-lg {
                 <div class="text-xs text-primary mt-1" x-text="'相似度 '+p.score+'%'"></div>
                 <div class="flex gap-2 mt-2">
                   <button @click="toast('跳转商品详情页 · '+p.sku+'（演示 · 无素材权限时商品侧将提示不可查看）')" class="text-xs text-primary hover:underline">打开商品详情</button>
-                  <button @click="toast('已关联当前素材 → '+p.sku)" class="text-xs text-primary hover:underline">关联素材</button>
+                  <button @click="askLinkMaterial(p)" class="text-xs text-primary hover:underline">关联素材</button>
                 </div>
               </div>
             </div>
@@ -1244,42 +1298,137 @@ aside nav > .mt-6.px-3.py-3.rounded-lg {
       </div>
     </div>
   </div>
-  <!-- 相似度剖析 §6.7 -->
-  <div x-show="modal.analyze" class="fixed inset-0 z-[300] flex items-center justify-center p-4">
-    <div class="absolute inset-0 bg-black/45" @click="modal.analyze=false"></div>
-    <div class="relative bg-white rounded-lg w-full max-w-2xl p-5 max-h-[90vh] overflow-y-auto">
-      <div class="flex justify-between mb-3">
-        <h3 class="font-semibold">相似度剖析</h3>
-        <div class="flex gap-2">
-          <button @click="modal.suggest=true" class="text-xs text-primary border border-primary/30 px-2 py-1 rounded">提交建议</button>
-          <button @click="modal.analyze=false">✕</button>
+  <!-- 大模型相似度剖析（二次判断 · 约 10s · 双图对比 · 单张） -->
+  <div x-show="modal.analyze" class="fixed inset-0 z-[300] flex items-center justify-center p-4" x-cloak>
+    <div class="absolute inset-0 bg-black/45" @click="!analyzeLoading && closeAnalyze()"></div>
+    <div class="relative bg-white rounded-lg w-full max-w-4xl p-5 max-h-[94vh] overflow-y-auto">
+      <div class="flex justify-between mb-3 gap-2">
+        <div>
+          <h3 class="font-semibold">大模型相似度剖析</h3>
+          <p class="text-xs text-ink-tertiary mt-0.5">悬停下方维度或图片区域，查看双图比对说明</p>
+        </div>
+        <div class="flex gap-2 items-center shrink-0">
+          <button type="button" @click="openSuggest()"
+                  class="text-xs px-3 py-1.5 rounded-md bg-primary text-white hover:bg-primary-hover"
+                  x-show="!analyzeLoading && analyzeReport">反馈剖析建议</button>
+          <button type="button" @click="closeAnalyze()" :disabled="analyzeLoading" class="text-ink-tertiary hover:text-ink px-1" aria-label="关闭">✕</button>
         </div>
       </div>
-      <div class="flex gap-4 mb-4">
-        <div class="text-center flex-1"><img :src="thumbSvg('参考图')" class="w-full aspect-square object-cover rounded" alt="" /><div class="text-xs text-ink-tertiary mt-1">参考图</div></div>
-        <div class="text-center flex-1"><img :src="thumbSvg(analyzeTarget?.name||'结果')" class="w-full aspect-square object-cover rounded" alt="" /><div class="text-xs text-ink-tertiary mt-1">本条结果 · <span class="text-primary font-bold" x-text="(analyzeTarget?.score||92)+'%'"></span></div></div>
+
+      <div x-show="analyzeLoading" class="py-20 flex flex-col items-center justify-center gap-3 border border-dashed border-line rounded-lg bg-fill/40 mb-2">
+        <div class="dam-spinner"></div>
+        <div class="text-sm font-medium">大模型正在对比参考图与候选图…</div>
+        <div class="text-xs text-ink-tertiary">线框 · 颜色 · 构图 · OCR · 主体 · 语义 · 已等待 <span class="text-primary font-semibold" x-text="analyzeLoadingSec"></span>s / 约 10s</div>
+        <div class="w-56 h-1.5 bg-fill rounded-full overflow-hidden mt-1">
+          <div class="h-full bg-primary rounded-full transition-all duration-500" :style="'width:'+Math.min(100, analyzeLoadingSec*10)+'%'"></div>
+        </div>
       </div>
-      <div class="space-y-3 text-sm mb-4">
-        <div><div class="flex justify-between text-xs mb-1"><span>线条相似度</span><span>88%</span></div><div class="h-2 bg-fill rounded-full overflow-hidden"><div class="h-full bg-primary" style="width:88%"></div></div><p class="text-xs text-ink-tertiary mt-1">轮廓走向接近，局部转折不同</p></div>
-        <div><div class="flex justify-between text-xs mb-1"><span>文字相似度</span><span>61%</span></div><div class="h-2 bg-fill rounded-full overflow-hidden"><div class="h-full bg-brand-gray" style="width:61%"></div></div><p class="text-xs text-ink-tertiary mt-1">字体接近，排版字数不同（维度来自 D13 剖析模板）</p></div>
+
+      <template x-if="!analyzeLoading && analyzeReport">
+        <div class="space-y-4">
+          <div class="text-center text-sm text-ink-secondary">
+            综合相似度 <b class="text-primary text-lg" x-text="analyzeReport.avgPct+'%'"></b>
+          </div>
+
+          <div class="relative grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+            <div class="analyze-vs hidden sm:flex">VS</div>
+            <div class="analyze-frame" :class="analyzeHoverDim ? 'is-active' : ''"
+                 @mouseenter="ensureAnalyzeHover()">
+              <img :src="thumbSvg('参考图')" alt="参考图" />
+              <div class="absolute top-3 left-3 text-[11px] px-2 py-0.5 rounded bg-black/65 text-white">参考图</div>
+              <div class="dim-veil"></div>
+              <div class="dim-pop" x-show="activeAnalyzeDim">
+                <div class="flex justify-between items-baseline gap-2 mb-1">
+                  <span class="text-xs font-semibold text-ink" x-text="activeAnalyzeDim && activeAnalyzeDim.label"></span>
+                  <span class="text-sm font-bold text-primary" x-text="(activeAnalyzeDim && activeAnalyzeDim.pct)+'%'"></span>
+                </div>
+                <p class="text-[11px] text-ink-tertiary leading-relaxed" x-text="activeAnalyzeDim && activeAnalyzeDim.noteRef"></p>
+              </div>
+            </div>
+            <div class="analyze-frame" :class="analyzeHoverDim ? 'is-active' : ''"
+                 @mouseenter="ensureAnalyzeHover()">
+              <img :src="thumbSvg(analyzeFocusTarget && analyzeFocusTarget.name)" alt="候选图" />
+              <div class="absolute top-3 left-3 text-[11px] px-2 py-0.5 rounded bg-black/65 text-white truncate max-w-[85%]" x-text="analyzeFocusTarget && analyzeFocusTarget.name"></div>
+              <div class="dim-veil"></div>
+              <div class="dim-pop" x-show="activeAnalyzeDim">
+                <div class="flex justify-between items-baseline gap-2 mb-1">
+                  <span class="text-xs font-semibold text-ink" x-text="activeAnalyzeDim && activeAnalyzeDim.label"></span>
+                  <span class="text-sm font-bold text-primary" x-text="(activeAnalyzeDim && activeAnalyzeDim.pct)+'%'"></span>
+                </div>
+                <p class="text-[11px] text-ink-tertiary leading-relaxed" x-text="activeAnalyzeDim && activeAnalyzeDim.note"></p>
+              </div>
+            </div>
+          </div>
+
+          <p class="text-[11px] text-ink-tertiary text-center -mt-1">将鼠标移到维度标签或图片上，查看该维度的双图比对说明</p>
+
+          <div class="flex flex-wrap justify-center gap-2">
+            <template x-for="dim in analyzeReport.dimensions" :key="dim.key">
+              <button type="button" class="dim-chip"
+                      :class="analyzeHoverDim===dim.key ? 'is-on' : ''"
+                      @mouseenter="analyzeHoverDim=dim.key"
+                      @focus="analyzeHoverDim=dim.key"
+                      @click="analyzeHoverDim=dim.key">
+                <span x-text="dim.short"></span>
+                <span class="ml-1 opacity-80" x-text="dim.pct+'%'"></span>
+              </button>
+            </template>
+          </div>
+        </div>
+      </template>
+    </div>
+  </div>
+  <!-- 提交剖析建议 -->
+  <div x-show="modal.suggest" class="fixed inset-0 z-[310] flex items-center justify-center p-4" x-cloak>
+    <div class="absolute inset-0 bg-black/45" @click="closeSuggest()"></div>
+    <div class="relative bg-white rounded-lg w-full max-w-md p-5">
+      <div class="flex justify-between items-start mb-3">
+        <div>
+          <h3 class="font-semibold">反馈剖析建议</h3>
+          <p class="text-xs text-ink-tertiary mt-1">进入待审池，由品牌管理员审阅后修正剖析模板 · 不即时改线上模板</p>
+        </div>
+        <button type="button" @click="closeSuggest()" class="text-ink-tertiary hover:text-ink">✕</button>
       </div>
-      <div class="flex gap-2">
-        <button @click="modal.linkSku=true" class="px-3 py-1.5 text-xs border border-line rounded">关联商品</button>
-        <button @click="toast('打开详情')" class="px-3 py-1.5 text-xs border border-line rounded">详情</button>
-        <button @click="toast('下载任务已创建')" class="px-3 py-1.5 text-xs border border-line rounded">下载</button>
+      <label class="text-xs text-ink-secondary block mb-3">针对维度
+        <select x-model="suggestForm.dimKey" class="mt-1 w-full border border-line rounded-md px-2 py-1.5 text-sm bg-white">
+          <option value="">综合 / 不限维度</option>
+          <template x-for="dim in (analyzeReport && analyzeReport.dimensions) || []" :key="dim.key">
+            <option :value="dim.key" x-text="dim.label + '（当前 ' + dim.pct + '%）'"></option>
+          </template>
+        </select>
+      </label>
+      <label class="text-xs text-ink-secondary block mb-3">建议类型
+        <select x-model="suggestForm.type" class="mt-1 w-full border border-line rounded-md px-2 py-1.5 text-sm bg-white">
+          <option value="score">分数不准</option>
+          <option value="desc">说明不准确</option>
+          <option value="miss">缺少应比对的点</option>
+          <option value="other">其它</option>
+        </select>
+      </label>
+      <label class="text-xs text-ink-secondary block mb-1">具体说明 <span class="text-primary">*</span>
+        <textarea x-model="suggestForm.text" class="mt-1 w-full border border-line rounded-md p-2 text-sm" rows="4"
+                  placeholder="例如：构图分数偏高，参考图留白明显更大…"></textarea>
+      </label>
+      <p class="text-[11px] text-warning mb-3" x-show="suggestError" x-text="suggestError"></p>
+      <div class="flex justify-end gap-2">
+        <button type="button" @click="closeSuggest()" class="px-3 py-1.5 text-sm border rounded-md">取消</button>
+        <button type="button" @click="submitSuggest()" class="px-3 py-1.5 text-sm bg-primary text-white rounded-md">提交</button>
       </div>
     </div>
   </div>
-  <!-- 提交建议 -->
-  <div x-show="modal.suggest" class="fixed inset-0 z-[310] flex items-center justify-center p-4">
-    <div class="absolute inset-0 bg-black/45" @click="modal.suggest=false"></div>
-    <div class="relative bg-white rounded-lg w-full max-w-md p-5">
-      <h3 class="font-semibold mb-3">提交剖析建议</h3>
-      <textarea class="w-full border border-line rounded-md p-2 text-sm mb-3" rows="3" placeholder="这条剖析哪里不准 / 希望怎么改…"></textarea>
-      <p class="text-xs text-ink-tertiary mb-3">进入待审池，不即时改模板</p>
+  <!-- 关联素材确认 -->
+  <div x-show="modal.linkMaterial" class="fixed inset-0 z-[310] flex items-center justify-center p-4" x-cloak>
+    <div class="absolute inset-0 bg-black/45" @click="modal.linkMaterial=false; linkMaterialTarget=null"></div>
+    <div class="relative bg-white rounded-lg w-full max-w-sm p-5">
+      <h3 class="font-semibold mb-2">确认关联素材</h3>
+      <p class="text-sm text-ink-secondary mb-1">将当前参考素材关联到商品：</p>
+      <p class="text-sm font-medium text-ink mb-4">
+        <span x-text="linkMaterialTarget && linkMaterialTarget.sku"></span>
+        <span class="text-ink-tertiary font-normal" x-text="linkMaterialTarget ? ' · ' + linkMaterialTarget.name : ''"></span>
+      </p>
       <div class="flex justify-end gap-2">
-        <button @click="modal.suggest=false" class="px-3 py-1.5 text-sm border rounded-md">取消</button>
-        <button @click="modal.suggest=false; toast('建议已提交待审')" class="px-3 py-1.5 text-sm bg-primary text-white rounded-md">提交</button>
+        <button type="button" @click="modal.linkMaterial=false; linkMaterialTarget=null" class="px-3 py-1.5 text-sm border rounded-md">取消</button>
+        <button type="button" @click="confirmLinkMaterial()" class="px-3 py-1.5 text-sm bg-primary text-white rounded-md">确认关联</button>
       </div>
     </div>
   </div>
@@ -1507,7 +1656,6 @@ aside nav > .mt-6.px-3.py-3.rounded-lg {
         pushMode: 'direct',
         productResults: [],
         pickerSelected: [],
-        analyzeTarget: null,
         newFolderName: '',
         newDeptName: '',
         addUserAccount: '赵七',
@@ -1561,6 +1709,21 @@ aside nav > .mt-6.px-3.py-3.rounded-lg {
         libraryDeleteIds: [],
         filteredMaterials: materials.filter(m => m.spaceId === 'sp1'),
         searchResults: [],
+        selectedSearchIds: [],
+        searchLoading: false,
+        searchLoadingSec: 0,
+        searchHead: null,
+        searchPicInfo: null,
+        analyzeTargets: [],
+        analyzeFocusId: null,
+        analyzeHoverDim: null,
+        analyzeReport: null,
+        analyzeLoading: false,
+        analyzeLoadingSec: 0,
+        analyzeTarget: null,
+        suggestForm: { dimKey: '', type: 'score', text: '' },
+        suggestError: '',
+        linkMaterialTarget: null,
         uploadQueue: [],
         currentMaterial: null,
         toastMsg: '',
@@ -1568,7 +1731,7 @@ aside nav > .mt-6.px-3.py-3.rounded-lg {
           detail: false, upload: false, share: false, replace: false, crop: false,
           newSpace: false, deptDict: false, push: false,
           analyze: false, suggest: false, newFolder: false, batchMove: false, batchTag: false,
-          linkSku: false, addUser: false, spaceConfig: false, landing: false, recyclePurge: false, libraryDelete: false,
+          linkSku: false, addUser: false, spaceConfig: false, landing: false, recyclePurge: false, libraryDelete: false, linkMaterial: false,
         },
         totalCapacityGB: 500,
         newSpaceForm: { name: '', type: 'dept', dept: '新品部门', quotaGB: 50 },
@@ -1716,6 +1879,13 @@ aside nav > .mt-6.px-3.py-3.rounded-lg {
         get pagedPickerMaterials() {
           const start = (this.pickerPageNo - 1) * this.pickerPageSize;
           return this.pickerMaterials.slice(start, start + this.pickerPageSize);
+        },
+        get analyzeFocusTarget() {
+          return this.analyzeTargets.find(t => t.id === this.analyzeFocusId) || this.analyzeTargets[0] || this.analyzeTarget;
+        },
+        get activeAnalyzeDim() {
+          if (!this.analyzeReport || !this.analyzeHoverDim) return null;
+          return this.analyzeReport.dimensions.find(d => d.key === this.analyzeHoverDim) || null;
         },
         get landingFolderOptions() {
           // 演示：各空间共用同一套文件夹树；生产按目标空间返回真实目录
@@ -2074,7 +2244,124 @@ aside nav > .mt-6.px-3.py-3.rounded-lg {
           if (this.pageNo > this.totalPages) this.pageNo = this.totalPages;
           this.toast('已移入当前空间回收站 · ' + n + ' 项');
         },
-        openAnalyze(r) { this.analyzeTarget = r; this.modal.analyze = true; },
+        openAnalyze(r) {
+          this.startAnalyze([r]);
+        },
+        closeAnalyze() {
+          if (this.analyzeLoading) return;
+          this.modal.analyze = false;
+          this.modal.suggest = false;
+        },
+        openSuggest() {
+          this.suggestError = '';
+          this.suggestForm = {
+            dimKey: this.analyzeHoverDim || '',
+            type: 'score',
+            text: '',
+          };
+          this.modal.suggest = true;
+        },
+        closeSuggest() {
+          this.modal.suggest = false;
+          this.suggestError = '';
+        },
+        submitSuggest() {
+          const text = (this.suggestForm.text || '').trim();
+          if (!text) {
+            this.suggestError = '请填写具体说明后再提交';
+            return;
+          }
+          const dims = (this.analyzeReport && this.analyzeReport.dimensions) || [];
+          const dim = dims.find(d => d.key === this.suggestForm.dimKey);
+          const dimLabel = dim ? dim.label : '综合';
+          const typeMap = { score: '分数不准', desc: '说明不准确', miss: '缺少应比对的点', other: '其它' };
+          const typeLabel = typeMap[this.suggestForm.type] || '其它';
+          this.modal.suggest = false;
+          this.suggestError = '';
+          this.toast('建议已进入待审池 · ' + dimLabel + ' · ' + typeLabel);
+        },
+        askLinkMaterial(p) {
+          this.linkMaterialTarget = p;
+          this.modal.linkMaterial = true;
+        },
+        confirmLinkMaterial() {
+          const p = this.linkMaterialTarget;
+          this.modal.linkMaterial = false;
+          this.linkMaterialTarget = null;
+          if (!p) return;
+          this.toast('已关联当前素材 → ' + p.sku);
+        },
+        ensureAnalyzeHover() {
+          if (this.analyzeHoverDim) return;
+          const dims = (this.analyzeReport && this.analyzeReport.dimensions) || [];
+          this.analyzeHoverDim = (dims[0] && dims[0].key) || null;
+        },
+        startAnalyze(targets) {
+          const one = targets.slice(0, 1);
+          this.analyzeTargets = one;
+          this.analyzeTarget = one[0] || null;
+          this.analyzeFocusId = (one[0] && one[0].id) || null;
+          this.analyzeHoverDim = null;
+          this.analyzeReport = null;
+          this.analyzeLoading = true;
+          this.analyzeLoadingSec = 0;
+          this.modal.suggest = false;
+          this.modal.analyze = true;
+          if (this._analyzeTimer) clearInterval(this._analyzeTimer);
+          this._analyzeTimer = setInterval(() => {
+            this.analyzeLoadingSec = Math.min(10, +(this.analyzeLoadingSec + 0.2).toFixed(1));
+          }, 200);
+          setTimeout(() => {
+            if (this._analyzeTimer) clearInterval(this._analyzeTimer);
+            this.analyzeLoadingSec = 10;
+            this.analyzeLoading = false;
+            this.analyzeReport = this.buildAnalyzeReport(one);
+            this.analyzeHoverDim = (this.analyzeReport.dimensions[0] || {}).key || null;
+            this.toast('大模型剖析完成');
+          }, 10000);
+        },
+        buildAnalyzeReport(targets) {
+          const primary = targets[0] || {};
+          const base = Number(primary.scorePct) || 88;
+          const jitter = (n) => Math.max(42, Math.min(99, Math.round(base + n + (Math.random() * 6 - 3))));
+          const dims = [
+            {
+              key: 'wireframe', short: '线框', label: '线框 / 轮廓相似度', pct: jitter(2),
+              noteRef: '参考图轮廓完整，铰链与底边倒角清晰。',
+              note: '机身外轮廓与铰链转折高度接近；底部倒角略有差异。',
+            },
+            {
+              key: 'color', short: '颜色', label: '颜色相似度', pct: jitter(-4),
+              noteRef: '主色偏深黑，高光带冷色。',
+              note: '主色黑度接近；高光带偏冷，辅色占比略低。',
+            },
+            {
+              key: 'layout', short: '构图', label: '构图 / 布局相似度', pct: jitter(-8),
+              noteRef: '主体居中，留白偏大，略仰视。',
+              note: '主体居中一致；相对参考图留白更紧，透视更平视。',
+            },
+            {
+              key: 'ocr', short: 'OCR', label: 'OCR 文字相似度', pct: jitter(-22),
+              noteRef: '图内品牌字样简洁。',
+              note: '品牌字样一致；候选图多一行促销文案，排版字数不同。',
+            },
+            {
+              key: 'subject', short: '主体', label: '主体占比与裁切', pct: jitter(-3),
+              noteRef: '主体约占画幅 72%。',
+              note: '主体约占画幅 68%；上下边距与参考接近。',
+            },
+            {
+              key: 'semantic', short: '语义', label: '整体视觉语义', pct: jitter(1),
+              noteRef: '主图方向拍摄。',
+              note: '同款主图方向；场景与光影属同一拍摄系列。',
+            },
+          ];
+          const avg = Math.round(dims.reduce((s, d) => s + d.pct, 0) / dims.length);
+          return {
+            avgPct: avg,
+            dimensions: dims,
+          };
+        },
         togglePicker(m) {
           if (!m.selectable) { this.toast(m.reason || '不可选'); return; }
           const i = this.pickerSelected.indexOf(m.id);
@@ -2157,22 +2444,68 @@ aside nav > .mt-6.px-3.py-3.rounded-lg {
           }, 250);
         },
         runSearch() {
+          if (this.searchLoading) return;
           this.externalFailed = false;
           this.searchPageNo = 1;
-          const accessible = this.spaces.filter(s => s.status !== 'ARCHIVED').map(s => s.id);
-          const pool = materials.filter(m => accessible.includes(m.spaceId));
-          const hits = [];
-          for (let i = 0; i < 120; i++) {
-            const m = pool[i % pool.length];
-            hits.push({
-              name: m.name,
-              assetNo: m.assetNo,
-              score: Math.max(72, 98 - (i % 27)),
-              spaceName: (this.spaces.find(s => s.id === m.spaceId) || {}).name || m.spaceId,
-            });
-          }
-          this.searchResults = hits;
-          this.toast('内部搜图完成 · ' + this.searchResults.length + ' 条');
+          this.selectedSearchIds = [];
+          this.searchResults = [];
+          this.searchHead = null;
+          this.searchPicInfo = null;
+          this.searchLoading = true;
+          this.searchLoadingSec = 0;
+          if (this._searchTimer) clearInterval(this._searchTimer);
+          this._searchTimer = setInterval(() => {
+            this.searchLoadingSec = Math.min(1, +(this.searchLoadingSec + 0.1).toFixed(1));
+          }, 100);
+          const categoryMap = {
+            0: 'Tops', 1: 'Dress', 4: 'Shoes', 5: 'Accessories',
+            8: 'Bottle', 22: 'Digital device', 88888888: 'Other',
+          };
+          setTimeout(() => {
+            if (this._searchTimer) clearInterval(this._searchTimer);
+            this.searchLoadingSec = 1;
+            const accessible = this.spaces.filter(s => s.status !== 'ARCHIVED').map(s => s.id);
+            const pool = materials.filter(m => accessible.includes(m.spaceId));
+            const hits = [];
+            for (let i = 0; i < 48; i++) {
+              const m = pool[i % pool.length];
+              const score = Math.max(0.72, +(0.98 - (i % 27) * 0.01).toFixed(3));
+              const catId = [0, 5, 8, 22, 88888888][i % 5];
+              const space = this.spaces.find(s => s.id === m.spaceId) || {};
+              hits.push({
+                id: 'hit-' + i + '-' + m.id,
+                name: m.name,
+                assetNo: m.assetNo,
+                spaceName: space.name || m.spaceId,
+                ProductId: m.assetNo,
+                PicName: (m.name || 'asset').replace(/\s+/g, '_') + '.' + String(m.format || 'JPG').toLowerCase(),
+                CategoryId: catId,
+                categoryName: categoryMap[catId] || 'Other',
+                Score: score,
+                scorePct: Math.round(score * 100),
+                CustomContent: JSON.stringify({ spaceId: m.spaceId, assetNo: m.assetNo, folderId: 'f1a' }),
+                SortExprValues: (7.3 - i * 0.08).toExponential(14) + ';0',
+                IntAttr: m.skuCount || 0,
+                StrAttr: space.shortType || '',
+              });
+            }
+            const searchTime = 780 + Math.floor(Math.random() * 180);
+            this.searchHead = {
+              DocsFound: hits.length,
+              DocsReturn: hits.length,
+              SearchTime: searchTime,
+              RequestId: 'B313-' + Date.now().toString(16).toUpperCase().slice(-8),
+            };
+            this.searchPicInfo = {
+              Region: '112,440,76,387',
+              CategoryId: 8,
+              CategoryName: 'Bottle',
+              MultiRegion: [{ Region: '112,440,76,387' }, { Region: '180,520,90,410' }],
+            };
+            this.searchResults = hits;
+            this.searchLoading = false;
+            this.toast('搜图完成 · ' + hits.length + ' 条');
+          }, 1000);
         },
         runExternalSearch() {
           this.externalFailed = false;
