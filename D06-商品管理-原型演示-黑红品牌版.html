@@ -9,7 +9,447 @@
 <html lang="zh-CN" data-brand="red" data-theme="light"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>D06 商品管理 · 黑红品牌版原型</title>
-<link rel="stylesheet" href="tokens.css" />
+<style id="ds-tokens-inline">
+/**
+ * AI-PIM Design System — Machine-readable Design Tokens (CSS Custom Properties)
+ * Version: 1.6.0
+ * Source of Truth (semantics): ../00-Color-Tokens.md … ../12-Size-Tokens.md
+ *
+ * Usage (HTML prototypes MUST link this file):
+ *   <link rel="stylesheet" href="…/02-Design-Token/tokens/tokens.css" />
+ *   <html data-brand="red" data-theme="light">
+ *
+ * Forbidden: hard-coded hex / px for colors, spacing, type, radius, shell sizes
+ * when an equivalent --token exists.
+ */
+
+:root,
+[data-brand="red"] {
+  /* —— Brand alias (red = default delivery) —— */
+  --color-primary: #c8102e;
+  --color-primary-hover: #a00d25;
+  --color-primary-active: #7a0a1c;
+  --color-primary-bg: #fde8ec;
+  --color-info: #13a8b8;
+  --color-info-bg: #e6fafc;
+}
+
+[data-brand="blue"] {
+  --color-primary: #1a6fe0;
+  --color-primary-hover: #3d8bf0;
+  --color-primary-active: #1557b8;
+  --color-primary-bg: #e8f1fd;
+  --color-info: #1a6fe0;
+  --color-info-bg: #e8f1fd;
+}
+
+:root,
+[data-theme="light"] {
+  /* —— Semantic colors (brand-invariant unless noted) —— */
+  --color-success: #2f6b3a;
+  --color-success-bg: #eaf5ec;
+  --color-warning: #8a6a1a;
+  --color-warning-bg: #f7f1de;
+  --color-danger: #dc2626;
+  --color-danger-bg: #fef2f2;
+
+  --color-text-primary: #0a0a0a;
+  --color-text-secondary: #595959;
+  --color-text-tertiary: #8c8c8c;
+  --color-text-disabled: #bfbfbf;
+  --color-text-inverse: #ffffff;
+
+  --color-border: #e8e8e8;
+  --color-border-hover: #8c8c8c;
+  --color-divider: #f0f0f0;
+  --color-bg-page: #ededed;
+  --color-bg-container: #ffffff;
+  --color-bg-fill: #f7f7f7;
+  --color-ink: #0a0a0a;
+  --color-mask: rgba(0, 0, 0, 0.45);
+  --color-link: var(--color-primary);
+  --color-link-hover: var(--color-primary-hover);
+
+  /* Component */
+  --table-header-bg: var(--color-bg-fill);
+  --table-row-hover-bg: var(--color-primary-bg);
+  --button-primary-bg: var(--color-primary);
+
+  /* Spacing */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  --spacing-xxl: 48px;
+
+  /* Typography */
+  --font-family-base: -apple-system, "PingFang SC", "Microsoft YaHei", "Segoe UI",
+    Roboto, sans-serif;
+  --font-family-mono: "SFMono-Regular", Consolas, monospace;
+  --font-size-caption: 12px;
+  --line-height-caption: 20px;
+  --font-size-body-sm: 13px;
+  --line-height-body-sm: 20px;
+  --font-size-body: 14px;
+  --line-height-body: 22px;
+  --font-size-body-lg: 16px;
+  --line-height-body-lg: 24px;
+  --font-size-title-sm: 18px;
+  --line-height-title-sm: 26px;
+  --font-size-title: 20px;
+  --line-height-title: 28px;
+  --font-size-title-lg: 24px;
+  --line-height-title-lg: 32px;
+  --font-size-display: 28px;
+  --line-height-display: 36px;
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+
+  /* Radius */
+  --radius-none: 0;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-full: 9999px;
+
+  /* Shadow */
+  --shadow-0: none;
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.06), 0 1px 4px rgba(0, 0, 0, 0.04);
+  --shadow-2: 0 2px 8px rgba(0, 0, 0, 0.08), 0 1px 4px rgba(0, 0, 0, 0.04);
+  --shadow-3: 0 4px 16px rgba(0, 0, 0, 0.1), 0 2px 6px rgba(0, 0, 0, 0.06);
+  --shadow-4: 0 8px 24px rgba(0, 0, 0, 0.12), 0 4px 8px rgba(0, 0, 0, 0.08);
+  --shadow-focus: 0 0 0 2px color-mix(in srgb, var(--color-primary) 25%, transparent);
+  --shadow-selected: 0 0 0 2px color-mix(in srgb, var(--color-primary) 18%, transparent);
+
+  /* Motion */
+  --motion-fast: 120ms;
+  --motion-base: 200ms;
+  --motion-slow: 320ms;
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-decelerate: cubic-bezier(0, 0, 0.2, 1);
+  --ease-accelerate: cubic-bezier(0.4, 0, 1, 1);
+  --motion-reduced: 0ms;
+
+  /* Opacity */
+  --opacity-disabled: 0.4;
+
+  /* Z-Index */
+  --z-index-sticky-secondary: 40;
+  --z-index-sticky: 50;
+  --z-index-dropdown: 100;
+  --z-index-overlay: 200;
+  --z-index-modal: 300;
+  --z-index-popover: 400;
+  --z-index-message: 500;
+  --z-index-notification: 600;
+
+  /* Breakpoints (reference; use in media queries via matching px) */
+  --breakpoint-xs: 480px;
+  --breakpoint-sm: 576px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 992px;
+  --breakpoint-xl: 1200px;
+  --breakpoint-xxl: 1600px;
+
+  /* App Shell & list chrome sizes */
+  --size-header-h: 56px;
+  --size-brand-stripe-h: 4px;
+  --size-nav-w: 260px;
+  --size-nav-w-compact: 224px;
+  --size-nav-w-collapsed: 64px;
+  --size-detail-drawer-w: 400px;
+  --size-pagination-h: 40px;
+  --size-batch-bar-h: 48px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --motion-fast: var(--motion-reduced);
+    --motion-base: var(--motion-reduced);
+    --motion-slow: var(--motion-reduced);
+  }
+}
+
+/* —— Prototype helpers (HTML golden samples / module HTML) —— */
+
+.ds-app-shell {
+  display: grid;
+  grid-template-columns: var(--size-nav-w) 1fr;
+  grid-template-rows: var(--size-header-h) var(--size-brand-stripe-h) 1fr;
+  min-height: 100vh;
+  background: var(--color-bg-page);
+  color: var(--color-text-primary);
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-body);
+  line-height: var(--line-height-body);
+}
+
+.ds-app-shell__header {
+  grid-column: 1 / -1;
+  height: var(--size-header-h);
+  background: var(--color-ink);
+  color: var(--color-text-inverse);
+  display: flex;
+  align-items: center;
+  padding: 0 var(--spacing-lg);
+  gap: var(--spacing-md);
+  position: sticky;
+  top: 0;
+  z-index: var(--z-index-sticky);
+}
+
+.ds-app-shell__header-tab {
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height-body);
+  color: rgba(255, 255, 255, 0.7);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-sm);
+  border: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+.ds-app-shell__header-tab[aria-current="page"],
+.ds-app-shell__header-tab.is-active {
+  color: var(--color-text-inverse);
+  font-weight: var(--font-weight-semibold);
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.ds-app-shell__stripe {
+  grid-column: 1 / -1;
+  height: var(--size-brand-stripe-h);
+  background: linear-gradient(
+    90deg,
+    var(--color-ink) 0%,
+    var(--color-ink) 72%,
+    var(--color-primary) 72%,
+    var(--color-primary) 100%
+  );
+}
+
+.ds-app-shell__nav {
+  background: var(--color-ink);
+  color: rgba(255, 255, 255, 0.7);
+  padding: var(--spacing-sm) 0;
+  overflow: auto;
+}
+
+.ds-app-shell__nav-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height-body);
+  color: inherit;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  border-left: 3px solid transparent;
+}
+
+.ds-app-shell__nav-item--child {
+  font-size: var(--font-size-body-sm);
+  line-height: var(--line-height-body-sm);
+  padding-left: calc(var(--spacing-md) + var(--spacing-md));
+}
+
+.ds-app-shell__nav-item[aria-current="page"],
+.ds-app-shell__nav-item.is-active {
+  background: #2d2d2d;
+  color: var(--color-text-inverse);
+  font-weight: var(--font-weight-semibold);
+  border-left-color: var(--color-primary);
+}
+
+.ds-app-shell__main {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  height: calc(100vh - var(--size-header-h) - var(--size-brand-stripe-h));
+  overflow: auto;
+  background: var(--color-bg-page);
+  position: relative;
+}
+
+.ds-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  padding: var(--spacing-lg);
+  gap: var(--spacing-md);
+  box-sizing: border-box;
+}
+
+.ds-page__header {
+  flex: 0 0 auto;
+}
+
+.ds-page__title {
+  margin: 0;
+  font-size: var(--font-size-title-lg);
+  line-height: var(--line-height-title-lg);
+  font-weight: var(--font-weight-semibold);
+}
+
+.ds-page__toolbar,
+.ds-page__filter {
+  flex: 0 0 auto;
+  position: sticky;
+  z-index: var(--z-index-sticky);
+  background: var(--color-bg-container);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-sm) var(--spacing-md);
+}
+
+.ds-page__toolbar {
+  top: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.ds-page__filter {
+  top: 48px; /* approx toolbar height; override per page if needed */
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-md);
+  align-items: center;
+}
+
+.ds-page__content {
+  flex: 1 1 auto;
+  background: var(--color-bg-container);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  overflow: auto;
+}
+
+/* Pagination: sticky to bottom of main scrollport (PAGE-043) */
+.ds-pagination {
+  flex: 0 0 auto;
+  height: var(--size-pagination-h);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-sm);
+  padding: 0 var(--spacing-md);
+  background: var(--color-bg-container);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-body);
+}
+
+.ds-pagination--sticky {
+  position: sticky;
+  bottom: 0;
+  z-index: var(--z-index-sticky-secondary);
+  box-shadow: var(--shadow-1);
+}
+
+/* When batch bar is visible, lift pagination above it */
+.ds-app-shell__main:has(.ds-batch-bar.is-visible) .ds-pagination--sticky {
+  bottom: var(--size-batch-bar-h);
+}
+
+.ds-batch-bar {
+  display: none;
+  position: sticky;
+  bottom: 0;
+  z-index: var(--z-index-sticky);
+  height: var(--size-batch-bar-h);
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--spacing-lg);
+  background: var(--color-bg-container);
+  border-top: 1px solid var(--color-border);
+  box-shadow: var(--shadow-1);
+}
+
+.ds-batch-bar.is-visible {
+  display: flex;
+}
+
+.ds-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 32px;
+  padding: 0 var(--spacing-md);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-medium);
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-container);
+  color: var(--color-text-primary);
+  cursor: pointer;
+}
+
+.ds-btn--primary {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-text-inverse);
+}
+
+.ds-btn--primary:hover {
+  background: var(--color-primary-hover);
+  border-color: var(--color-primary-hover);
+}
+
+.ds-btn:disabled {
+  opacity: var(--opacity-disabled);
+  cursor: not-allowed;
+}
+
+.ds-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-size-body);
+}
+
+.ds-table th {
+  background: var(--table-header-bg);
+  text-align: left;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-bottom: 1px solid var(--color-border);
+  font-weight: var(--font-weight-medium);
+}
+
+.ds-table td {
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-bottom: 1px solid var(--color-divider);
+}
+
+.ds-table tr:hover td {
+  background: var(--table-row-hover-bg);
+}
+
+.ds-input,
+.ds-select {
+  height: 32px;
+  padding: 0 var(--spacing-sm);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-body);
+  background: var(--color-bg-container);
+  color: var(--color-text-primary);
+}
+
+.ds-input:focus,
+.ds-select:focus {
+  outline: none;
+  box-shadow: var(--shadow-focus);
+  border-color: var(--color-primary);
+}
+
+</style>
 <style>
 /* 页面级壳样式：颜色/字号/圆角/尺寸一律引用 tokens.css（G01/G03/G04） */
 :root{
