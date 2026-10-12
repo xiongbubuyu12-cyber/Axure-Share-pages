@@ -3,12 +3,12 @@
   @module    D09-退市管理
   @version   V4.0-变体6
   @layout    L-D09-01 标准列表骨架（列表与搜索形态与变体4/变体5 1:1 一致，仅重排布局）
-  @style     方案 D 延展 · 千鸟截图壳（客户参考截图：白色顶栏页签 + 白色图标侧栏 + 浅灰内容区 + 绿色主按钮）
+  @style     方案 D 延展 · 白色顶栏页签 + 白色图标侧栏 + 浅灰内容区 + 绿色主按钮
   @shell     截图壳要素：顶栏（页面页签：退市申请/退市执行/退市配置 + 角色切换/通知/头像）；
              190px 图标+文本侧栏（底部「« 收起」可整栏折叠）；内容区浅灰直铺、白色表格、
              筛选区标签上置（关键词紧随提交时间止）、工具条主操作居左（截图：添加按钮位于工具条首位）
-  @base      功能与交互 1:1 移植自 变体5 V3.0（20261012_Flash参考/D09-退市管理-原型演示-深色顶栏 + 深 navy 文本侧栏.html），
-             数据/筛选语义/操作/反馈/空态/弹窗全部不变；壳层与布局按千鸟参考截图重排
+  @base      功能与交互 1:1 移植自 变体5 V3.0（深色顶栏方案），
+             数据/筛选语义/操作/反馈/空态/弹窗全部不变；壳层与布局按参考截图重排
   @coverage  功能覆盖见 功能覆盖对照表.md（变体6 增补节）；截图对齐项与偏离项见 README-变体说明.md
   @note      截图壳对 DS 默认壳的偏离（延续变体4/5 已批准例外口径）：① 无 4px 品牌条；
              ② 主操作「新建退市申请」置于工具条左侧（PAGE-031「主操作居右」在截图壳变体中按已批准例外执行）；
@@ -20,14 +20,14 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>D09 退市管理 · 变体6 标准列表骨架 × 千鸟截图风格（V4.0）</title>
+<title>D09 退市管理 · 白色顶栏页签</title>
 <link rel="stylesheet" href="../../../03-设计体系/AI-PIM-Design-System/02-Design-Token/tokens/tokens.css" />
 <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 <style>
   * { box-sizing: border-box; }
   html, body { height: 100%; margin: 0; }
   :root {
-    /* —— 截图壳层 token（千鸟参考截图取色；壳层例外已写入文件头 @note）—— */
+    /* —— 截图壳层 token（参考截图取色；壳层例外已写入文件头 @note）—— */
     --qn-primary: #00881F;            /* 截图主绿（白字对比度 4.6:1，达 AA） */
     --qn-primary-hover: #00A02A;
     --qn-primary-active: #006E19;
@@ -56,7 +56,7 @@
     outline: 2px solid var(--qn-primary); outline-offset: 1px; }
   .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
 
-  /* ===== 顶栏（千鸟截图风：白底 + 页面页签 + 右侧角色/通知/头像）===== */
+  /* ===== 顶栏（截图风：白底 + 页面页签 + 右侧角色/通知/头像）===== */
   .topbar { flex: 0 0 auto; height: var(--qn-topbar-h); background: var(--qn-surface);
     border-bottom: 1px solid var(--qn-border); display: flex; align-items: stretch; padding-right: 14px; }
   .top-tabs { display: flex; align-items: stretch; height: 100%; padding-left: 8px; }
@@ -353,7 +353,7 @@
 </head>
 <body x-data="d09()" x-cloak @keydown.escape.window="esc()">
 
-  <!-- ===== 顶栏（千鸟截图风：白底页面页签 + 右侧角色/通知/头像）===== -->
+  <!-- ===== 顶栏（截图风：白底页面页签 + 右侧角色/通知/头像）===== -->
   <header class="topbar">
     <nav class="top-tabs" aria-label="退市管理导航">
       <button type="button" class="ttab" :class="activeTab==='apply' ? 'active' : ''"

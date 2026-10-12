@@ -3,7 +3,7 @@
   @module    D09-退市管理
   @version   V2.1-变体4
   @layout    L-D09-01 标准列表骨架（列表与搜索形态不变）
-  @style     方案 D · 平台 ERP 蓝（学习领星ERP：筛选区展开/收起、图标化刷新/列筛选/密度/全屏）
+  @style     方案 D · 平台 ERP 蓝（筛选区展开/收起、图标化刷新/列筛选/密度/全屏）
   @depth     L3
   @tokens    1.6.0
   @source    02-PRD/D09-退市管理/D09-退市管理-原型演示-黑红品牌版.html（V1.6）
@@ -14,7 +14,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>D09 退市管理 · 变体4 标准列表 × 平台ERP蓝（V2.1 学习领星）</title>
+<title>D09 退市管理 · 浅色顶栏页签</title>
 <link rel="stylesheet" href="../../../03-设计体系/AI-PIM-Design-System/02-Design-Token/tokens/tokens.css" />
 <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 <style>
@@ -305,7 +305,7 @@
                 <span x-text="t.label"></span><span class="cnt num" x-text="t.count"></span>
               </button>
             </template>
-            <!-- 展开/收起：仅作用于筛选区（学习领星），不改变表格形态 -->
+            <!-- 展开/收起：仅作用于筛选区，不改变表格形态 -->
             <button type="button" class="collapse-link" @click="filterExpanded=!filterExpanded" x-text="filterExpanded ? '收起 ▴' : '展开 ▾'"></button>
           </nav>
 

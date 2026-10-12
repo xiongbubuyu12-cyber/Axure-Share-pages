@@ -3,10 +3,10 @@
   @module    D09-退市管理
   @version   V3.0-变体5
   @layout    L-D09-01 标准列表骨架（列表与搜索形态与变体4 1:1 一致，仅重排布局）
-  @style     方案 D 延展 · FLASH SCM 截图壳（客户参考截图：深色顶栏 + 深 navy 文本侧栏 + 白色页签条）
+  @style     方案 D 延展 · 深色顶栏 + 深 navy 文本侧栏 + 白色页签条
   @shell     截图壳要素：顶栏（双行 logo + 汉堡 + 系统名 + 全局搜索 + 角色/通知/头像）；
              200px 文本侧栏（汉堡可折叠，一级分组可展开）；页签条（可关闭 + 「标签选项」浮层：刷新当前页/关闭其它/关闭所有）
-  @base      功能与交互 1:1 移植自 变体4 V2.1（20261012_领星参考/D09-退市管理-原型演示-浅色顶栏页签.html），
+  @base      功能与交互 1:1 移植自 变体4 V2.1（浅色顶栏页签），
              数据/筛选语义/操作/反馈/空态/弹窗全部不变
   @coverage  功能覆盖见 功能覆盖对照表.md（变体5 增补节）；截图对齐项与偏离项见 README-变体说明.md
   @note      截图壳对 DS 默认壳的偏离（延续变体4 已批准例外口径）：① 无 4px 品牌条；
@@ -17,14 +17,14 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>D09 退市管理 · 变体5 标准列表骨架 × FLASH SCM 截图风格（V3.0）</title>
+<title>D09 退市管理 · 深色顶栏 + 深 navy 文本侧栏</title>
 <link rel="stylesheet" href="../../../03-设计体系/AI-PIM-Design-System/02-Design-Token/tokens/tokens.css" />
 <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 <style>
   * { box-sizing: border-box; }
   html, body { height: 100%; margin: 0; }
   :root {
-    /* —— 截图壳层 token（FLASH SCM 参考截图取色；壳层例外已写入文件头 @note）—— */
+    /* —— 截图壳层 token（ 参考截图取色；壳层例外已写入文件头 @note）—— */
     --d-primary: #2D6CEE; --d-primary-hover: #4A82F2; --d-primary-active: #1F54C4; --d-primary-bg: #EAF1FE;
     --d-topbar: #1C2735;            /* 截图顶栏：近黑深蓝 */
     --d-sidebar: #26334A;           /* 截图侧栏：深 navy */
@@ -49,7 +49,7 @@
     outline: 2px solid var(--d-primary); outline-offset: 1px; }
   .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
 
-  /* ===== 顶栏（FLASH SCM 截图风：近黑深蓝 + 双行 logo + 居中全局搜索）===== */
+  /* ===== 顶栏（ 截图风：近黑深蓝 + 双行 logo + 居中全局搜索）===== */
   .topbar { flex: 0 0 auto; height: 48px; background: var(--d-topbar); color: #fff;
     display: flex; align-items: center; gap: 14px; padding: 0 16px; }
   .brand { display: flex; flex-direction: column; line-height: 1.15; flex-shrink: 0; }
@@ -350,7 +350,7 @@
 </head>
 <body x-data="d09()" x-cloak @keydown.escape.window="esc()">
 
-  <!-- ===== 顶栏（FLASH SCM 截图风）===== -->
+  <!-- ===== 顶栏（ 截图风）===== -->
   <header class="topbar">
     <div class="brand"><b>ZIPPO</b><span>AI-PIM</span></div>
     <button type="button" class="ham" :aria-label="sidebarOpen ? '收起导航菜单' : '展开导航菜单'"
